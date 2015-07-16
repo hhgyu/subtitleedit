@@ -269,6 +269,8 @@ namespace Nikse.SubtitleEdit.Logic.SubtitleFormats
                 else
                     text = allInput.Substring(index);
 
+                text = text.Replace("\0", "");
+
                 string textToLower = text.ToLower();
                 if (textToLower.Contains(" class="))
                 {
