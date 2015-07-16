@@ -399,7 +399,7 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                 int end = text.IndexOf('>', start);
                 if (end > 0)
                 {
-                    string fontTag = text.Substring(start + 4, end - (start + 4));
+                    string fontTag = text.Substring(start + 4, end - (start + 4) + 1);
                     text = text.Remove(start, end - start + 1);
                     int indexOfEndFont = text.IndexOf("</font>", start, StringComparison.Ordinal);
                     if (indexOfEndFont > 0)
@@ -411,12 +411,72 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
 
                     fontTag = FormatTag(ref text, start, fontTag, "face=\"", "\"", "fn", "}");
                     fontTag = FormatTag(ref text, start, fontTag, "face='", "'", "fn", "}");
+                    if (fontTag.Contains("face=") == true)
+                    {
+                        int findIndex = fontTag.IndexOf("face=");
+                        int findEndIndex = fontTag.IndexOf(' ', findIndex);
+                        if (!(findEndIndex > 0))
+                        {
+                            findEndIndex = fontTag.IndexOf('>');
+                        }
+
+                        if (findEndIndex > 0)
+                        {
+                            var tempFontTag = fontTag.Substring(findIndex, findEndIndex - findIndex);
+                            var value = fontTag.Substring(findIndex + 6, findEndIndex - (findIndex + 6));
+                            if (value != "")
+                            {
+                                fontTag = fontTag.Replace(tempFontTag, string.Format("face='{0}'", value));
+                                fontTag = FormatTag(ref text, start, fontTag, "face='", "'", "fn", "}");
+                            }
+                        }
+                    }
 
                     fontTag = FormatTag(ref text, start, fontTag, "size=\"", "\"", "fs", "}");
                     fontTag = FormatTag(ref text, start, fontTag, "size='", "'", "fs", "}");
+                    if (fontTag.Contains("size=") == true)
+                    {
+                        int findIndex = fontTag.IndexOf("size=");
+                        int findEndIndex = fontTag.IndexOf(' ', findIndex);
+                        if (!(findEndIndex > 0))
+                        {
+                            findEndIndex = fontTag.IndexOf('>');
+                        }
+
+                        if (findEndIndex > 0)
+                        {
+                            var tempFontTag = fontTag.Substring(findIndex, findEndIndex - findIndex);
+                            var value = fontTag.Substring(findIndex + 6, findEndIndex - (findIndex + 6));
+                            if (value != "")
+                            {
+                                fontTag = fontTag.Replace(tempFontTag, string.Format("size='{0}'", value));
+                                fontTag = FormatTag(ref text, start, fontTag, "size='", "'", "fs", "}");
+                            }
+                        }
+                    }
 
                     fontTag = FormatTag(ref text, start, fontTag, "color=\"", "\"", "c&H", "&}");
                     fontTag = FormatTag(ref text, start, fontTag, "color='", "'", "c&H", "&}");
+                    if (fontTag.Contains("color=") == true)
+                    {
+                        int findIndex = fontTag.IndexOf("color=");
+                        int findEndIndex = fontTag.IndexOf(' ', findIndex);
+                        if (!(findEndIndex > 0))
+                        {
+                            findEndIndex = fontTag.IndexOf('>');
+                        }
+
+                        if (findEndIndex > 0)
+                        {
+                            var tempFontTag = fontTag.Substring(findIndex, findEndIndex - findIndex);
+                            var value = fontTag.Substring(findIndex + 6, findEndIndex - (findIndex + 6));
+                            if (value != "")
+                            {
+                                fontTag = fontTag.Replace(tempFontTag, string.Format("color='{0}'", value));
+                                fontTag = FormatTag(ref text, start, fontTag, "color='", "'", "c&H", "&}");
+                            }
+                        }
+                    }
                 }
                 count++;
             }
