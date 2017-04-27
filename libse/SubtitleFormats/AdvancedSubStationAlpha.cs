@@ -462,14 +462,31 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                     fontTag = FormatTag(ref text, start, fontTag, "face=\"", "fn", "}");
                     fontTag = FormatTag(ref text, start, fontTag, "face='", "fn", "}");
                     fontTag = FormatTag(ref text, start, fontTag, "face=", "fn", "}");
+                    if (fontTag.Contains("face=") == true)
+                    {
+                        int findIndex = fontTag.IndexOf("face=");
+                        int findEndIndex = fontTag.IndexOf(' ', findIndex);
+                        if (!(findEndIndex > 0))
+                        {
+                            findEndIndex = fontTag.IndexOf('>');
+                        }
 
                     fontTag = FormatTag(ref text, start, fontTag, "size=\"", "fs", "}");
                     fontTag = FormatTag(ref text, start, fontTag, "size='", "fs", "}");
                     fontTag = FormatTag(ref text, start, fontTag, "size=", "fs", "}");
+                    if (fontTag.Contains("size=") == true)
+                    {
+                        int findIndex = fontTag.IndexOf("size=");
+                        int findEndIndex = fontTag.IndexOf(' ', findIndex);
+                        if (!(findEndIndex > 0))
+                        {
+                            findEndIndex = fontTag.IndexOf('>');
+                        }
 
                     fontTag = FormatTag(ref text, start, fontTag, "color=\"", "c&H", "&}");
                     fontTag = FormatTag(ref text, start, fontTag, "color='", "c&H", "&}");
                     FormatTag(ref text, start, fontTag, "color=", "c&H", "&}");
+                        }
                 }
                 count++;
             }
