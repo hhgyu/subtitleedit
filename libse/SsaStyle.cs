@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using System;
 using System.Drawing;
 using System.Text;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
 namespace Nikse.SubtitleEdit.Core
 {
@@ -82,10 +82,10 @@ namespace Nikse.SubtitleEdit.Core
         {
             var sb = new StringBuilder();
             sb.Append("Style: ");
-            var format = styleFormat.ToLower().Substring(8).Split(',');
+            var format = styleFormat.ToLowerInvariant().Substring(8).Split(',');
             for (int i = 0; i < format.Length; i++)
             {
-                string f = format[i].Trim().ToLower();
+                string f = format[i].Trim();
                 if (f == "name")
                     sb.Append(Name);
                 else if (f == "fontname")
@@ -144,10 +144,10 @@ namespace Nikse.SubtitleEdit.Core
         {
             var sb = new StringBuilder();
             sb.Append("Style: ");
-            var format = styleFormat.ToLower().Substring(8).Split(',');
+            var format = styleFormat.ToLowerInvariant().Substring(8).Split(',');
             for (int i = 0; i < format.Length; i++)
             {
-                string f = format[i].Trim().ToLower();
+                string f = format[i].Trim();
                 if (f == "name")
                     sb.Append(Name);
                 else if (f == "fontname")

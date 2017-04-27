@@ -136,7 +136,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private TimeCode DecodeTimeCode(string[] parts)
         {
-            var tc = new TimeCode(0, 0, 0, 0);
+            var tc = new TimeCode();
             try
             {
                 int hour = int.Parse(parts[0]);
@@ -144,7 +144,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 int seconds = int.Parse(parts[2]);
                 int millisecond = int.Parse(parts[3]);
 
-                int milliseconds = (int)(millisecond * 100.0);
+                int milliseconds = (int) Math.Round(millisecond * 100.0);
                 if (milliseconds > 999)
                     milliseconds = 999;
 

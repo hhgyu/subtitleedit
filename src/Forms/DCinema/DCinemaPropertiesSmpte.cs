@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Globalization;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms.DCinema
 {
-    public sealed partial class DCinemaPropertiesSmpte : DCinemaPropertiesForm
+    public sealed partial class DCinemaPropertiesSmpte : PositionAndSizeForm
     {
         public DCinemaPropertiesSmpte()
         {
@@ -31,7 +31,7 @@ namespace Nikse.SubtitleEdit.Forms.DCinema
             labelEffectColor.Text = l.FontEffectColor;
             buttonFontEffectColor.Text = l.ChooseColor;
             labelFontSize.Text = l.FontSize;
-            buttonGenerateID.Text = l.Generate;
+            buttonGenerateID.Text = l.GenerateId;
             buttonGenFontUri.Text = l.Generate;
 
             foreach (CultureInfo x in CultureInfo.GetCultures(CultureTypes.NeutralCultures))

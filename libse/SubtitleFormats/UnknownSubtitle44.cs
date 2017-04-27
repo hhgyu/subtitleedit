@@ -10,8 +10,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         //>>> "COMMON GROUND" IS FUNDED BY  10:01:04:12                         1
         //THE MINNESOTA ARTS AND CULTURAL   10:01:07:09
-        private static Regex regexTimeCodes1 = new Regex(@" \d\d:\d\d:\d\d:\d\d$", RegexOptions.Compiled);
-        private static Regex regexTimeCodes2 = new Regex(@" \d\d:\d\d:\d\d:\d\d         +\d+$", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes1 = new Regex(@" \d\d:\d\d:\d\d:\d\d$", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes2 = new Regex(@" \d\d:\d\d:\d\d:\d\d         +\d+$", RegexOptions.Compiled);
 
         public override string Extension
         {
@@ -62,7 +62,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 Paragraph next = subtitle.GetParagraphOrDefault(index);
                 if (next != null && next.StartTime.TotalMilliseconds - p.EndTime.TotalMilliseconds > 150)
                 {
-                    text = new StringBuilder();
+                    text.Clear();
                     while (text.Length < 34)
                         text.Append(' ');
                     sb.AppendLine(string.Format("{0}{1}", text, EncodeTimeCode(p.EndTime)));
@@ -84,23 +84,23 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (string line in lines)
             {
                 string s = line.Trim();
-                var match = regexTimeCodes2.Match(s);
+                var match = RegexTimeCodes2.Match(s);
                 if (match.Success)
                 {
                     s = s.Substring(0, match.Index + 13).Trim();
                 }
-                match = regexTimeCodes1.Match(s);
+                match = RegexTimeCodes1.Match(s);
                 if (match.Success && match.Index > 13)
                 {
                     string text = s.Substring(0, match.Index).Trim();
                     string timeCode = s.Substring(match.Index).Trim();
 
-                    string[] startParts = timeCode.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] startParts = timeCode.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (startParts.Length == 4)
                     {
                         try
                         {
-                            p = new Paragraph(DecodeTimeCode(startParts), new TimeCode(0, 0, 0, 0), text);
+                            p = new Paragraph(DecodeTimeCodeFramesFourParts(startParts), new TimeCode(), text);
                             subtitle.Paragraphs.Add(p);
                         }
                         catch (Exception exception)
@@ -110,7 +110,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         }
                     }
                 }
-                else if (string.IsNullOrWhiteSpace(line) || regexTimeCodes1.IsMatch("   " + s))
+                else if (string.IsNullOrWhiteSpace(line) || RegexTimeCodes1.IsMatch("   " + s))
                 {
                     // skip empty lines
                 }
@@ -134,18 +134,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            TimeCode tc = new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
-            return tc;
         }
 
     }

@@ -1,11 +1,11 @@
 ﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -240,7 +240,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (e.KeyCode == Keys.Escape)
                 DialogResult = DialogResult.Cancel;
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
             {
                 Utilities.ShowHelp("#sync");
                 e.SuppressKeyPress = true;
@@ -267,6 +267,26 @@ namespace Nikse.SubtitleEdit.Forms
                 SubtitleListview1.SelectIndexAndEnsureVisible(selectedIndex);
                 e.SuppressKeyPress = true;
             }
+            else if (e.KeyData == (Keys.Control | Keys.G))
+            {
+                var subView = SubtitleListview1;
+                if (subtitleListView2 != null && subtitleListView2.Visible && !SubtitleListview1.Focused)
+                {
+                    var x = PointToClient(MousePosition).X;
+                    if (x >= subtitleListView2.Left && x <= subtitleListView2.Left + subtitleListView2.Width)
+                    {
+                        subView = subtitleListView2;
+                    }
+                }
+                using (var gotoForm = new GoToLine())
+                {
+                    gotoForm.Initialize(1, subView.Items.Count);
+                    if (gotoForm.ShowDialog() == DialogResult.OK)
+                    {
+                        subView.SelectIndexAndEnsureVisible(gotoForm.LineNumber - 1, true);
+                    }
+                }
+            }
         }
 
         private void SetSyncFactorLabel()
@@ -283,7 +303,7 @@ namespace Nikse.SubtitleEdit.Forms
             else if (_synchronizationPoints.Count == 2)
             {
                 double startPos = _synchronizationPoints.First().Value.TotalMilliseconds / TimeCode.BaseUnit;
-                double endPos = _synchronizationPoints.Last().Value.TotalMilliseconds/TimeCode.BaseUnit;
+                double endPos = _synchronizationPoints.Last().Value.TotalMilliseconds / TimeCode.BaseUnit;
 
                 double subStart = _originalSubtitle.Paragraphs[_synchronizationPoints.First().Key].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
                 double subEnd = _originalSubtitle.Paragraphs[_synchronizationPoints.Last().Key].StartTime.TotalMilliseconds / TimeCode.BaseUnit;

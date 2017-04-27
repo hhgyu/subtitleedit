@@ -8,7 +8,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     public class UnknownSubtitle47 : SubtitleFormat
     {
         //7:00:01:27AM
-        private static Regex regexTimeCodes = new Regex(@"^\d\:\d\d\:\d\d\:\d\d\t", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^\d\:\d\d\:\d\d\:\d\d\t", RegexOptions.Compiled);
+
         public override string Extension
         {
             get { return ".txt"; }
@@ -52,19 +53,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (string line in lines)
             {
                 string s = line.Trim();
-                if (regexTimeCodes.Match(s).Success)
+                if (RegexTimeCodes.Match(s).Success)
                 {
                     try
                     {
                         var arr = s.Substring(0, 10).Split(':');
                         if (arr.Length == 4)
                         {
-                            int hours = int.Parse(arr[0]);
-                            int minutes = int.Parse(arr[1]);
-                            int seconds = int.Parse(arr[2]);
-                            int frames = int.Parse(arr[3]);
                             var p = new Paragraph();
-                            p.StartTime = new TimeCode(hours, minutes, seconds, FramesToMillisecondsMax999(frames));
+                            p.StartTime = DecodeTimeCodeFramesFourParts(arr);
                             p.Text = s.Remove(0, 10).Trim();
                             subtitle.Paragraphs.Add(p);
                         }

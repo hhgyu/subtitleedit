@@ -102,12 +102,12 @@ DIGITAL_CINEMA=YES
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeStart && RegexTimeCode.IsMatch(line))
                 {
-                    string[] parts = line.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 4)
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesFourParts(parts);
                             paragraph.StartTime = tc;
                             expecting = ExpectingLine.TimeEnd;
                         }
@@ -120,12 +120,12 @@ DIGITAL_CINEMA=YES
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeEnd && RegexTimeCode.IsMatch(line))
                 {
-                    string[] parts = line.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 4)
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesFourParts(parts);
                             paragraph.EndTime = tc;
                             expecting = ExpectingLine.Text;
                         }
@@ -178,20 +178,5 @@ DIGITAL_CINEMA=YES
         {
             return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", time.Hours, time.Minutes, time.Seconds, MillisecondsToFramesMaxFrameRate(time.Milliseconds));
         }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            var milliseconds = (int)((TimeCode.BaseUnit / Configuration.Settings.General.CurrentFrameRate) * int.Parse(frames));
-            if (milliseconds > 999)
-                milliseconds = 999;
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), milliseconds);
-        }
-
     }
 }

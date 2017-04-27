@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.VobSub;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.VobSub;
 
 namespace Nikse.SubtitleEdit.Core.TransportStream
 {
@@ -20,8 +20,10 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
         public long TotalNumberOfPrivateStream1Continuation0 { get; private set; }
         public List<int> SubtitlePacketIds { get; private set; }
         public List<Packet> SubtitlePackets { get; private set; }
+
         //        public List<Packet> ProgramAssociationTables { get; private set; }
         private Dictionary<int, List<DvbSubPes>> SubtitlesLookup { get; set; }
+
         private Dictionary<int, List<TransportStreamSubtitle>> DvbSubtitlesLookup { get; set; }
         public bool IsM2TransportStream { get; private set; }
         public ulong FirstVideoPts { get; private set; }
@@ -38,6 +40,7 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
         /// Can be used with e.g. MemoryStream or FileStream
         /// </summary>
         /// <param name="ms">Input stream</param>
+        /// <param name="callback">Optional callback event to follow progress</param>
         public void Parse(Stream ms, LoadTransportStreamCallback callback)
         {
             bool firstVideoPtsFound = false;
@@ -263,7 +266,8 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
             foreach (int pid in SubtitlePacketIds)
             {
                 var subtitles = new List<TransportStreamSubtitle>();
-                var list = GetSubtitlePesPackets(pid);
+                var list = ParseAndRemoveEmpty(GetSubtitlePesPackets(pid));
+
                 if (list != null)
                 {
                     for (int i = 0; i < list.Count; i++)
@@ -277,7 +281,7 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
                             sub.Pes = pes;
                             if (i + 1 < list.Count && list[i + 1].PresentationTimestampToMilliseconds() > 25)
                                 sub.EndMilliseconds = list[i + 1].PresentationTimestampToMilliseconds() - 25;
-                            if (sub.EndMilliseconds < sub.StartMilliseconds)
+                            if (sub.EndMilliseconds < sub.StartMilliseconds || sub.EndMilliseconds - sub.StartMilliseconds > (ulong)Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
                                 sub.EndMilliseconds = sub.StartMilliseconds + 3500;
                             subtitles.Add(sub);
                             if (sub.StartMilliseconds < firstVideoMs)
@@ -337,6 +341,20 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
             if (SubtitlesLookup.ContainsKey(packetId))
                 return SubtitlesLookup[packetId];
             return null;
+        }
+
+        private List<DvbSubPes> ParseAndRemoveEmpty(List<DvbSubPes> list)
+        {
+            var newList = new List<DvbSubPes>();
+            foreach (var pes in list)
+            {
+                pes.ParseSegments();
+                if (pes.ObjectDataList.Count > 0 || pes.PresentationTimestamp > 0)
+                {
+                    newList.Add(pes);
+                }
+            }
+            return newList;
         }
 
         private static void AddPesPacket(List<DvbSubPes> list, List<Packet> packetList)

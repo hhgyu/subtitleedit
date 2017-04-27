@@ -8,7 +8,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class SubStationAlpha : SubtitleFormat
     {
-
         public string Errors { get; private set; }
 
         public override string Extension
@@ -48,7 +47,7 @@ PlayDepth: 0
 
 [V4 Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, TertiaryColour, BackColour, Bold, Italic, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, AlphaLevel, Encoding
-Style: Default,{1},{2},{3},65535,65535,-2147483640,-1,{9},1,{4},{5},2,{6},{7},{8},0,1
+Style: Default,{1},{2},{3},65535,65535,-2147483640,{9},0,1,{4},{5},2,{6},{7},{8},0,1
 
 [Events]
 Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text";
@@ -87,6 +86,8 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             else if (!string.IsNullOrEmpty(subtitle.Header) && subtitle.Header.Contains("[V4+ Styles]"))
             {
                 LoadStylesFromAdvancedSubstationAlpha(subtitle, title, subtitle.Header, headerNoStyles, sb);
+                isValidAssHeader = true;
+                styles = AdvancedSubStationAlpha.GetStylesFromHeader(subtitle.Header);
             }
             else if (subtitle.Header != null && subtitle.Header.Contains("http://www.w3.org/ns/ttml"))
             {
@@ -97,7 +98,7 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 var ssa = Configuration.Settings.SubtitleSettings;
                 string boldStyle = "0"; // 0=regular
                 if (ssa.SsaFontBold)
-                    boldStyle = "1";
+                    boldStyle = "-1"; // -1 = true, 0 is false
                 sb.AppendLine(string.Format(header,
                                             title,
                                             ssa.SsaFontName,
@@ -131,7 +132,6 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 if (!string.IsNullOrEmpty(p.MarginV) && Utilities.IsInteger(p.MarginV))
                     marginV = p.MarginV.PadLeft(4, '0');
 
-
                 string effect = "";
                 if (!string.IsNullOrEmpty(p.Effect))
                     effect = p.Effect;
@@ -161,12 +161,12 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                         var ssaStyle = AdvancedSubStationAlpha.GetSsaStyle(styleName, subtitle.Header);
                         if (ssaStyle != null)
                         {
-                            string bold = "-1";
+                            string bold = "0";
                             if (ssaStyle.Bold)
-                                bold = "1";
+                                bold = "-1";
                             string italic = "0";
                             if (ssaStyle.Italic)
-                                italic = "1";
+                                italic = "-1";
 
                             string newAlignment = "2";
                             switch (ssaStyle.Alignment)
@@ -209,6 +209,7 @@ Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     }
                     catch
                     {
+                        // ignored
                     }
                 }
 

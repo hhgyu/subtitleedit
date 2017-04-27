@@ -72,6 +72,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             _errorCount = 0;
 
             subtitle.Paragraphs.Clear();
+            char[] splitChar = { '.' };
             foreach (string line in lines)
             {
                 if (line.EndsWith('.') && Utilities.IsInteger(line.TrimEnd('.')))
@@ -88,7 +89,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesTwoParts(parts);
                             paragraph.StartTime = tc;
                             expecting = ExpectingLine.TimeEnd;
                         }
@@ -101,12 +102,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeEnd && RegexTimeCode.IsMatch(line))
                 {
-                    string[] parts = line.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2)
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesTwoParts(parts);
                             paragraph.EndTime = tc;
                             expecting = ExpectingLine.Text;
                         }
@@ -147,14 +148,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static string EncodeTimeCode(TimeCode time)
         {
             return string.Format("{0:00}.{1:00}", (int)time.TotalSeconds, MillisecondsToFramesMaxFrameRate(time.Milliseconds));
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            string seconds = parts[0];
-            string frames = parts[1];
-
-            return new TimeCode(0, 0, int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

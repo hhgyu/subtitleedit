@@ -22,10 +22,15 @@ bin/
 obj/
 SubtitleEdit-*-setup.exe
 
-# Visual Studio 2015
+# Visual Studio 2015/2017 cache/options directory
+.vs/
 *.ide
 
 # NuGet
 /src/.nuget/NuGet.exe
 /src/.nuget/NuGet.Config
 /src/packages/
+/src/SubtitleEdit.VC.opendb
+/src/SubtitleEdit.VC.VC.opendb
+/src/SubtitleEdit.VC.db
+/src/SubtitleEdit.userprefs

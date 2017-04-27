@@ -7,7 +7,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle71 : SubtitleFormat
     {
-
         private static readonly Regex RegexTimeCode = new Regex(@"^ \d \d : \d \d : \d \d : \d \d $", RegexOptions.Compiled);
         private static readonly Regex RegexTimeCode2 = new Regex(@"^\d \d : \d \d : \d \d : \d \d$", RegexOptions.Compiled);
 
@@ -127,12 +126,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeStart && (RegexTimeCode.IsMatch(line) || RegexTimeCode2.IsMatch(line.Trim())))
                 {
-                    string[] parts = RemoveSpaces(line.Trim()).Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = RemoveSpaces(line.Trim()).Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 4)
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesFourParts(parts);
                             paragraph.StartTime = tc;
                             expecting = ExpectingLine.TimeEnd;
                         }
@@ -145,12 +144,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeEnd && (RegexTimeCode.IsMatch(line) || RegexTimeCode2.IsMatch(line.Trim())))
                 {
-                    string[] parts = RemoveSpaces(line.Trim()).Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = RemoveSpaces(line.Trim()).Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 4)
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesFourParts(parts);
                             paragraph.EndTime = tc;
                             expecting = ExpectingLine.Text;
                         }
@@ -202,15 +201,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             var s = time.ToHHMMSSFF();
             return AddSpaces(s);
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-            return new TimeCode(hour, minutes, seconds, FramesToMillisecondsMax999(frames));
         }
 
     }

@@ -6,7 +6,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UtxFrames : SubtitleFormat
     {
-
         public override string Extension
         {
             get { return ".utx"; }
@@ -82,7 +81,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else
                 {
-                    text = new StringBuilder();
+                    text.Clear();
                 }
             }
             subtitle.Renumber();
@@ -96,7 +95,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static TimeCode DecodeTimeCode(string timePart)
         {
-            int milliseconds = (int)((TimeCode.BaseUnit / Configuration.Settings.General.CurrentFrameRate) * int.Parse(timePart));
+            int milliseconds = (int)Math.Round(TimeCode.BaseUnit / Configuration.Settings.General.CurrentFrameRate * int.Parse(timePart));
             return new TimeCode(milliseconds);
         }
 

@@ -90,9 +90,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
         {
-            ExpectingLine expecting = ExpectingLine.TimeCodes;
             Paragraph p = new Paragraph();
-            expecting = ExpectingLine.TimeCodes;
+            var expecting = ExpectingLine.TimeCodes;
             _errorCount = 0;
 
             subtitle.Paragraphs.Clear();
@@ -139,7 +138,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
                     else
                     {
-                        if (line.StartsWith("||"))
+                        if (line.StartsWith("||", StringComparison.Ordinal))
                             line = "<i>" + line.Replace("||", string.Empty) + "</i>";
                         p.Text = (p.Text + Environment.NewLine + line).Trim();
                         expecting = ExpectingLine.TimeCodes;

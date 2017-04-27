@@ -2,9 +2,10 @@
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
 
@@ -16,8 +17,8 @@ namespace Nikse.SubtitleEdit.Forms
         private string _videoFileName;
         private readonly Timer _refreshTimer = new Timer();
 
-        public Subtitle FixedSubtitle { get { return _subtitle; } }
-        public string VideoFileName { get { return _videoFileName; } }
+        public Subtitle FixedSubtitle => _subtitle;
+        public string VideoFileName => _videoFileName;
 
         public ImportText()
         {
@@ -55,6 +56,7 @@ namespace Nikse.SubtitleEdit.Forms
             buttonRefresh.Text = Configuration.Settings.Language.ImportText.Refresh;
             groupBoxTimeCodes.Text = Configuration.Settings.Language.ImportText.TimeCodes;
             groupBoxImportResult.Text = Configuration.Settings.Language.General.Preview;
+            clearToolStripMenuItem.Text = Configuration.Settings.Language.DvdSubRip.Clear;
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
             SubtitleListview1.InitializeLanguage(Configuration.Settings.Language.General, Configuration.Settings);
@@ -100,11 +102,15 @@ namespace Nikse.SubtitleEdit.Forms
                 }
                 else
                 {
-                    string ext = Path.GetExtension(openFileDialog1.FileName).ToLowerInvariant();
-                    if (ext == ".astx")
-                        LoadAdobeStory(openFileDialog1.FileName);
-                    else
-                        LoadTextFile(openFileDialog1.FileName);
+                    var extension = Path.GetExtension(openFileDialog1.FileName);
+                    if (extension != null)
+                    {
+                        string ext = extension.ToLowerInvariant();
+                        if (ext == ".astx")
+                            LoadAdobeStory(openFileDialog1.FileName);
+                        else
+                            LoadTextFile(openFileDialog1.FileName);
+                    }
                 }
                 GeneratePreview();
             }
@@ -122,14 +128,8 @@ namespace Nikse.SubtitleEdit.Forms
             }
 
             if (_refreshTimer.Enabled)
-            {
                 _refreshTimer.Stop();
-                _refreshTimer.Start();
-            }
-            else
-            {
-                _refreshTimer.Start();
-            }
+            _refreshTimer.Start();
         }
 
         private void GeneratePreviewReal()
@@ -174,7 +174,7 @@ namespace Nikse.SubtitleEdit.Forms
                 string line;
                 try
                 {
-                    line = File.ReadAllText(item.Text).Trim();
+                    line = GetAllText(item.Text).Trim();
                 }
                 catch
                 {
@@ -222,12 +222,12 @@ namespace Nikse.SubtitleEdit.Forms
                 {
                     Paragraph next = _subtitle.GetParagraphOrDefault(i + 1);
 
-                    bool merge = !(p.Text.Contains(Environment.NewLine) || next == null);
+                    bool merge = !(p.Text.Contains(Environment.NewLine) || next == null) && Configuration.Settings.Tools.ListViewSyntaxMoreThanXLinesX > 1;
 
                     if (merge && (p.Text.TrimEnd().EndsWith('!') || p.Text.TrimEnd().EndsWith('.')))
                     {
-                        var st = new StripableText(p.Text);
-                        if (st.StrippedText.Length > 0 && Utilities.UppercaseLetters.Contains(st.StrippedText[0].ToString(CultureInfo.InvariantCulture)))
+                        var st = new StrippableText(p.Text);
+                        if (st.StrippedText.Length > 0 && char.IsUpper(st.StrippedText[0]))
                             merge = false;
                     }
 
@@ -260,8 +260,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 p.EndTime.TotalMilliseconds = millisecondsIndex + p.Duration.TotalMilliseconds;
                 p.StartTime.TotalMilliseconds = millisecondsIndex;
-
-                millisecondsIndex += p.Duration.TotalMilliseconds + millisecondsInterval;
+                millisecondsIndex += (p.EndTime.TotalMilliseconds - p.StartTime.TotalMilliseconds) + millisecondsInterval;
             }
         }
 
@@ -334,8 +333,8 @@ namespace Nikse.SubtitleEdit.Forms
                         if (checkBoxAutoBreak.Enabled && checkBoxAutoBreak.Checked)
                             text = Utilities.AutoBreakLine(text);
                         _subtitle.Paragraphs.Add(new Paragraph { Text = text });
+                        sb.Clear();
                     }
-                    sb = new StringBuilder();
                 }
                 else if (!ContainsLetters(line))
                 {
@@ -380,10 +379,7 @@ namespace Nikse.SubtitleEdit.Forms
                             third.Append(word);
                         }
                     }
-                    if (first.Length <= Configuration.Settings.General.SubtitleLineMaximumLength &&
-                        second.Length <= Configuration.Settings.General.SubtitleLineMaximumLength &&
-                        third.Length <= Configuration.Settings.General.SubtitleLineMaximumLength &&
-                        third.Length > 10)
+                    if (third.Length <= Configuration.Settings.General.SubtitleLineMaximumLength && third.Length > 10)
                     {
                         if (second.Length > 15)
                         {
@@ -605,18 +601,57 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        private void LoadTextFile(string fileName)
+        private static string HtmlToPlainText(string html)
+        {
+            var stripFormattingRegex = new Regex(@"<[^>]*(>|$)", RegexOptions.Multiline); // match any character between '<' and '>', even when end tag is missing
+            var tagWhiteSpaceRegex = new Regex(@"(>|$)(\W|\n|\r)+<", RegexOptions.Multiline); // matches one or more (white space or line breaks) between '>' and '<'
+
+            // Decode html specific characters
+            var text = System.Net.WebUtility.HtmlDecode(html);
+
+            // Remove tag whitespace/line breaks
+            text = tagWhiteSpaceRegex.Replace(text, "><");
+
+            // Find new lines
+            text = text.Replace("<BR>", Environment.NewLine);
+            text = text.Replace("<br>", Environment.NewLine);
+            text = text.Replace("<br />", Environment.NewLine);
+            text = text.Replace("<br/>", Environment.NewLine);
+            text = text.Replace("<HR>", Environment.NewLine + Environment.NewLine);
+            text = text.Replace("<hr>", Environment.NewLine + Environment.NewLine);
+            text = text.Replace("<hr />", Environment.NewLine + Environment.NewLine);
+            text = text.Replace("<hr/>", Environment.NewLine + Environment.NewLine);
+            text = text.Replace("</p>", Environment.NewLine + Environment.NewLine);
+            text = text.Replace("</P>", Environment.NewLine + Environment.NewLine);
+            text = text.Replace(Environment.NewLine + Environment.NewLine + Environment.NewLine, Environment.NewLine + Environment.NewLine);
+            text = text.Replace(Environment.NewLine + Environment.NewLine + Environment.NewLine, Environment.NewLine + Environment.NewLine);
+
+            text = stripFormattingRegex.Replace(text, string.Empty);
+
+            return text;
+        }
+
+        private static string GetAllText(string fileName)
         {
             try
             {
                 Encoding encoding = LanguageAutoDetect.GetEncodingFromFile(fileName);
-                textBoxText.Text = File.ReadAllText(fileName, encoding);
-                SetVideoFileName(fileName);
+                var text = File.ReadAllText(fileName, encoding);
+                if (fileName.EndsWith(".htm", StringComparison.OrdinalIgnoreCase) || fileName.EndsWith(".htm", StringComparison.OrdinalIgnoreCase))
+                    text = HtmlToPlainText(text);
+                return text;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                return string.Empty;
             }
+        }
+
+        private void LoadTextFile(string fileName)
+        {
+            textBoxText.Text = GetAllText(fileName);
+            SetVideoFileName(fileName);
             GeneratePreview();
         }
 
@@ -763,7 +798,7 @@ namespace Nikse.SubtitleEdit.Forms
         private void listViewInputFiles_DragDrop(object sender, DragEventArgs e)
         {
             var fileNames = (string[])e.Data.GetData(DataFormats.FileDrop);
-            foreach (string fileName in fileNames)
+            foreach (string fileName in fileNames.OrderBy(p => p))
             {
                 AddInputFile(fileName);
             }
@@ -776,6 +811,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 var fi = new FileInfo(fileName);
                 var item = new ListViewItem(fileName);
+                item.Tag = fileName;
                 item.SubItems.Add(Utilities.FormatBytesToDisplayFileSize(fi.Length));
                 if (fi.Length < 1024 * 1024) // max 1 mb
                 {
@@ -784,6 +820,7 @@ namespace Nikse.SubtitleEdit.Forms
             }
             catch
             {
+                // ignored
             }
         }
 
@@ -795,6 +832,11 @@ namespace Nikse.SubtitleEdit.Forms
         private void comboBoxLineBreak_TextChanged(object sender, EventArgs e)
         {
             GeneratePreview();
+        }
+
+        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            listViewInputFiles.Items.Clear();
         }
 
     }

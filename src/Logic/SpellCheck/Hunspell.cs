@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using System;
 using System.Collections.Generic;
-using Nikse.SubtitleEdit.Core;
 
 namespace Nikse.SubtitleEdit.Logic.SpellCheck
 {
@@ -15,7 +15,7 @@ namespace Nikse.SubtitleEdit.Logic.SpellCheck
 
             // Finnish uses Voikko (not available via hunspell)
             if (dictionary.EndsWith("fi_fi", StringComparison.OrdinalIgnoreCase))
-                return new VoikkoSpellCheck(Configuration.BaseDirectory, Configuration.DictionariesFolder);
+                return new VoikkoSpellCheck(Configuration.BaseDirectory, Configuration.DictionariesDirectory);
 
             return new WindowsHunspell(dictionary + ".aff", dictionary + ".dic");
         }

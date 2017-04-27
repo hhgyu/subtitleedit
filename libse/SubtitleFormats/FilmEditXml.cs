@@ -74,11 +74,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 paragraph.AppendChild(num);
 
                 XmlNode dur = xml.CreateElement("dur");
-                num.InnerText = EncodeDuration(p.Duration);
-                paragraph.AppendChild(num);
+                dur.InnerText = EncodeDuration(p.Duration);
+                paragraph.AppendChild(dur);
 
                 XmlNode textNode = xml.CreateElement("text");
-                textNode.InnerText = p.Text.Replace(Environment.NewLine, "\\N");
+                textNode.InnerText = text.Replace(Environment.NewLine, "\\N");
                 paragraph.AppendChild(textNode);
 
                 XmlNode timeIn = xml.CreateElement("in");
@@ -128,7 +128,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             lines.ForEach(line => sb.AppendLine(line));
             var xml = new XmlDocument { XmlResolver = null };
             xml.LoadXml(sb.ToString().Trim());
-            string lastKey = string.Empty;
             foreach (XmlNode node in xml.DocumentElement.SelectNodes("subtitle"))
             {
                 try
@@ -142,10 +141,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 p.Text = innerNode.InnerText.Replace("\\N", Environment.NewLine);
                                 break;
                             case "in":
-                                p.StartTime = DecodeTime(innerNode.InnerText);
+                                p.StartTime = DecodeTimeCodeFrames(innerNode.InnerText, SplitCharColon);
                                 break;
                             case "out":
-                                p.EndTime = DecodeTime(innerNode.InnerText);
+                                p.EndTime = DecodeTimeCodeFrames(innerNode.InnerText, SplitCharColon);
                                 break;
                         }
                     }
@@ -160,16 +159,5 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
             subtitle.Renumber();
         }
-
-        private static TimeCode DecodeTime(string s)
-        {
-            var arr = s.Split(':');
-            if (arr.Length == 4)
-            {
-                return new TimeCode(int.Parse(arr[0]), int.Parse(arr[1]), int.Parse(arr[2]), FramesToMillisecondsMax999(int.Parse(arr[3])));
-            }
-            return new TimeCode(0, 0, 0, 0);
-        }
-
     }
 }

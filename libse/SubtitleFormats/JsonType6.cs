@@ -28,6 +28,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return subtitle.Paragraphs.Count > _errorCount;
         }
 
+        private static readonly char[] CharSpace = { ' ' };
+
         public override string ToText(Subtitle subtitle, string title)
         {
             var sb = new StringBuilder();
@@ -38,7 +40,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                 //split words
                 string text = p.Text.Replace(Environment.NewLine, " ").Replace("  ", " ");
-                var words = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                var words = text.Split(CharSpace, StringSplitOptions.RemoveEmptyEntries);
                 var times = GenerateTimes(words, text, p.StartTime, p.EndTime);
                 for (int j = 0; j < words.Length; j++)
                 {
@@ -110,7 +112,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
             }
 
-            sb = new StringBuilder();
+            sb.Clear();
             var sub = new Subtitle();
             double startMilliseconds = 0;
             if (subtitle.Paragraphs.Count > 0)
@@ -124,7 +126,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 {
                     var newParagraph = new Paragraph(sb.ToString(), startMilliseconds, prev.EndTime.TotalMilliseconds);
                     sub.Paragraphs.Add(newParagraph);
-                    sb = new StringBuilder();
+                    sb.Clear();
                     if (!string.IsNullOrWhiteSpace(p.Text))
                     {
                         sb.Append(p.Text);
@@ -140,7 +142,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
                     var newParagraph = new Paragraph(sb.ToString(), startMilliseconds, next.StartTime.TotalMilliseconds);
                     sub.Paragraphs.Add(newParagraph);
-                    sb = new StringBuilder();
+                    sb.Clear();
                     startMilliseconds = next.StartTime.TotalMilliseconds;
                 }
                 else if (string.IsNullOrWhiteSpace(p.Text)) // empty text line
@@ -149,7 +151,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         var newParagraph = new Paragraph(sb.ToString(), startMilliseconds, next.StartTime.TotalMilliseconds);
                         sub.Paragraphs.Add(newParagraph);
-                        sb = new StringBuilder();
+                        sb.Clear();
                     }
                 }
                 else // just add word to current sub

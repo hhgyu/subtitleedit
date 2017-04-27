@@ -1,15 +1,15 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Core.Enums;
+using System;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
-using Nikse.SubtitleEdit.Core.Enums;
 
 namespace Nikse.SubtitleEdit.Logic
 {
     public class FindReplaceDialogHelper
     {
-        private const string StartChars = " >-\"”“['‘`´¶(♪¿¡.…—";
-        private const string EndChars = " -\"”“]'`´¶)♪.!?:…—\r\n";
+        private const string StartChars = " >-\"„”“[]'‘`´¶(){}♪¿¡.…—\r\n\u2028";
+        private const string EndChars = " <-\"”“]'`´¶(){}♪,.!?:;…—\r\n\u2028";
         private readonly string _findText = string.Empty;
         private readonly string _replaceText = string.Empty;
         private Regex _regEx;
@@ -17,10 +17,9 @@ namespace Nikse.SubtitleEdit.Logic
 
         public bool Success { get; set; }
         public FindType FindType { get; set; }
+        public bool MatchWholeWord { get; set; }
         public int SelectedIndex { get; set; }
         public int SelectedPosition { get; set; }
-        public int WindowPositionLeft { get; set; }
-        public int WindowPositionTop { get; set; }
         public int StartLineIndex { get; set; }
         public bool MatchInOriginal { get; set; }
 
@@ -48,7 +47,7 @@ namespace Nikse.SubtitleEdit.Logic
             }
         }
 
-        public FindReplaceDialogHelper(FindType findType, string findText, Regex regEx, string replaceText, int left, int top, int startLineIndex)
+        public FindReplaceDialogHelper(FindType findType, bool matchWholeWord, string findText, Regex regEx, string replaceText, int startLineIndex)
         {
             FindType = findType;
             _findText = findText;
@@ -61,14 +60,13 @@ namespace Nikse.SubtitleEdit.Logic
 
             _regEx = regEx;
             _findTextLenght = findText.Length;
-            WindowPositionLeft = left;
-            WindowPositionTop = top;
             StartLineIndex = startLineIndex;
+            MatchWholeWord = matchWholeWord;
         }
 
-        public bool Find(Subtitle subtitle, Subtitle originalSubtitle, int startIndex)
+        public bool Find(Subtitle subtitle, Subtitle originalSubtitle, int startIndex, int startPosition = 0)
         {
-            return FindNext(subtitle, originalSubtitle, startIndex, 0, Configuration.Settings.General.AllowEditOfOriginalSubtitle);
+            return FindNext(subtitle, originalSubtitle, startIndex, startPosition, Configuration.Settings.General.AllowEditOfOriginalSubtitle);
         }
 
         public bool Find(TextBox textBox, int startIndex)
@@ -81,28 +79,39 @@ namespace Nikse.SubtitleEdit.Logic
             if (startIndex >= text.Length && !(FindType == FindType.RegEx && startIndex == 0))
                 return -1;
 
-            switch (FindType)
+            if (FindType == FindType.CaseSensitive || FindType == FindType.Normal)
             {
-                case FindType.Normal:
-                    return (text.IndexOf(_findText, startIndex, System.StringComparison.OrdinalIgnoreCase));
-                case FindType.CaseSensitive:
-                    return (text.IndexOf(_findText, startIndex, System.StringComparison.Ordinal));
-                case FindType.RegEx:
+                var comparison = FindType == FindType.CaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                var idx = text.IndexOf(_findText, startIndex, comparison);
+                while (idx >= 0)
+                {
+                    if (MatchWholeWord)
                     {
-                        Match match = _regEx.Match(text, startIndex);
-                        if (match.Success)
-                        {
-                            string groupName = Utilities.GetRegExGroup(_findText);
-                            if (groupName != null && match.Groups[groupName] != null && match.Groups[groupName].Success)
-                            {
-                                _findTextLenght = match.Groups[groupName].Length;
-                                return match.Groups[groupName].Index;
-                            }
-                            _findTextLenght = match.Length;
-                            return match.Index;
-                        }
-                        return -1;
+                        var startOk = idx == 0 || StartChars.Contains(text[idx - 1]);
+                        var endOk = idx + _findText.Length == text.Length || EndChars.Contains(text[idx + _findText.Length]);
+                        if (startOk && endOk)
+                            return idx;
                     }
+                    else
+                    {
+                        return idx;
+                    }
+                    idx = text.IndexOf(_findText, idx + _findText.Length, comparison);
+                }
+                return -1;
+            }
+
+            var match = _regEx.Match(text, startIndex);
+            if (match.Success)
+            {
+                string groupName = Utilities.GetRegExGroup(_findText);
+                if (groupName != null && match.Groups[groupName] != null && match.Groups[groupName].Success)
+                {
+                    _findTextLenght = match.Groups[groupName].Length;
+                    return match.Groups[groupName].Index;
+                }
+                _findTextLenght = match.Length;
+                return match.Index;
             }
             return -1;
         }
@@ -294,5 +303,6 @@ namespace Nikse.SubtitleEdit.Logic
             }
             return count;
         }
+
     }
 }

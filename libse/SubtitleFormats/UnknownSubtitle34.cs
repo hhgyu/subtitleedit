@@ -9,6 +9,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
 
         private static readonly Regex RegexTimeCodes = new Regex(@"^\d\d\:\d\d\:\d\d\t[^ ]+", RegexOptions.Compiled);
+
         public override string Extension
         {
             get { return ".txt"; }
@@ -57,7 +58,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string EncodeTimeCode(TimeCode timeCode)
         {
-            int seconds = (int)(timeCode.Seconds + timeCode.Milliseconds / 1000 + 0.5);
+            int seconds = (int)Math.Round(timeCode.Seconds + timeCode.Milliseconds / 1000.0);
             return string.Format("{0:00}:{1:00}:{2:00}", timeCode.Hours, timeCode.Minutes, seconds);
         }
 

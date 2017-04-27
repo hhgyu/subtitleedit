@@ -27,7 +27,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override bool IsMine(List<string> lines, string fileName)
         {
             var subtitle = new Subtitle();
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             foreach (string line in lines)
                 sb.AppendLine(line);
             if (sb.ToString().Contains("#INPOINT OUTPOINT PATH"))
@@ -40,17 +40,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override string ToText(Subtitle subtitle, string title)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine(@"-------------------------------------------------
 #INPOINT OUTPOINT PATH
 -------------------------------------------------");
-            int index = 0;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 //00:03:15:22 00:03:23:10 This is line one.
                 //This is line two.
                 sb.AppendLine(string.Format("{0} {1} {2}", EncodeTimeCode(p.StartTime), EncodeTimeCode(p.EndTime), HtmlUtil.RemoveHtmlTags(p.Text)));
-                index++;
             }
             sb.AppendLine(@"-------------------------------------------------");
 
@@ -79,8 +77,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     string start = temp.Substring(0, 11);
                     string end = temp.Substring(12, 11);
 
-                    string[] startParts = start.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                    string[] endParts = end.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] startParts = start.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
+                    string[] endParts = end.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (startParts.Length == 4 && endParts.Length == 4)
                     {
                         string text = line.Remove(0, RegexTimeCodes.Match(line).Length - 1).Trim();
@@ -112,12 +110,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             string seconds = parts[2];
             string frames = parts[3];
 
-            int milliseconds = (int)((1000 / 30.0) * int.Parse(frames));
+            int milliseconds = (int)Math.Round(1000.0 / 30.0 * int.Parse(frames));
             if (milliseconds > 999)
                 milliseconds = 999;
 
-            TimeCode tc = new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), milliseconds);
-            return tc;
+            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), milliseconds);
         }
 
     }

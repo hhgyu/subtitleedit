@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UleadSubtitleFormat : SubtitleFormat
     {
-        private static readonly Regex regexTimeCodes = new Regex(@"^#\d+ \d\d;\d\d;\d\d;\d\d \d\d;\d\d;\d\d;\d\d", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^#\d+ \d\d;\d\d;\d\d;\d\d \d\d;\d\d;\d\d;\d\d", RegexOptions.Compiled);
 
         public override string Extension
         {
@@ -82,7 +82,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (string l2 in lines)
             {
                 string line = l2.TrimEnd('ഀ');
-                if (line.StartsWith('#') && regexTimeCodes.IsMatch(line))
+                if (line.StartsWith('#') && RegexTimeCodes.IsMatch(line))
                 {
                     string[] parts = line.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 3)
@@ -128,7 +128,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var seconds = int.Parse(time.Substring(6, 2));
             var frames = int.Parse(time.Substring(9, 2));
 
-            int milliseconds = (int)(1000 / 25.0 * frames);
+            int milliseconds = (int)Math.Round(1000.0 / 25.0 * frames);
             if (milliseconds > 999)
                 milliseconds = 999;
 

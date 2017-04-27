@@ -31,15 +31,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string ToTimeCode(TimeCode tc)
         {
-            int last = (int)(tc.Milliseconds / 10.0D + 0.5D);
+            int last = (int)Math.Round(tc.Milliseconds / 10.0D + 0.5D);
             return tc.ToString().Substring(0, 8) + ":" + string.Format("{0:0#}", last);
         }
 
         private static TimeCode DecodeTimeCode(string s)
         {
             var parts = s.Split(new[] { ';', ':' }, StringSplitOptions.RemoveEmptyEntries);
-            var tc = new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]) * 100);
-            return tc;
+            return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]) * 100);
         }
 
         public override string ToText(Subtitle subtitle, string title)

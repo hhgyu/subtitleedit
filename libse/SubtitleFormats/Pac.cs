@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -12,13 +11,17 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         public interface IGetPacEncoding
         {
-            int GetPacEncoding(byte[] previewBuffer , string fileName);
+            int GetPacEncoding(byte[] previewBuffer, string fileName);
         }
 
         public static IGetPacEncoding GetPacEncodingImplementation;
 
         public static readonly TimeCode PacNullTime = new TimeCode(655, 35, 00, 0);
 
+        public static bool IsValidCodePage(int codePage)
+        {
+            return 0 <= codePage && codePage <= 10;
+        }
         public const int CodePageLatin = 0;
         public const int CodePageGreek = 1;
         public const int CodePageLatinCzech = 2;
@@ -30,6 +33,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public const int CodePageChineseSimplified = 8;
         public const int CodePageKorean = 9;
         public const int CodePageJapanese = 10;
+
         private const int EncodingChineseSimplified = 936;
         private const int EncodingChineseTraditional = 950;
         private const int EncodingKorean = 949;
@@ -66,8 +70,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             0x5c, // Æ
             0x5d, // Ø
             0x5e, // ÷
-            0x5f, // -
-            0x2d, // –
+            0x2d, // -
+            0x5f, // –
             0xE54f, // Ö
             0xE56f, // ö
             0xe541, // Ä
@@ -827,38 +831,44 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             get { return true; }
         }
 
-        public void Save(string fileName, Subtitle subtitle)
+        public bool Save(string fileName, Subtitle subtitle, bool batchMode = false)
         {
             using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write))
             {
-                _fileName = fileName;
-
-                // header
-                fs.WriteByte(1);
-                for (int i = 1; i < 23; i++)
-                    fs.WriteByte(0);
-                fs.WriteByte(0x60);
-
-                // paragraphs
-                int number = 0;
-                foreach (Paragraph p in subtitle.Paragraphs)
-                {
-                    WriteParagraph(fs, p, number, number + 1 == subtitle.Paragraphs.Count);
-                    number++;
-                }
-
-                // footer
-                fs.WriteByte(0xff);
-                for (int i = 0; i < 11; i++)
-                    fs.WriteByte(0);
-                fs.WriteByte(0x11);
-                fs.WriteByte(0);
-                byte[] footerBuffer = Encoding.ASCII.GetBytes("dummy end of file");
-                fs.Write(footerBuffer, 0, footerBuffer.Length);
+                return Save(fileName, fs, subtitle, batchMode);
             }
         }
 
-        private void WriteParagraph(FileStream fs, Paragraph p, int number, bool isLast)
+        public bool Save(string fileName, Stream stream, Subtitle subtitle, bool batchMode)
+        {
+            _fileName = fileName;
+
+            // header
+            stream.WriteByte(1);
+            for (int i = 1; i < 23; i++)
+                stream.WriteByte(0);
+            stream.WriteByte(0x60);
+
+            // paragraphs
+            int number = 0;
+            foreach (Paragraph p in subtitle.Paragraphs)
+            {
+                WriteParagraph(stream, p, number, number + 1 == subtitle.Paragraphs.Count);
+                number++;
+            }
+
+            // footer
+            stream.WriteByte(0xff);
+            for (int i = 0; i < 11; i++)
+                stream.WriteByte(0);
+            stream.WriteByte(0x11);
+            stream.WriteByte(0);
+            byte[] footerBuffer = Encoding.ASCII.GetBytes("dummy end of file");
+            stream.Write(footerBuffer, 0, footerBuffer.Length);
+            return true;
+        }
+
+        private void WriteParagraph(Stream fs, Paragraph p, int number, bool isLast)
         {
             WriteTimeCode(fs, p.StartTime);
             WriteTimeCode(fs, p.EndTime);
@@ -911,7 +921,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             else if (_codePage == CodePageJapanese)
                 textBuffer = GetW16Bytes(text, alignment, EncodingJapanese);
             else if (_codePage == CodePageThai)
-                textBuffer = encoding.GetBytes(text.Replace("ต", "€"));
+                textBuffer = encoding.GetBytes(text.Replace('ต', '€'));
             else
                 textBuffer = encoding.GetBytes(text);
 
@@ -970,7 +980,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return sb.ToString().Trim();
         }
 
-        internal static void WriteTimeCode(FileStream fs, TimeCode timeCode)
+        internal static void WriteTimeCode(Stream fs, TimeCode timeCode)
         {
             // write four bytes time code
             string highPart = string.Format("{0:00}", timeCode.Hours) + string.Format("{0:00}", timeCode.Minutes);
@@ -1009,7 +1019,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 try
                 {
                     var fi = new FileInfo(fileName);
-                    if (fi.Length > 100 && fi.Length < 1024000) // not too small or too big
+                    if (fi.Length > 65 && fi.Length < 1024000) // not too small or too big
                     {
                         byte[] buffer = FileUtil.ReadAllBytesShared(fileName);
 
@@ -1092,7 +1102,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             int feIndex = index;
             const int endDelimiter = 0x00;
             byte alignment = buffer[feIndex + 1];
-            byte verticalAlignment = buffer[feIndex - 1];
             var p = new Paragraph();
 
             int timeStartIndex = feIndex - 15;
@@ -1115,6 +1124,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (textLength > 500)
                 return null; // probably not correct index
             int maxIndex = timeStartIndex + 10 + textLength;
+
+            byte verticalAlignment = buffer[timeStartIndex + 11];
 
             if (_codePage == -1)
                 GetCodePage(buffer, index, endDelimiter);
@@ -1228,19 +1239,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 else if (alignment == 0) // right
                     p.Text = "{\\an3}" + p.Text;
             }
-
-            p.Text = p.Text.Replace(Convert.ToChar(0).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(1).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(2).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(3).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(4).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(5).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(6).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(7).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(8).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(11).ToString(CultureInfo.InvariantCulture), string.Empty);
-            p.Text = p.Text.Replace(Convert.ToChar(12).ToString(CultureInfo.InvariantCulture), string.Empty);
-
+            p.Text = p.Text.RemoveControlCharactersButWhiteSpace();
             return p;
         }
 
@@ -1792,16 +1791,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                 int hours = int.Parse(highPart.Substring(0, 4));
                 int minutes = int.Parse(highPart.Substring(4, 2));
-                int second = int.Parse(lowPart.Substring(2, 2));
+                int seconds = int.Parse(lowPart.Substring(2, 2));
                 int frames = int.Parse(lowPart.Substring(4, 2));
 
-                int milliseconds = (int)((TimeCode.BaseUnit / Configuration.Settings.General.CurrentFrameRate) * frames);
-                if (milliseconds > 999)
-                    milliseconds = 999;
-
-                return new TimeCode(hours, minutes, second, milliseconds);
+                return new TimeCode(hours, minutes, seconds, FramesToMillisecondsMax999(frames));
             }
-            return new TimeCode(0, 0, 0, 0);
+            return new TimeCode();
         }
 
     }

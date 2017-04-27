@@ -35,11 +35,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override string ToText(Subtitle subtitle, string title)
         {
             var sb = new StringBuilder();
-            int index = 0;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 sb.AppendLine(string.Format("{0} – {1}{2}{3}", EncodeTimeCode(p.StartTime), EncodeTimeCode(p.EndTime), Environment.NewLine, HtmlUtil.RemoveHtmlTags(p.Text)));
-                index++;
             }
             return sb.ToString();
         }
@@ -58,7 +56,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             Paragraph p = null;
             subtitle.Paragraphs.Clear();
             _errorCount = 0;
-            char[] splitChar = { ':' };
             foreach (string line in lines)
             {
                 if (RegexTimeCodes.IsMatch(line))
@@ -67,8 +64,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     string start = temp[0].Trim();
                     string end = temp[1].Trim();
 
-                    string[] startParts = start.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
-                    string[] endParts = end.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
+                    string[] startParts = start.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
+                    string[] endParts = end.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (startParts.Length == 2 && endParts.Length == 2)
                     {
                         p = new Paragraph(DecodeTimeCode(startParts), DecodeTimeCode(endParts), string.Empty);

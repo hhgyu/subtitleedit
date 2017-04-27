@@ -165,17 +165,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return "Not supported!";
         }
 
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-
-            return new TimeCode(hour, minutes, seconds, FramesToMillisecondsMax999(frames));
-        }
-
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
         {
             subtitle.Paragraphs.Clear();
@@ -191,7 +180,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     string timeCode = Encoding.ASCII.GetString(buffer, i + 1, 11);
                     if (timeCode != "00:00:00:00" && RegexTimeCodes.IsMatch(timeCode))
                     {
-                        var p = new Paragraph { StartTime = DecodeTimeCode(timeCode.Split(':')) };
+                        var p = new Paragraph { StartTime = DecodeTimeCodeFramesFourParts(timeCode.Split(':')) };
                         bool italic = buffer[i + 22] == 3; // 3=italic, 1=normal
                         int textStart = i + 25; // text starts 25 chars after time code
                         int textLength = 0;
@@ -265,7 +254,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 try
                 {
                     string adjust = Encoding.GetEncoding(1252).GetString(buffer, 1354, 11); // 00:59:59:28
-                    TimeCode tc = DecodeTimeCode(adjust.Split(':'));
+                    TimeCode tc = DecodeTimeCodeFramesFourParts(adjust.Split(':'));
                     if (tc.TotalMilliseconds > 0)
                         subtitle.AddTimeToAllParagraphs(TimeSpan.FromMilliseconds(-tc.TotalMilliseconds));
                 }

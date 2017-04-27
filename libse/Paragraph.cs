@@ -31,6 +31,7 @@ namespace Nikse.SubtitleEdit.Core
         public bool IsComment { get; set; }
 
         public string Actor { get; set; }
+        public string Region { get; set; }
 
         public string MarginL { get; set; }
         public string MarginR { get; set; }
@@ -81,6 +82,7 @@ namespace Nikse.SubtitleEdit.Core
             Extra = paragraph.Extra;
             IsComment = paragraph.IsComment;
             Actor = paragraph.Actor;
+            Region = paragraph.Region;
             MarginL = paragraph.MarginL;
             MarginR = paragraph.MarginR;
             MarginV = paragraph.MarginV;
@@ -94,8 +96,8 @@ namespace Nikse.SubtitleEdit.Core
 
         public Paragraph(int startFrame, int endFrame, string text)
         {
-            StartTime = new TimeCode(0, 0, 0, 0);
-            EndTime = new TimeCode(0, 0, 0, 0);
+            StartTime = new TimeCode();
+            EndTime = new TimeCode();
             StartFrame = startFrame;
             EndFrame = endFrame;
             Text = text;
@@ -115,11 +117,8 @@ namespace Nikse.SubtitleEdit.Core
             if (StartTime.IsMaxTime)
                 return;
 
-            double seconds = StartTime.TimeSpan.TotalSeconds * factor + adjustmentInSeconds;
-            StartTime.TimeSpan = TimeSpan.FromSeconds(seconds);
-
-            seconds = EndTime.TimeSpan.TotalSeconds * factor + adjustmentInSeconds;
-            EndTime.TimeSpan = TimeSpan.FromSeconds(seconds);
+            StartTime.TotalMilliseconds = StartTime.TotalMilliseconds * factor + (adjustmentInSeconds * TimeCode.BaseUnit);
+            EndTime.TotalMilliseconds = EndTime.TotalMilliseconds * factor + (adjustmentInSeconds * TimeCode.BaseUnit);
         }
 
         public void CalculateFrameNumbersFromTimeCodes(double frameRate)
@@ -153,8 +152,7 @@ namespace Nikse.SubtitleEdit.Core
             {
                 if (string.IsNullOrEmpty(Text))
                     return 0;
-                int wordCount = HtmlUtil.RemoveHtmlTags(Text, true).Split(new[] { ' ', ',', '.', '!', '?', ';', ':', '(', ')', '[', ']', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
-                return (60.0 / Duration.TotalSeconds) * wordCount;
+                return (60.0 / Duration.TotalSeconds) * Text.CountWords();
             }
         }
     }

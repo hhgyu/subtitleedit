@@ -130,7 +130,7 @@ namespace Nikse.SubtitleEdit.Core.VobSub
 
             float ticksPerMillisecond = 90.000F;
             if (!IsPal)
-                ticksPerMillisecond = 90.090F; // TODO: What should this be for NTSC?
+                ticksPerMillisecond = 90.090F * (23.976F / 24F);
 
             // get unique streamIds
             var uniqueStreamIds = new List<int>();
@@ -192,12 +192,20 @@ namespace Nikse.SubtitleEdit.Core.VobSub
                 if (pack.SubPicture.Delay.TotalMilliseconds > 0)
                     pack.EndTime = pack.StartTime.Add(pack.SubPicture.Delay);
 
-                if (pack.EndTime < pack.StartTime || pack.EndTime.TotalSeconds - pack.StartTime.TotalSeconds > 10.0)
+                if (pack.EndTime < pack.StartTime || pack.EndTime.TotalMilliseconds - pack.StartTime.TotalMilliseconds > Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
                 {
                     if (i + 1 < list.Count)
-                        pack.EndTime = TimeSpan.FromMilliseconds(list[i].StartTime.TotalMilliseconds - 100);
-                    else
+                    {
+                        pack.EndTime = TimeSpan.FromMilliseconds(list[i + 1].StartTime.TotalMilliseconds - Configuration.Settings.General.MinimumMillisecondsBetweenLines);
+                        if (pack.EndTime.TotalMilliseconds - pack.StartTime.TotalMilliseconds > Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                        {
+                            pack.EndTime = TimeSpan.FromMilliseconds(pack.StartTime.TotalMilliseconds + Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds);
+                        }
+                    }
+                     else
+                    {
                         pack.EndTime = TimeSpan.FromMilliseconds(pack.StartTime.TotalMilliseconds + 3000);
+                    }
                 }
             }
 
@@ -206,7 +214,7 @@ namespace Nikse.SubtitleEdit.Core.VobSub
 
         public static bool IsMpeg2PackHeader(byte[] buffer)
         {
-            return buffer.Length >= 3 &&
+            return buffer.Length >= 4 &&
                    buffer[0] == 0 &&
                    buffer[1] == 0 &&
                    buffer[2] == 1 &&
@@ -215,7 +223,7 @@ namespace Nikse.SubtitleEdit.Core.VobSub
 
         public static bool IsPrivateStream1(byte[] buffer, int index)
         {
-            return buffer.Length >= index + 3 &&
+            return buffer.Length >= index + 4 &&
                    buffer[index + 0] == 0 &&
                    buffer[index + 1] == 0 &&
                    buffer[index + 2] == 1 &&
@@ -224,7 +232,7 @@ namespace Nikse.SubtitleEdit.Core.VobSub
 
         public static bool IsPrivateStream2(byte[] buffer, int index)
         {
-            return buffer.Length >= index + 3 &&
+            return buffer.Length >= index + 4 &&
                    buffer[index + 0] == 0 &&
                    buffer[index + 1] == 0 &&
                    buffer[index + 2] == 1 &&

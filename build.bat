@@ -10,11 +10,8 @@ IF /I "%~1" == "-help"  GOTO SHOWHELP
 IF /I "%~1" == "--help" GOTO SHOWHELP
 IF /I "%~1" == "/?"     GOTO SHOWHELP
 
-IF DEFINED VS140COMNTOOLS (
-  SET VSVARS_BAT="%VS140COMNTOOLS%vsvars32.bat"
-) ELSE (
-  ECHO Cannot find Visual Studio 2015
-  GOTO EndWithError
+for /f "usebackq tokens=1* delims=: " %%i in (`vswhere -latest -requires Microsoft.Component.MSBuild`) do (
+  if /i "%%i"=="installationPath" set InstallDir=%%j
 )
 
 IF "%~1" == "" (
@@ -41,21 +38,25 @@ IF "%~1" == "" (
 :START
 PUSHD "src"
 
-CALL %VSVARS_BAT%
 TITLE %BUILDTYPE%ing SubtitleEdit - Release^|Any CPU...
 
-"MSBuild.exe" SubtitleEdit.sln /t:%BUILDTYPE% /p:Configuration=Release /p:Platform="Any CPU"^
+if exist "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" (
+  "%InstallDir%\MSBuild\15.0\Bin\MSBuild.exe" SubtitleEdit.sln /t:%BUILDTYPE% /p:Configuration=Release /p:Platform="Any CPU"^
  /maxcpucount /consoleloggerparameters:DisableMPLogging;Summary;Verbosity=minimal
-IF %ERRORLEVEL% NEQ 0 GOTO EndWithError
+  IF %ERRORLEVEL% NEQ 0 GOTO EndWithError
+) else (
+  ECHO Cannot find Visual Studio 2017
+  GOTO EndWithError
+)
+
+IF /I "%BUILDTYPE%" == "Clean" GOTO END
 
 ECHO.
 ECHO ILRepack...
-"packages\ILRepack.2.0.5\tools\ILRepack.exe" /out:"bin\Release\SubtitleEdit.exe" "bin\Release\SubtitleEdit.exe" "bin\Release\libse.dll" "packages\NHunspell.1.2.5554.16953\lib\net\NHunspell.dll" "packages\zlib.net.1.0.4.0\lib\zlib.net.dll" "DLLs\Interop.QuartzTypeLib.dll" /targetplatform:v4 /internalize /parallel
+"packages\ILRepack.2.0.11\tools\ILRepack.exe" /parallel /internalize /targetplatform:v4 /out:"bin\Release\SubtitleEdit.exe" "bin\Release\SubtitleEdit.exe" "bin\Release\libse.dll" "bin\Release\zlib.net.dll" "bin\Release\NHunspell.dll" "DLLs\Interop.QuartzTypeLib.dll"
 ECHO.
 ECHO.
 POPD
-
-IF /I "%BUILDTYPE%" == "Clean" GOTO END
 
 CALL :SubDetectSevenzipPath
 IF DEFINED SEVENZIP IF EXIST "%SEVENZIP%" (
@@ -94,7 +95,7 @@ IF NOT EXIST "temp_zip\Tesseract"                  MD "temp_zip\Tesseract"
 IF NOT EXIST "temp_zip\Tesseract\tessdata"         MD "temp_zip\Tesseract\tessdata"
 IF NOT EXIST "temp_zip\Tesseract\tessdata\configs" MD "temp_zip\Tesseract\tessdata\configs"
 
-COPY /Y /V "..\..\..\gpl.txt"                            "temp_zip\"
+COPY /Y /V "..\..\..\LICENSE.txt"                        "temp_zip\"
 COPY /Y /V "..\..\..\Changelog.txt"                      "temp_zip\"
 COPY /Y /V "Hunspellx86.dll"                             "temp_zip\"
 COPY /Y /V "Hunspellx64.dll"                             "temp_zip\"

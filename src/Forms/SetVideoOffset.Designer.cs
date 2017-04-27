@@ -1,6 +1,6 @@
 ﻿namespace Nikse.SubtitleEdit.Forms
 {
-    partial class SetVideoOffset
+    sealed partial class SetVideoOffset
     {
         /// <summary>
         /// Required designer variable.
@@ -33,13 +33,15 @@
             this.labelDescription = new System.Windows.Forms.Label();
             this.checkBoxFromCurrentPosition = new System.Windows.Forms.CheckBox();
             this.timeUpDownVideoPosition = new Nikse.SubtitleEdit.Controls.TimeUpDown();
+            this.buttonReset = new System.Windows.Forms.Button();
+            this.checkBoxKeepTimeCodes = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // buttonCancel
             // 
             this.buttonCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCancel.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.buttonCancel.Location = new System.Drawing.Point(352, 109);
+            this.buttonCancel.Location = new System.Drawing.Point(386, 129);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(75, 21);
             this.buttonCancel.TabIndex = 5;
@@ -51,10 +53,10 @@
             // 
             this.buttonOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonOK.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.buttonOK.Location = new System.Drawing.Point(271, 109);
+            this.buttonOK.Location = new System.Drawing.Point(194, 129);
             this.buttonOK.Name = "buttonOK";
             this.buttonOK.Size = new System.Drawing.Size(75, 21);
-            this.buttonOK.TabIndex = 4;
+            this.buttonOK.TabIndex = 3;
             this.buttonOK.Text = "&OK";
             this.buttonOK.UseVisualStyleBackColor = true;
             this.buttonOK.Click += new System.EventHandler(this.buttonOK_Click);
@@ -66,7 +68,7 @@
             this.labelDescription.Location = new System.Drawing.Point(12, 22);
             this.labelDescription.Name = "labelDescription";
             this.labelDescription.Size = new System.Drawing.Size(81, 13);
-            this.labelDescription.TabIndex = 3;
+            this.labelDescription.TabIndex = 0;
             this.labelDescription.Text = "Set video offset";
             // 
             // checkBoxFromCurrentPosition
@@ -75,7 +77,7 @@
             this.checkBoxFromCurrentPosition.Location = new System.Drawing.Point(15, 71);
             this.checkBoxFromCurrentPosition.Name = "checkBoxFromCurrentPosition";
             this.checkBoxFromCurrentPosition.Size = new System.Drawing.Size(153, 17);
-            this.checkBoxFromCurrentPosition.TabIndex = 14;
+            this.checkBoxFromCurrentPosition.TabIndex = 2;
             this.checkBoxFromCurrentPosition.Text = "From current video position";
             this.checkBoxFromCurrentPosition.UseVisualStyleBackColor = true;
             // 
@@ -87,13 +89,38 @@
             this.timeUpDownVideoPosition.Margin = new System.Windows.Forms.Padding(4);
             this.timeUpDownVideoPosition.Name = "timeUpDownVideoPosition";
             this.timeUpDownVideoPosition.Size = new System.Drawing.Size(96, 24);
-            this.timeUpDownVideoPosition.TabIndex = 13;
+            this.timeUpDownVideoPosition.TabIndex = 1;
+            this.timeUpDownVideoPosition.UseVideoOffset = false;
+            // 
+            // buttonReset
+            // 
+            this.buttonReset.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonReset.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.buttonReset.Location = new System.Drawing.Point(275, 129);
+            this.buttonReset.Name = "buttonReset";
+            this.buttonReset.Size = new System.Drawing.Size(105, 21);
+            this.buttonReset.TabIndex = 4;
+            this.buttonReset.Text = "Reset";
+            this.buttonReset.UseVisualStyleBackColor = true;
+            this.buttonReset.Click += new System.EventHandler(this.buttonReset_Click);
+            // 
+            // checkBoxKeepTimeCodes
+            // 
+            this.checkBoxKeepTimeCodes.AutoSize = true;
+            this.checkBoxKeepTimeCodes.Location = new System.Drawing.Point(15, 94);
+            this.checkBoxKeepTimeCodes.Name = "checkBoxKeepTimeCodes";
+            this.checkBoxKeepTimeCodes.Size = new System.Drawing.Size(261, 17);
+            this.checkBoxKeepTimeCodes.TabIndex = 6;
+            this.checkBoxKeepTimeCodes.Text = "Keep existing time codes (do not add video offset)";
+            this.checkBoxKeepTimeCodes.UseVisualStyleBackColor = true;
             // 
             // SetVideoOffset
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(439, 142);
+            this.ClientSize = new System.Drawing.Size(473, 162);
+            this.Controls.Add(this.checkBoxKeepTimeCodes);
+            this.Controls.Add(this.buttonReset);
             this.Controls.Add(this.checkBoxFromCurrentPosition);
             this.Controls.Add(this.timeUpDownVideoPosition);
             this.Controls.Add(this.buttonCancel);
@@ -107,6 +134,7 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "SetVideoOffset";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SetVideoOffset_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -119,5 +147,7 @@
         private System.Windows.Forms.Label labelDescription;
         private Controls.TimeUpDown timeUpDownVideoPosition;
         private System.Windows.Forms.CheckBox checkBoxFromCurrentPosition;
+        private System.Windows.Forms.Button buttonReset;
+        private System.Windows.Forms.CheckBox checkBoxKeepTimeCodes;
     }
 }

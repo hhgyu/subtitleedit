@@ -35,7 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
@@ -46,6 +48,8 @@
     <Compile Include="Core\LanguageAutoDetectTest.cs" />
     <Compile Include="Core\StringExtensionsTest.cs" />
     <Compile Include="Core\SubtitleTest.cs" />
+    <Compile Include="Core\RichTextToPlainTextTest.cs" />
+    <Compile Include="Logic\NetflixQualityCheckTest.cs" />
     <Compile Include="Logic\Ocr\BinaryOcrTest.cs" />
     <Compile Include="Core\HtmlUtilTest.cs" />
     <Compile Include="FixCommonErrorsTest.cs" />
@@ -58,7 +62,7 @@
     <Compile Include="Logic\TarFileTest.cs" />
     <Compile Include="Logic\TransportStream\TransportStreamTest.cs" />
     <Compile Include="Logic\ParagraphTest.cs" />
-    <Compile Include="Logic\StripableTextTest.cs" />
+    <Compile Include="Logic\StrippableTextTest.cs" />
     <Compile Include="Logic\TimeCodeTest.cs" />
     <Compile Include="Logic\VideoFormats\MatroskaTest.cs" />
     <Compile Include="Logic\VobSub\VobSubTest.cs" />
@@ -84,7 +88,7 @@
     <EmbeddedResource Include="Dictionaries\en_US.dic" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Dictionaries\names_etc.xml" />
+    <EmbeddedResource Include="Dictionaries\names.xml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Files\sample.tar">
@@ -126,10 +130,6 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>
-    </PreBuildEvent>
-  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

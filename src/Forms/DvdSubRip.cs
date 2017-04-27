@@ -22,7 +22,8 @@ namespace Nikse.SubtitleEdit.Forms
         private long _lastVobPresentationTimestamp;
         private long _lastNavEndPts;
         private long _accumulatedPresentationTimestamp;
-        private IntPtr _taskbarFormHandle;
+        private readonly IntPtr _taskbarFormHandle;
+        private string _initialFileName;
 
         public string SelectedLanguage
         {
@@ -34,10 +35,11 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        public DvdSubRip(IntPtr taskbarFormHandle)
+        public DvdSubRip(IntPtr taskbarFormHandle, string initialFileName)
         {
             InitializeComponent();
             _taskbarFormHandle = taskbarFormHandle;
+            _initialFileName = initialFileName;
             labelStatus.Text = string.Empty;
             buttonStartRipping.Enabled = false;
 
@@ -355,7 +357,7 @@ namespace Nikse.SubtitleEdit.Forms
 
         internal static bool IsPrivateStream2(byte[] buffer, int index)
         {
-            return buffer.Length >= index + 3 &&
+            return buffer.Length > index + 3 &&
                    buffer[index + 0] == 0 &&
                    buffer[index + 1] == 0 &&
                    buffer[index + 2] == 1 &&
@@ -512,6 +514,23 @@ namespace Nikse.SubtitleEdit.Forms
                     DialogResult = DialogResult.Cancel;
                 }
             }
+        }
+
+        private void DvdSubRip_Shown(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(_initialFileName))
+                return;
+
+            if (_initialFileName.EndsWith(".ifo", StringComparison.InvariantCultureIgnoreCase))
+            {
+                OpenIfoFile(_initialFileName);
+            }
+            else if (_initialFileName.EndsWith(".vob", StringComparison.InvariantCultureIgnoreCase))
+            {
+                listBoxVobFiles.Items.Add(_initialFileName);
+                buttonStartRipping.Enabled = listBoxVobFiles.Items.Count > 0;
+            }
+            _initialFileName = null;
         }
 
     }

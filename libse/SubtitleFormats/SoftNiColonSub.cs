@@ -57,7 +57,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 var lines = text.SplitToLines();
                 int count = 0;
                 lineSb.Clear();
-                string tempLine = string.Empty;
                 bool nextLineInItalics = false;
                 foreach (string line in lines)
                 {
@@ -65,7 +64,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     if (count > 0)
                         lineSb.Append(Environment.NewLine);
 
-                    tempLine = line;
+                    var tempLine = line;
 
                     // This line should be in italics (it was detected in previous line)
                     if (nextLineInItalics)
@@ -159,8 +158,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             try
                             {
                                 p = new Paragraph();
-                                p.StartTime = DecodeTimeCode(startParts);
-                                p.EndTime = DecodeTimeCode(endParts);
+                                p.StartTime = DecodeTimeCodeFramesFourParts(startParts);
+                                p.EndTime = DecodeTimeCodeFramesFourParts(endParts);
                                 string text = sb.ToString().Trim();
 
                                 bool positionTop = false;
@@ -179,13 +178,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 var subtitleLines = text.SplitToLines();
                                 int count = 0;
                                 lineSb.Clear();
-                                string tempLine = string.Empty;
                                 foreach (string subtitleLine in subtitleLines)
                                 {
                                     // Append line break in every line except the first one
                                     if (count > 0)
                                         lineSb.Append(Environment.NewLine);
-                                    tempLine = subtitleLine;
+                                    var tempLine = subtitleLine;
                                     // Close italics in every line (if next line is in italics, SoftNI will use "[" at the beginning)
                                     if (Utilities.CountTagInText(tempLine, "<i>") > Utilities.CountTagInText(tempLine, "</i>"))
                                         tempLine = tempLine + "</i>";
@@ -226,17 +224,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
 
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-
-            return new TimeCode(hour, minutes, seconds, FramesToMillisecondsMax999(frames));
         }
 
     }

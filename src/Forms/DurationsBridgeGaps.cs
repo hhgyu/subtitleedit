@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Nikse.SubtitleEdit.Controls;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -14,13 +15,15 @@ namespace Nikse.SubtitleEdit.Forms
         private Dictionary<string, string> _dic;
         private readonly Timer _refreshTimer = new Timer();
         public Subtitle FixedSubtitle { get { return _fixedSubtitle; } }
+        public int FixedCount { get; private set; }
 
         public DurationsBridgeGaps(Subtitle subtitle)
         {
             InitializeComponent();
             UiUtil.FixLargeFonts(this, buttonOK);
 
-            // Remove SE's built-in ListView resize logic
+            SubtitleListview1.HideColumn(SubtitleListView.SubtitleColumn.CharactersPerSeconds);
+            SubtitleListview1.HideColumn(SubtitleListView.SubtitleColumn.WordsPerMinute);
             SubtitleListview1.SetCustomResize(SubtitleListView1_Resize);
 
             Text = Configuration.Settings.Language.DurationsBridgeGaps.Title;
@@ -29,7 +32,6 @@ namespace Nikse.SubtitleEdit.Forms
             SubtitleListview1.InitializeLanguage(Configuration.Settings.Language.General, Configuration.Settings);
             UiUtil.InitializeSubtitleFont(SubtitleListview1);
             SubtitleListview1.ShowExtraColumn(Configuration.Settings.Language.DurationsBridgeGaps.GapToNext);
-            SubtitleListview1.DisplayExtraFromExtra = true;
             SubtitleListview1.AutoSizeAllColumns(this);
 
             labelBridgePart1.Text = Configuration.Settings.Language.DurationsBridgeGaps.BridgeGapsSmallerThanXPart1;
@@ -64,7 +66,7 @@ namespace Nikse.SubtitleEdit.Forms
             GeneratePreviewReal();
         }
 
-        public override sealed string Text
+        public sealed override string Text
         {
             get { return base.Text; }
             set { base.Text = value; }
@@ -86,12 +88,8 @@ namespace Nikse.SubtitleEdit.Forms
             if (_refreshTimer.Enabled)
             {
                 _refreshTimer.Stop();
-                _refreshTimer.Start();
             }
-            else
-            {
-                _refreshTimer.Start();
-            }
+            _refreshTimer.Start();
         }
 
         private void GeneratePreviewReal()
@@ -102,7 +100,7 @@ namespace Nikse.SubtitleEdit.Forms
             Cursor = Cursors.WaitCursor;
             SubtitleListview1.Items.Clear();
             SubtitleListview1.BeginUpdate();
-            int count = 0;
+            FixedCount = 0;
             _fixedSubtitle = new Subtitle(_subtitle);
             _dic = new Dictionary<string, string>();
             var fixedIndexes = new List<int>(_fixedSubtitle.Paragraphs.Count);
@@ -125,7 +123,7 @@ namespace Nikse.SubtitleEdit.Forms
                     cur.EndTime.TotalMilliseconds = next.StartTime.TotalMilliseconds - minMsBetweenLines;
                     fixedIndexes.Add(i);
                     fixedIndexes.Add(i + 1);
-                    count++;
+                    FixedCount++;
                 }
                 var msToNext = next.StartTime.TotalMilliseconds - cur.EndTime.TotalMilliseconds;
                 if (msToNext < 2000)
@@ -149,9 +147,9 @@ namespace Nikse.SubtitleEdit.Forms
             }
 
             foreach (var index in fixedIndexes)
-                SubtitleListview1.SetBackgroundColor(index, Color.Green);
+                SubtitleListview1.SetBackgroundColor(index, Color.LightGreen);
             SubtitleListview1.EndUpdate();
-            groupBoxLinesFound.Text = string.Format(Configuration.Settings.Language.DurationsBridgeGaps.GapsBridgedX, count);
+            groupBoxLinesFound.Text = string.Format(Configuration.Settings.Language.DurationsBridgeGaps.GapsBridgedX, FixedCount);
 
             Cursor = Cursors.Default;
         }
@@ -199,15 +197,14 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void SubtitleListView1_Resize(object sender, EventArgs e)
         {
-            // Store last column width 'cause it won't be changed
+            const int lastColumnWidth = 150;
             var columnsCount = SubtitleListview1.Columns.Count - 1;
-            var lastColumnWidth = SubtitleListview1.Columns[columnsCount].Width;
             var width = 0;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < columnsCount - 1; i++)
             {
                 width += SubtitleListview1.Columns[i].Width;
             }
-            SubtitleListview1.Columns[4].Width = SubtitleListview1.Width - (width + lastColumnWidth);
+            SubtitleListview1.Columns[columnsCount - 1].Width = SubtitleListview1.Width - (width + lastColumnWidth);
             SubtitleListview1.Columns[columnsCount].Width = lastColumnWidth;
         }
 

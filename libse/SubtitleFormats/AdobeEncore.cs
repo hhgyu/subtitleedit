@@ -80,16 +80,17 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             subtitle.Paragraphs.Clear();
             foreach (string line in lines)
             {
-                if (RegexTimeCodes.IsMatch(line))
+                Match match = RegexTimeCodes.Match(line);
+                if (match.Success)
                 {
                     try
                     {
-                        string temp = line.Substring(0, RegexTimeCodes.Match(line).Length);
+                        string temp = line.Substring(0, match.Value.Length);
                         string start = temp.Substring(0, 11);
                         string end = temp.Substring(12, 11);
 
-                        string[] startParts = start.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                        string[] endParts = end.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] startParts = start.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
+                        string[] endParts = end.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                         if (startParts.Length == 4 && endParts.Length == 4)
                         {
                             string text = line.Remove(0, RegexTimeCodes.Match(line).Length - 1).Trim();

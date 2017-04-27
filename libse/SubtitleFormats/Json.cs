@@ -30,20 +30,20 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public static string EncodeJsonText(string text)
         {
-            var sb = new StringBuilder();
+            var sb = new StringBuilder(text.Length);
             foreach (var c in text)
             {
-                if (c == '"')
+                switch (c)
                 {
-                    sb.Append("\\\"");
-                }
-                else if (c == '\\')
-                {
-                    sb.Append("\\\\");
-                }
-                else
-                {
-                    sb.Append(c);
+                    case '\\':
+                        sb.Append("\\\\");
+                        break;
+                    case '"':
+                        sb.Append("\\\"");
+                        break;
+                    default:
+                        sb.Append(c);
+                        break;
                 }
             }
             return sb.ToString().Replace(Environment.NewLine, "<br />");
@@ -51,12 +51,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public static string DecodeJsonText(string text)
         {
-            var sb = new StringBuilder();
             text = text.Replace("<br />", Environment.NewLine);
             text = text.Replace("<br>", Environment.NewLine);
             text = text.Replace("<br/>", Environment.NewLine);
             text = text.Replace("\\n", Environment.NewLine);
             bool keepNext = false;
+            var sb = new StringBuilder(text.Length);
             foreach (var c in text)
             {
                 if (c == '\\' && !keepNext)
@@ -100,7 +100,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var sb = new StringBuilder();
             foreach (string s in lines)
                 sb.Append(s);
-            if (!sb.ToString().TrimStart().StartsWith("[{\"start"))
+            if (!sb.ToString().TrimStart().StartsWith("[{\"", StringComparison.Ordinal))
                 return;
 
             foreach (string line in sb.ToString().Replace("},{", Environment.NewLine).SplitToLines())
@@ -145,6 +145,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return s;
         }
 
+        private static readonly char[] CommaAndEndCurlyBracket = { ',', '}' };
+
         public static string ReadTag(string s, string tag)
         {
             var startIndex = s.IndexOfAny(new[] { "\"" + tag + "\"", "'" + tag + "'" }, StringComparison.Ordinal);
@@ -153,7 +155,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var res = s.Substring(startIndex + 3 + tag.Length).Trim().TrimStart(':').TrimStart();
             if (res.StartsWith('"'))
             { // text
-                res = Json.ConvertJsonSpecialCharacters(res);
+                res = ConvertJsonSpecialCharacters(res);
                 res = res.Replace("\\\"", "@__1");
                 int endIndex = res.IndexOf("\"}", StringComparison.Ordinal);
                 int endAlternate = res.IndexOf("\",", StringComparison.Ordinal);
@@ -161,6 +163,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     endIndex = endAlternate;
                 else if (endAlternate > 0 && endAlternate < endIndex)
                     endIndex = endAlternate;
+                if (endIndex < 0 && res.EndsWith("\""))
+                    endIndex = res.Length - 1;
                 if (endIndex < 0)
                     return null;
                 if (res.Length > 1)
@@ -169,7 +173,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
             else
             { // number
-                var endIndex = res.IndexOfAny(new[] { ',', '}' });
+                var endIndex = res.IndexOfAny(CommaAndEndCurlyBracket);
                 if (endIndex < 0)
                     return null;
                 return res.Substring(0, endIndex);
@@ -184,16 +188,23 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (startIndex < 0)
                 return list;
 
-            startIndex += tag.Length + 4;
-
-            string res = s.Substring(startIndex);
-
+            startIndex += tag.Length + 2;
+            string res = s.Substring(startIndex).TrimStart().TrimStart(':').TrimStart(); //.TrimStart('[').TrimStart();
             int tagLevel = 1;
-            int nextTag = 0;
             int oldStart = 0;
+            if (oldStart < res.Length && res[oldStart] == '[')
+            {
+                oldStart++;
+            }
+            int nextTag = oldStart;
             while (tagLevel >= 1 && nextTag >= 0 && nextTag + 1 < res.Length)
             {
-                if (res[oldStart] == '"')
+                while (oldStart < res.Length && res[oldStart] == ' ')
+                {
+                    oldStart++;
+                }
+
+                if (oldStart < res.Length && res[oldStart] == '"')
                 {
                     nextTag = res.IndexOf('"', oldStart + 1);
 
@@ -204,10 +215,38 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         string newValue = res.Substring(oldStart, nextTag - oldStart);
                         list.Add(newValue.Remove(0, 1));
-                        oldStart = nextTag + 2;
+                        oldStart = nextTag + 1;
+                        while (oldStart < res.Length && "\r\n\t ".Contains(res[oldStart]))
+                        {
+                            oldStart++;
+                        }
+                        if (oldStart < res.Length && res[oldStart] == ']')
+                        {
+                            oldStart++;
+                        }
+                        while (oldStart < res.Length && "\r\n\t ".Contains(res[oldStart]))
+                        {
+                            oldStart++;
+                        }
+                        if (oldStart < res.Length && res[oldStart] == ',')
+                        {
+                            oldStart++;
+                        }
+                        while (oldStart < res.Length && "\r\n\t ".Contains(res[oldStart]))
+                        {
+                            oldStart++;
+                        }
+                        if (oldStart < res.Length && res[oldStart] == '[')
+                        {
+                            oldStart++;
+                        }
+                        while (oldStart < res.Length && "\r\n\t ".Contains(res[oldStart]))
+                        {
+                            oldStart++;
+                        }
                     }
                 }
-                else if (res[oldStart] != '[' && res[oldStart] != ']')
+                else if (oldStart < res.Length && res[oldStart] != '[' && res[oldStart] != ']')
                 {
                     nextTag = res.IndexOf(',', oldStart + 1);
                     if (nextTag > 0)
@@ -284,6 +323,54 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 if (sb.Length > 0)
                     list.Add(sb.ToString());
+            }
+            return list;
+        }
+
+        public static List<string> ReadObjectArray(string text)
+        {
+            var list = new List<string>();
+            text = text.Trim();
+            if (text.StartsWith('[') && text.EndsWith(']'))
+            {
+                text = text.Trim('[', ']').Trim();
+                int onCount = 0;
+                bool keepNext = false;
+                var sb = new StringBuilder();
+                foreach (var c in text)
+                {
+                    if (keepNext)
+                    {
+                        sb.Append(c);
+                        keepNext = false;
+                    }
+                    else if (c == '\\')
+                    {
+                        sb.Append(c);
+                        keepNext = true;
+                    }
+                    else if (c == '{')
+                    {
+                        sb.Append(c);
+                        onCount++;
+                    }
+                    else if (c == '}')
+                    {
+                        sb.Append(c);
+                        onCount--;
+                    }
+                    else if (c == ',' && onCount == 0)
+                    {
+                        list.Add(sb.ToString().Trim());
+                        sb.Clear();
+                    }
+                    else
+                    {
+                        sb.Append(c);
+                    }
+                }
+                if (sb.Length > 0)
+                    list.Add(sb.ToString().Trim());
             }
             return list;
         }

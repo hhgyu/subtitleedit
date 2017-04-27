@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Nikse.SubtitleEdit.Core;
+using System;
 
 namespace Test.Logic
 {
@@ -61,7 +61,6 @@ namespace Test.Logic
             Assert.AreEqual(tc.TotalMilliseconds, 2000);
         }
 
-
         [TestMethod]
         public void TimeCodeAddTime7()
         {
@@ -69,6 +68,19 @@ namespace Test.Logic
             tc.AddTime(1000.0);
 
             Assert.AreEqual(tc.TotalMilliseconds, 2000);
+        }
+
+        [TestMethod]
+        public void TimeCodeDaysTest()
+        {
+            var tc = new TimeCode(24 * 3, 0, 0, 0)
+            {
+                Hours = 0,
+                Minutes = 0,
+                Seconds = 0,
+                Milliseconds = 0,
+            };
+            Assert.IsTrue(tc.TotalMilliseconds > 0);
         }
 
         [TestMethod]
@@ -117,7 +129,39 @@ namespace Test.Logic
             var tc = new TimeCode(1, 2, 3, 4);
 
             Assert.AreEqual(tc.TotalMilliseconds, 3723004);
-            Assert.IsTrue(Math.Abs(tc.TotalMilliseconds -  (tc.TotalSeconds * 1000.0)) < 0.001);
+            Assert.IsTrue(Math.Abs(tc.TotalMilliseconds - (tc.TotalSeconds * 1000.0)) < 0.001);
+        }
+
+        [TestMethod]
+        public void ToShortStringHhmmssff1()
+        {
+            Configuration.Settings.General.CurrentFrameRate = 25;
+            var res = new TimeCode(1, 2, 3, 0).ToShortStringHHMMSSFF();
+            Assert.AreEqual("01:02:03:00", res);
+        }
+
+        [TestMethod]
+        public void ToShortStringHhmmssff2()
+        {
+            Configuration.Settings.General.CurrentFrameRate = 25;
+            var res = new TimeCode(0, 2, 3, 0).ToShortStringHHMMSSFF();
+            Assert.AreEqual(res, "02:03:00", res);
+        }
+
+        [TestMethod]
+        public void ToShortStringHhmmssff3()
+        {
+            Configuration.Settings.General.CurrentFrameRate = 25;
+            var res = new TimeCode(0, 0, 3, 0).ToShortStringHHMMSSFF();
+            Assert.AreEqual("03:00", res);
+        }
+
+        [TestMethod]
+        public void ToShortStringHhmmssff4()
+        {
+            Configuration.Settings.General.CurrentFrameRate = 25;
+            var res = new TimeCode(0, 0, 0, 0).ToShortStringHHMMSSFF();
+            Assert.AreEqual("00:00", res);
         }
 
     }

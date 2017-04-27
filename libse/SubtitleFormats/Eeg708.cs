@@ -88,13 +88,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 {
                     string start = node.Attributes["timecode"].InnerText;
                     if (lastParagraph != null)
-                        lastParagraph.EndTime = DecodeTimeCode(start.Split(':'));
+                        lastParagraph.EndTime = DecodeTimeCodeFramesFourParts(start.Split(':'));
                     XmlNode text = node.SelectSingleNode("Text");
                     if (text != null)
                     {
                         string s = text.InnerText;
                         s = s.Replace("<br />", Environment.NewLine).Replace("<br/>", Environment.NewLine);
-                        TimeCode startTime = DecodeTimeCode(start.Split(':'));
+                        TimeCode startTime = DecodeTimeCodeFramesFourParts(start.Split(':'));
                         lastParagraph = new Paragraph(s, startTime.TotalMilliseconds, startTime.TotalMilliseconds + 3000);
                         subtitle.Paragraphs.Add(lastParagraph);
                     }
@@ -111,16 +111,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static string EncodeTimeCode(TimeCode time)
         {
             return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", time.Hours, time.Minutes, time.Seconds, MillisecondsToFramesMaxFrameRate(time.Milliseconds));
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-
-            return new TimeCode(hour, minutes, seconds, FramesToMillisecondsMax999(frames));
         }
 
     }

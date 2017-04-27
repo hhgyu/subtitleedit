@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle27 : SubtitleFormat
     {
-        private static Regex regexTimeCodes = new Regex(@"^\d\d:\d\d:\d\d:  ", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^\d\d:\d\d:\d\d:  ", RegexOptions.Compiled);
 
         public override string Extension
         {
@@ -39,10 +39,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override string ToText(Subtitle subtitle, string title)
         {
             var sb = new StringBuilder();
-            int index = 0;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
-                index++;
                 //00:18:02:  (斉藤)失礼な大人って！  (悠子)何言ってんのあんた？
                 string text = HtmlUtil.RemoveHtmlTags(p.Text);
                 text = text.Replace(Environment.NewLine, "  ");
@@ -70,18 +68,18 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (string line in lines)
             {
                 string s = line.Trim();
-                if (regexTimeCodes.IsMatch(s))
+                if (RegexTimeCodes.IsMatch(s))
                 {
                     var temp = s.Substring(0, 8);
 
-                    string[] startParts = temp.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] startParts = temp.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                     if (startParts.Length == 3)
                     {
                         try
                         {
                             string text = s.Remove(0, 10).Trim();
                             text = text.Replace("  ", Environment.NewLine);
-                            p = new Paragraph(DecodeTimeCode(startParts), new TimeCode(0, 0, 0, 0), text);
+                            p = new Paragraph(DecodeTimeCode(startParts), new TimeCode(), text);
                             subtitle.Paragraphs.Add(p);
                         }
                         catch (Exception exception)
@@ -124,8 +122,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             string minutes = parts[1];
             string seconds = parts[2];
 
-            TimeCode tc = new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), 0);
-            return tc;
+            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), 0);
         }
 
     }

@@ -46,6 +46,7 @@
     <Compile Include="BluRaySup\PaletteInfo.cs" />
     <Compile Include="BluRaySup\ToolBox.cs" />
     <Compile Include="BmpReader.cs" />
+    <Compile Include="CharUtils.cs" />
     <Compile Include="Configuration.cs" />
     <Compile Include="ContainerFormats\AviRiffData.cs" />
     <Compile Include="ContainerFormats\Ebml\Element.cs" />
@@ -113,6 +114,7 @@
     <Compile Include="DetectEncoding\Multilang\__MIDL_IWinTypes_0009.cs" />
     <Compile Include="Dictionaries\NamesList.cs" />
     <Compile Include="Dictionaries\OcrFixReplaceList.cs" />
+    <Compile Include="DvdSubtitleLanguage.cs" />
     <Compile Include="Enums\FindType.cs" />
     <Compile Include="Enums\SelectionChoice.cs" />
     <Compile Include="Enums\SpellCheckAction.cs" />
@@ -154,8 +156,9 @@
     <Compile Include="Forms\FixCommonErrors\FixUnneededSpaces.cs" />
     <Compile Include="Forms\FixCommonErrors\FixUppercaseIInsideWords.cs" />
     <Compile Include="Forms\FixCommonErrors\Helper.cs" />
-    <Compile Include="Forms\FixCommonErrors\IFixCallbacks.cs" />
-    <Compile Include="Forms\FixCommonErrors\IFixCommonError.cs" />
+    <Compile Include="Interfaces\IBinaryPersistableSubtitle.cs" />
+    <Compile Include="Interfaces\IFixCallbacks.cs" />
+    <Compile Include="Interfaces\IFixCommonError.cs" />
     <Compile Include="Forms\FixCommonErrors\RemoveSpaceBetweenNumbers.cs" />
     <Compile Include="Forms\RemoveTextForHI.cs" />
     <Compile Include="Forms\RemoveTextForHISettings.cs" />
@@ -163,7 +166,6 @@
     <Compile Include="HistoryItem.cs" />
     <Compile Include="HtmlUtil.cs" />
     <Compile Include="IfoParser.cs" />
-    <Compile Include="ImageSplitter.cs" />
     <Compile Include="ImageSplitterItem.cs" />
     <Compile Include="Interfaces\IRtfTextConverter.cs" />
     <Compile Include="Language.cs" />
@@ -173,19 +175,62 @@
     <Compile Include="ManagedBitmap.cs" />
     <Compile Include="MurMurHash3.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckMaxLineLength.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckItalics.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixHelper.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckNumbersOneToTenSpellOut.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckStartNumberSpellOut.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckGlyph.cs" />
+    <Compile Include="NetflixQualityCheck\INetflixQualityChecker.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckTextForHiUseBrackets.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckDialogeHyphenNoSpace.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckMaxCps.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckTwoFramesGap.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckNumberOfLines.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckMinDuration.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixQualityController.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckMaxDuration.cs" />
+    <Compile Include="NetflixQualityCheck\NetflixCheckWhiteSpace.cs" />
     <Compile Include="NikseBitmap.cs" />
     <Compile Include="NoBreakAfterItem.cs" />
     <Compile Include="Paragraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="RealFFT.cs" />
     <Compile Include="RegistryUtil.cs" />
     <Compile Include="RichTextToPlainText.cs" />
+    <Compile Include="SceneChangeHelper.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="SpellCheckWord.cs" />
+    <Compile Include="Interfaces\IDoSpell.cs" />
+    <Compile Include="SpellCheck\SpellCheckWord.cs" />
+    <Compile Include="SpellCheck\SpellCheckWordLists.cs" />
+    <Compile Include="SpellCheck\UndoObject.cs" />
     <Compile Include="SsaStyle.cs" />
     <Compile Include="StringExtensions.cs" />
-    <Compile Include="StripableText.cs" />
+    <Compile Include="StrippableText.cs" />
+    <Compile Include="SubtitleEditRegex.cs" />
     <Compile Include="Subtitle.cs" />
+    <Compile Include="SubtitleFormats\AribB36.cs" />
+    <Compile Include="SubtitleFormats\AribB24Decoder.cs" />
+    <Compile Include="SubtitleFormats\JsonType11.cs" />
+    <Compile Include="SubtitleFormats\SmpteTt2052.cs" />
+    <Compile Include="SubtitleFormats\Ted20.cs" />
+    <Compile Include="SubtitleFormats\Csv4.cs" />
+    <Compile Include="SubtitleFormats\Gremots.cs" />
+    <Compile Include="SubtitleFormats\JsonType10.cs" />
+    <Compile Include="SubtitleFormats\JsonType9.cs" />
+    <Compile Include="SubtitleFormats\JsonType8.cs" />
+    <Compile Include="SubtitleFormats\MacSub.cs" />
+    <Compile Include="SubtitleFormats\SubUrbia.cs" />
+    <Compile Include="SubtitleFormats\NetflixTimedText.cs" />
+    <Compile Include="SubtitleFormats\JsonType7.cs" />
+    <Compile Include="SubtitleFormats\PhoenixSubtitle.cs" />
+    <Compile Include="SubtitleFormats\SamiAvDicPlayer.cs" />
+    <Compile Include="SubtitleFormats\SpuImage.cs" />
     <Compile Include="SubtitleFormats\AbcIViewer.cs" />
     <Compile Include="SubtitleFormats\AdobeAfterEffectsFTME.cs" />
     <Compile Include="SubtitleFormats\AdobeEncore.cs" />
@@ -209,6 +254,7 @@
     <Compile Include="SubtitleFormats\CaptionsInc.cs" />
     <Compile Include="SubtitleFormats\CaraokeXml.cs" />
     <Compile Include="SubtitleFormats\Cavena890.cs" />
+    <Compile Include="SubtitleFormats\CheetahCaptionOld.cs" />
     <Compile Include="SubtitleFormats\CheetahCaption.cs" />
     <Compile Include="SubtitleFormats\Chk.cs" />
     <Compile Include="SubtitleFormats\Csv.cs" />
@@ -228,6 +274,7 @@
     <Compile Include="SubtitleFormats\Eeg708.cs" />
     <Compile Include="SubtitleFormats\ELRStudioClosedCaption.cs" />
     <Compile Include="SubtitleFormats\F4Rtf.cs" />
+    <Compile Include="SubtitleFormats\SeImageHtmlIndex.cs" />
     <Compile Include="SubtitleFormats\F4Text.cs" />
     <Compile Include="SubtitleFormats\F4Xml.cs" />
     <Compile Include="SubtitleFormats\FabSubtitler.cs" />
@@ -292,6 +339,8 @@
     <Compile Include="SubtitleFormats\SonicScenaristBitmaps.cs" />
     <Compile Include="SubtitleFormats\SonyDVDArchitect.cs" />
     <Compile Include="SubtitleFormats\SonyDVDArchitectExplicitDuration.cs" />
+    <Compile Include="SubtitleFormats\Edl.cs" />
+    <Compile Include="SubtitleFormats\SonyDVDArchitectLineDurationLength.cs" />
     <Compile Include="SubtitleFormats\SonyDVDArchitectLineAndDuration.cs" />
     <Compile Include="SubtitleFormats\SonyDVDArchitectTabs.cs" />
     <Compile Include="SubtitleFormats\SonyDVDArchitectWithLineNumbers.cs" />
@@ -311,6 +360,7 @@
     <Compile Include="SubtitleFormats\SwiftTextLineNumber.cs" />
     <Compile Include="SubtitleFormats\Tek.cs" />
     <Compile Include="SubtitleFormats\TextST.cs" />
+    <Compile Include="SubtitleFormats\TimedTextImage.cs" />
     <Compile Include="SubtitleFormats\TimedText.cs" />
     <Compile Include="SubtitleFormats\TimedText10.cs" />
     <Compile Include="SubtitleFormats\TimedText200604.cs" />
@@ -349,14 +399,21 @@
     <Compile Include="SubtitleFormats\UnknownSubtitle21.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle22.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle23.cs" />
+    <Compile Include="SubtitleFormats\UnknownSubtitle84.cs" />
+    <Compile Include="SubtitleFormats\UnknownSubtitle83.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle24.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle25.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle26.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle27.cs" />
+    <Compile Include="SubtitleFormats\Cappella.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle28.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle29.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle3.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle30.cs" />
+    <Compile Include="SubtitleFormats\DlDd.cs" />
+    <Compile Include="SubtitleFormats\MediaTransData.cs" />
+    <Compile Include="SubtitleFormats\UnknownSubtitle82.cs" />
+    <Compile Include="SubtitleFormats\UnknownSubtitle81.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle80.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle79.cs" />
     <Compile Include="SubtitleFormats\UnknownSubtitle31.cs" />
@@ -430,6 +487,7 @@
     <Compile Include="TarReader.cs" />
     <Compile Include="TaskbarList.cs" />
     <Compile Include="TextDraw.cs" />
+    <Compile Include="TextEncodingExtensions.cs" />
     <Compile Include="TimeCode.cs" />
     <Compile Include="TransportStream\AdaptationField.cs" />
     <Compile Include="TransportStream\ClutDefinitionSegment.cs" />
@@ -451,6 +509,7 @@
     <Compile Include="TransportStream\SubtitleSegment.cs" />
     <Compile Include="TransportStream\TransportStreamParser.cs" />
     <Compile Include="TransportStream\TransportStreamSubtitle.cs" />
+    <Compile Include="UknownFormatImporterJson.cs" />
     <Compile Include="UknownFormatImporter.cs" />
     <Compile Include="Utilities.cs" />
     <Compile Include="VideoInfo.cs" />
@@ -465,16 +524,25 @@
     <Compile Include="VobSub\VobSubPack.cs" />
     <Compile Include="VobSub\VobSubParser.cs" />
     <Compile Include="VobSub\VobSubWriter.cs" />
-    <Compile Include="Wave.cs" />
     <Compile Include="WaveToVisualizer.cs" />
     <Compile Include="XmlDeserializerGenerator.cs" />
     <Compile Include="XSub.cs" />
     <Compile Include="ZipExtractor.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\NetflixAllowedGlyphs.bin.gz" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>"$(ProjectDir)..\build_helpers.bat" rev $(ConfigurationName) &amp;&amp; "$(ProjectDir)..\build_helpers.bat" lang $(ConfigurationName)</PreBuildEvent>
-  </PropertyGroup>
+  <Target Name="BeforeCompile">
+    <Exec Command="%22$(SolutionDir)..\build_helpers.bat%22 rev %22$(ConfigurationName)%22" />
+    <Exec Command="%22$(SolutionDir)..\build_helpers.bat%22 lang %22$(ConfigurationName)%22" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

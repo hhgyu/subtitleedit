@@ -145,6 +145,9 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
             return pre + text;
         }
 
+        private static readonly string[] EndPlusDashList = { ". -", "! -", "? -", "— -", "-- -", ") -", "] -", "> -", ".\" -", "!\" -", "?\" -", ")\" -", "]\" -" };
+        private static readonly string[] EndPlusDashListShort = { ". -", "! -", "? -", "— -" };
+
         public static string FixDialogsOnOneLine(string text, string language)
         {
             if (text.Contains(" - ") && !text.Contains(Environment.NewLine))
@@ -155,10 +158,10 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                     string part0 = noTagLines[0];
                     string part1 = noTagLines[1];
                     if (part0.Length > 1 && "-—!?.\")]".Contains(part0[part0.Length - 1]) &&
-                        part1.Length > 1 && ("'" + Utilities.UppercaseLetters).Contains(part1[0]))
+                        part1.Length > 1 && (char.IsUpper(part1[0]) || part1[0] == '\''))
                     {
                         text = text.Replace(" - ", Environment.NewLine + "- ");
-                        if (Utilities.AllLettersAndNumbers.Contains(part0[0]))
+                        if (char.IsLetter((part0[0])) || CharUtils.IsDigit(part0[0]))
                         {
                             if (text.Length > 3 && text[0] == '<' && text[2] == '>')
                                 text = "<" + text[1] + ">" + "- " + text.Substring(3).TrimStart();
@@ -169,11 +172,11 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                 }
             }
 
-            var stringArray = new string[] { ". -", "! -", "? -", "— -", "-- -", ") -", "] -", "> -" };
-            var idx = text.IndexOfAny(stringArray, StringComparison.Ordinal);
+            var idx = text.IndexOfAny(EndPlusDashList, StringComparison.Ordinal);
             if (idx >= 0)
             {
-                if (Utilities.GetNumberOfLines(text) == 2)
+                int lineCount = Utilities.GetNumberOfLines(text);
+                if (lineCount == 2)
                 {
                     string temp = Utilities.AutoBreakLine(text, 99, 33, language);
                     var arr = text.SplitToLines();
@@ -186,7 +189,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                             text = temp;
                     }
                 }
-                else if (Utilities.GetNumberOfLines(text) == 1)
+                else if (lineCount == 1)
                 {
                     string temp = Utilities.AutoBreakLine(text, language);
                     var arrTemp = temp.SplitToLines();
@@ -198,7 +201,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                     }
                     else
                     {
-                        int index = text.IndexOfAny(new[] { ". -", "! -", "? -", "— -" }, StringComparison.Ordinal);
+                        int index = text.IndexOfAny(EndPlusDashListShort, StringComparison.Ordinal);
                         if (index < 0 && text.IndexOf("-- -", StringComparison.Ordinal) > 0)
                             index = text.IndexOf("-- -", StringComparison.Ordinal) + 1;
                         if (index > 0)
@@ -226,7 +229,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
 
             if (isPrevEndOfLine && prevText.Length > 5 && prevText.EndsWith('.') &&
                 prevText[prevText.Length - 3] == '.' &&
-                Utilities.AllLetters.Contains(prevText[prevText.Length - 2]))
+                char.IsLetter(prevText[prevText.Length - 2]))
                 isPrevEndOfLine = false;
             return isPrevEndOfLine;
         }
@@ -267,16 +270,16 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                         if (remove)
                         {
                             int idx = text.IndexOf('-');
-                            var st = new StripableText(text);
+                            var st = new StrippableText(text);
                             if (idx < 5 && st.Pre.Length >= idx)
                             {
                                 text = text.Remove(idx, 1).TrimStart();
                                 idx = text.IndexOf('-');
-                                st = new StripableText(text);
+                                st = new StrippableText(text);
                                 if (idx < 5 && idx >= 0 && st.Pre.Length >= idx)
                                 {
                                     text = text.Remove(idx, 1).TrimStart();
-                                    st = new StripableText(text);
+                                    st = new StrippableText(text);
                                 }
                                 idx = text.IndexOf('-');
                                 if (idx < 5 && idx >= 0 && st.Pre.Length >= idx)
@@ -313,7 +316,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                 var prev = subtitle.GetParagraphOrDefault(i - 1);
                 if (prev == null || !HtmlUtil.RemoveHtmlTags(prev.Text).TrimEnd().EndsWith('-') || HtmlUtil.RemoveHtmlTags(prev.Text).TrimEnd().EndsWith("--", StringComparison.Ordinal))
                 {
-                    var st = new StripableText(text);
+                    var st = new StrippableText(text);
                     if (st.Pre.EndsWith('-') || st.Pre.EndsWith("- ", StringComparison.Ordinal))
                     {
                         text = st.Pre.TrimEnd('-', ' ') + st.StrippedText + st.Post;
@@ -377,48 +380,47 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
         {
             Paragraph p = subtitle.Paragraphs[i];
             string text = p.Text;
-            var textCache = HtmlUtil.RemoveHtmlTags(text.TrimStart());
+            var textCache = HtmlUtil.RemoveHtmlTags(text.TrimStart(), true);
             if (textCache.StartsWith('-') || textCache.Contains(Environment.NewLine + "-"))
             {
                 Paragraph prev = subtitle.GetParagraphOrDefault(i - 1);
 
                 if (prev == null || !HtmlUtil.RemoveHtmlTags(prev.Text).TrimEnd().EndsWith('-') || HtmlUtil.RemoveHtmlTags(prev.Text).TrimEnd().EndsWith("--", StringComparison.Ordinal))
                 {
-                    var lines = HtmlUtil.RemoveHtmlTags(p.Text).SplitToLines();
+                    var lines = textCache.SplitToLines();
                     int startHyphenCount = lines.Count(line => line.TrimStart().StartsWith('-'));
                     int totalSpaceHyphen = Utilities.CountTagInText(text, " -");
                     if (startHyphenCount == 1 && totalSpaceHyphen == 0)
                     {
-                        var parts = HtmlUtil.RemoveHtmlTags(text).Trim().SplitToLines();
-                        if (parts.Length == 2)
+                        var parts = textCache.SplitToLines();
+                        if (parts.Length == 2 && !string.IsNullOrWhiteSpace(parts[0]))
                         {
                             var part0 = parts[0].TrimEnd();
                             bool doAdd = "!?.".Contains(part0[part0.Length - 1]) || language == "ko";
-                            if (parts[0].TrimStart().StartsWith('-') && parts[1].Contains(':') && !doAdd)
+                            if (parts[0].TrimStart().StartsWith('-') && parts[1].Contains(':') && doAdd)
                                 doAdd = false;
-                            if (parts[1].TrimStart().StartsWith('-') && parts[0].Contains(':') && !doAdd)
+                            if (parts[1].TrimStart().StartsWith('-') && parts[0].Contains(':') && doAdd)
                                 doAdd = false;
 
                             if (doAdd)
                             {
                                 int idx = text.IndexOf('-');
                                 int newLineIdx = text.IndexOf(Environment.NewLine, StringComparison.Ordinal);
-                                bool addSecondLine = idx < newLineIdx ? true : false;
+                                bool addSecondLine = idx < newLineIdx;
 
-                                if (addSecondLine && idx > 0 && Utilities.AllLetters.Contains(text[idx - 1]))
+                                if (addSecondLine && idx > 0 && char.IsLetter(text[idx - 1]))
                                     addSecondLine = false;
                                 if (addSecondLine)
                                 {
                                     // add dash in second line.
-                                    newLineIdx += 2;
-                                    if (text.LineBreakStartsWithHtmlTag(true))
-                                    {
-                                        text = text.Insert(newLineIdx + 3, "- ").TrimEnd();
-                                    }
+                                    var originalParts = text.SplitToLines();
+                                    if (originalParts[1].LineStartsWithHtmlTag(true))
+                                        originalParts[1] = originalParts[1].Substring(0, 3) + "- " + originalParts[1].Remove(0, 3).TrimEnd();
+                                    else if (originalParts[1].StartsWith("{\\an", StringComparison.Ordinal) && originalParts[1].Length > 6 && originalParts[1][5] == '}')
+                                        originalParts[1] = originalParts[1].Insert(6, "- ");
                                     else
-                                    {
-                                        text = text.Replace(Environment.NewLine, Environment.NewLine + "- ").Replace(Environment.NewLine + "-  ", Environment.NewLine + "- ");
-                                    }
+                                        originalParts[1] = "- " + originalParts[1].Trim();
+                                    text = originalParts[0] + Environment.NewLine + originalParts[1];
                                 }
                                 else
                                 {
@@ -471,6 +473,8 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
             return post + text;
         }
 
+        private static readonly char[] NoShortLineList = { '.', '?', '!', ':', ';', '-', '♪', '♫' };
+
         public static string FixShortLines(string text)
         {
             if (string.IsNullOrWhiteSpace(text) || !text.Contains(Environment.NewLine, StringComparison.Ordinal))
@@ -481,7 +485,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
             {
                 s = s.TrimEnd().TrimEnd('.', '?', '!', ':', ';');
                 s = s.TrimStart('-');
-                if (!s.Contains(new[] { '.', '?', '!', ':', ';', '-', '♪', '♫' }) &&
+                if (!s.Contains(NoShortLineList) &&
                     !(s.StartsWith('[') && s.Contains("]" + Environment.NewLine, StringComparison.Ordinal)) &&
                     !(s.StartsWith('(') && s.Contains(")" + Environment.NewLine, StringComparison.Ordinal)) &&
                     s != s.ToUpper())

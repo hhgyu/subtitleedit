@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Nikse.SubtitleEdit.Core;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Nikse.SubtitleEdit.Core;
 
 namespace Test.Logic
 {
@@ -22,7 +22,7 @@ namespace Test.Logic
             if (Directory.Exists(Path.Combine(Configuration.BaseDirectory, "Languages")))
             {
                 string[] versionInfo = Utilities.AssemblyVersion.Split('.');
-                string currentVersion = String.Format("{0}.{1}.{2}", versionInfo[0], versionInfo[1], versionInfo[2]);
+                string currentVersion = string.Format("{0}.{1}.{2}", versionInfo[0], versionInfo[1], versionInfo[2]);
 
                 foreach (string fileName in Directory.GetFiles(Path.Combine(Configuration.BaseDirectory, "Languages"), "*.xml"))
                 {

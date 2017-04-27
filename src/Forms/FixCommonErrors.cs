@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core.Dictionaries;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
+using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,6 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -87,13 +87,14 @@ namespace Nikse.SubtitleEdit.Forms
         private bool _onlyListFixes = true;
         private bool _batchMode;
         private string _autoDetectGoogleLanguage;
-        private List<string> _namesEtcList;
+        private HashSet<string> _namesEtcList;
         private HashSet<string> _abbreviationList;
-        private StringBuilder _newLog = new StringBuilder();
+        private readonly StringBuilder _newLog = new StringBuilder();
         private readonly StringBuilder _appliedLog = new StringBuilder();
         private int _numberOfImportantLogMessages;
         private List<int> _deleteIndices = new List<int>();
-        private HashSet<string> _notAllowedFixes;
+        private HashSet<string> _allowedFixes;
+        private bool _linesDeletedOrMerged;
 
         public SubtitleFormat Format
         {
@@ -175,6 +176,18 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
+        public bool BatchMode
+        {
+            get
+            {
+                return _batchMode;
+            }
+            set
+            {
+                _batchMode = value;
+            }
+        }
+
         public void RunBatch(Subtitle subtitle, SubtitleFormat format, Encoding encoding, string language)
         {
             _autoDetectGoogleLanguage = language;
@@ -215,7 +228,6 @@ namespace Nikse.SubtitleEdit.Forms
             _onlyListFixes = false;
             _totalFixes = 0;
             _totalErrors = 0;
-            _batchMode = true;
             RunSelectedActions();
             _originalSubtitle = Subtitle;
         }
@@ -311,7 +323,7 @@ namespace Nikse.SubtitleEdit.Forms
                 Width = MinimumSize.Width;
                 Height = MinimumSize.Height;
             }
-            if (Configuration.Settings.Tools.FixCommonErrorsSkipStepOne)
+            if (Configuration.Settings.Tools.FixCommonErrorsSkipStepOne && !_batchMode)
             {
                 Next();
             }
@@ -477,7 +489,7 @@ namespace Nikse.SubtitleEdit.Forms
             if (_onlyListFixes || _batchMode)
                 return true;
 
-            return !_notAllowedFixes.Contains(p.Number.ToString(CultureInfo.InvariantCulture) + "|" + action);
+            return _allowedFixes.Contains(p.Number.ToString(CultureInfo.InvariantCulture) + "|" + action);
         }
 
         public void ShowStatus(string message)
@@ -511,19 +523,22 @@ namespace Nikse.SubtitleEdit.Forms
         public bool IsName(string candidate)
         {
             MakeSureNamesListIsLoaded();
-            return _namesEtcList.Contains(candidate);
+            return _namesEtcList.Contains(candidate); // O(1)
         }
 
         private void MakeSureNamesListIsLoaded()
         {
             if (_namesEtcList == null)
             {
-                _namesEtcList = new List<string>();
-                string languageTwoLetterCode = LanguageAutoDetect.AutoDetectGoogleLanguage(Subtitle);
-
+                string languageTwoLetterCode = LanguageAutoDetect.AutoDetectGoogleLanguage(Subtitle);                
                 // Will contains both one word names and multi names
-                var namesList = new NamesList(Configuration.DictionariesFolder, languageTwoLetterCode, Configuration.Settings.WordLists.UseOnlineNamesEtc, Configuration.Settings.WordLists.NamesEtcUrl);
-                _namesEtcList = namesList.GetAllNames();
+                var namesList = new NamesList(Configuration.DictionariesDirectory, languageTwoLetterCode, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
+                _namesEtcList = namesList.GetNames();
+                // Multi word names.
+                foreach (var name in namesList.GetMultiNames())
+                {
+                    _namesEtcList.Add(name);
+                }
             }
         }
 
@@ -604,7 +619,7 @@ namespace Nikse.SubtitleEdit.Forms
 
             buttonBack.Enabled = true;
             buttonNextFinish.Text = _languageGeneral.Ok;
-            buttonNextFinish.Enabled = _hasFixesBeenMade;
+            buttonNextFinish.Enabled = _hasFixesBeenMade || _linesDeletedOrMerged;
             groupBoxStep1.Visible = false;
             groupBox2.Visible = true;
             listViewFixes.Sort();
@@ -618,10 +633,15 @@ namespace Nikse.SubtitleEdit.Forms
         private void RunSelectedActions()
         {
             subtitleListView1.BeginUpdate();
-            _newLog = new StringBuilder();
+            _newLog.Clear();
             _deleteIndices = new List<int>();
 
             Subtitle = new Subtitle(_originalSubtitle, false);
+            if (listView1.Items[IndexFixOcrErrorsViaReplaceList].Checked)
+            {
+                var fixItem = (FixItem)listView1.Items[IndexFixOcrErrorsViaReplaceList].Tag;
+                fixItem.Action.Invoke();
+            }
             foreach (ListViewItem item in listView1.Items)
             {
                 if (item.Checked && item.Index != IndexRemoveEmptyLines)
@@ -653,7 +673,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (e.KeyCode == Keys.Escape)
                 DialogResult = DialogResult.Cancel;
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
                 Utilities.ShowHelp("#fixcommonerrors");
             else if (e.KeyCode == Keys.Enter && buttonNextFinish.Text == _language.Next)
                 ButtonFixClick(null, null);
@@ -1010,14 +1030,10 @@ namespace Nikse.SubtitleEdit.Forms
                 int firstSelectedIndex = 0;
                 if (subtitleListView1.SelectedItems.Count > 0)
                     firstSelectedIndex = subtitleListView1.SelectedItems[0].Index;
-
-                Paragraph p = GetParagraphOrDefault(firstSelectedIndex);
+                Paragraph p = _originalSubtitle.GetParagraphOrDefault(firstSelectedIndex);
                 if (p != null)
                 {
-                    textBoxListViewText.TextChanged -= TextBoxListViewTextTextChanged;
                     InitializeListViewEditBox(p);
-                    textBoxListViewText.TextChanged += TextBoxListViewTextTextChanged;
-
                     _subtitleListViewIndex = firstSelectedIndex;
                     UpdateOverlapErrors();
                     UpdateListViewTextInfo(p.Text);
@@ -1050,14 +1066,6 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        private Paragraph GetParagraphOrDefault(int index)
-        {
-            if (_originalSubtitle.Paragraphs == null || _originalSubtitle.Paragraphs.Count <= index || index < 0)
-                return null;
-
-            return _originalSubtitle.Paragraphs[index];
-        }
-
         private void InitializeListViewEditBox(Paragraph p)
         {
             textBoxListViewText.TextChanged -= TextBoxListViewTextTextChanged;
@@ -1079,7 +1087,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 int firstSelectedIndex = subtitleListView1.SelectedItems[0].Index;
 
-                Paragraph currentParagraph = GetParagraphOrDefault(firstSelectedIndex);
+                Paragraph currentParagraph = _originalSubtitle.GetParagraphOrDefault(firstSelectedIndex);
                 if (currentParagraph != null)
                 {
                     UpdateOverlapErrors();
@@ -1101,11 +1109,11 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 int firstSelectedIndex = subtitleListView1.SelectedItems[0].Index;
 
-                Paragraph prevParagraph = GetParagraphOrDefault(firstSelectedIndex - 1);
+                Paragraph prevParagraph = _originalSubtitle.GetParagraphOrDefault(firstSelectedIndex - 1);
                 if (prevParagraph != null && prevParagraph.EndTime.TotalMilliseconds > startTime.TotalMilliseconds)
                     labelStartTimeWarning.Text = string.Format(_languageGeneral.OverlapPreviousLineX, (prevParagraph.EndTime.TotalMilliseconds - startTime.TotalMilliseconds) / TimeCode.BaseUnit);
 
-                Paragraph nextParagraph = GetParagraphOrDefault(firstSelectedIndex + 1);
+                Paragraph nextParagraph = _originalSubtitle.GetParagraphOrDefault(firstSelectedIndex + 1);
                 if (nextParagraph != null)
                 {
                     double durationMilliSeconds = (double)numericUpDownDuration.Value * TimeCode.BaseUnit;
@@ -1163,13 +1171,11 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void UpdateListViewTextInfo(string text)
         {
-            labelTextLineTotal.Text = string.Empty;
-
             labelTextLineLengths.Text = _languageGeneral.SingleLineLengths;
             labelSingleLine.Left = labelTextLineLengths.Left + labelTextLineLengths.Width - 6;
             UiUtil.GetLineLengths(labelSingleLine, text);
 
-            string s = HtmlUtil.RemoveHtmlTags(text).Replace(Environment.NewLine, " ");
+            string s = HtmlUtil.RemoveHtmlTags(text, true).Replace(Environment.NewLine, " ");
             buttonSplitLine.Visible = false;
             if (s.Length < Configuration.Settings.General.SubtitleLineMaximumLength * 1.9)
             {
@@ -1201,6 +1207,7 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void ButtonFixesApplyClick(object sender, EventArgs e)
         {
+            buttonFixesApply.Enabled = false;
             _hasFixesBeenMade = true;
             Cursor = Cursors.WaitCursor;
             ShowStatus(_language.Analysing);
@@ -1210,14 +1217,14 @@ namespace Nikse.SubtitleEdit.Forms
             if (subtitleListView1.SelectedItems.Count > 0)
                 firstSelectedIndex = subtitleListView1.SelectedItems[0].Index;
 
-            _notAllowedFixes = new HashSet<string>();
+            _allowedFixes = new HashSet<string>();
             foreach (ListViewItem item in listViewFixes.Items)
             {
-                if (!item.Checked)
+                if (item.Checked)
                 {
                     string key = item.SubItems[1].Text + "|" + item.SubItems[2].Text;
-                    if (!_notAllowedFixes.Contains(key))
-                        _notAllowedFixes.Add(key);
+                    if (!_allowedFixes.Contains(key))
+                        _allowedFixes.Add(key);
                 }
             }
 
@@ -1228,11 +1235,6 @@ namespace Nikse.SubtitleEdit.Forms
             RunSelectedActions();
             _originalSubtitle = new Subtitle(Subtitle, false);
             subtitleListView1.Fill(_originalSubtitle);
-            RefreshFixes();
-            if (listViewFixes.Items.Count == 0)
-            {
-                subtitleListView1.SelectIndexAndEnsureVisible(firstSelectedIndex);
-            }
             if (_totalFixes == 0 && _totalErrors == 0)
                 ShowStatus(_language.NothingToFix);
             else if (_totalFixes > 0)
@@ -1240,11 +1242,18 @@ namespace Nikse.SubtitleEdit.Forms
             else if (_totalErrors > 0)
                 ShowStatus(_language.NothingToFixBut);
 
+            RefreshFixes();
+            if (listViewFixes.Items.Count == 0)
+            {
+                subtitleListView1.SelectIndexAndEnsureVisible(firstSelectedIndex);
+            }
+
             Cursor = Cursors.Default;
             if (_numberOfImportantLogMessages == 0)
                 labelNumberOfImportantLogMessages.Text = string.Empty;
             else
                 labelNumberOfImportantLogMessages.Text = string.Format(_language.NumberOfImportantLogMessages, _numberOfImportantLogMessages);
+            buttonFixesApply.Enabled = true;
         }
 
         private void ButtonRefreshFixesClick(object sender, EventArgs e)
@@ -1279,6 +1288,8 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void RefreshFixes()
         {
+            listViewFixes.BeginUpdate();
+
             // save de-seleced fixes
             var deSelectedFixes = new List<string>();
             foreach (ListViewItem item in listViewFixes.Items)
@@ -1297,6 +1308,8 @@ namespace Nikse.SubtitleEdit.Forms
                 if (deSelectedFixes.Contains(item.SubItems[1].Text + item.SubItems[2].Text + item.SubItems[3].Text))
                     item.Checked = false;
             }
+
+            listViewFixes.EndUpdate();
         }
 
         private void ButtonAutoBreakClick(object sender, EventArgs e)
@@ -1322,8 +1335,8 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (_originalSubtitle.Paragraphs.Count > 0 && subtitleListView1.SelectedItems.Count > 0)
             {
+                _linesDeletedOrMerged = true;
                 _subtitleListViewIndex = -1;
-
                 var indexes = new List<int>();
                 foreach (ListViewItem item in subtitleListView1.SelectedItems)
                     indexes.Add(item.Index);
@@ -1376,6 +1389,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (_originalSubtitle.Paragraphs.Count > 0 && subtitleListView1.SelectedItems.Count > 0)
             {
+                _linesDeletedOrMerged = true;
                 int startNumber = _originalSubtitle.Paragraphs[0].Number;
                 int firstSelectedIndex = subtitleListView1.SelectedItems[0].Index;
 

@@ -70,7 +70,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             string movieFileName = null;
 
-            foreach (string extension in Utilities.GetMovieFileExtensions())
+            foreach (string extension in Utilities.VideoFileExtensions)
             {
                 movieFileName = fileNameNoExtension + extension;
                 if (File.Exists(movieFileName))
@@ -163,6 +163,11 @@ namespace Nikse.SubtitleEdit.Forms
                 var libVlc = (LibVlcDynamic)videoPlayerContainer1.VideoPlayer;
                 libVlc.AudioTrackNumber = _audioTrackNumber;
             }
+            else if (_audioTrackNumber >= 0 && videoPlayerContainer1.VideoPlayer is LibMpvDynamic)
+            {
+                var libMpv = (LibMpvDynamic)videoPlayerContainer1.VideoPlayer;
+                libMpv.AudioTrackNumber = _audioTrackNumber;
+            }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -187,9 +192,9 @@ namespace Nikse.SubtitleEdit.Forms
                 {
                     pos = videoPlayerContainer1.CurrentPosition;
                 }
-                if (pos != _lastPosition)
+                if (Math.Abs(pos - _lastPosition) > 0.01)
                 {
-                    UiUtil.ShowSubtitle(_subtitle.Paragraphs, videoPlayerContainer1);
+                    UiUtil.ShowSubtitle(_subtitle, videoPlayerContainer1);
                     timeUpDownLine.TimeCode = TimeCode.FromSeconds(pos);
                     _lastPosition = pos;
                 }
@@ -210,7 +215,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (e.KeyCode == Keys.Escape)
                 DialogResult = DialogResult.Cancel;
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
                 Utilities.ShowHelp(string.Empty);
             else if (e.KeyCode == Keys.S && e.Modifiers == Keys.Control)
             {
@@ -242,7 +247,7 @@ namespace Nikse.SubtitleEdit.Forms
                 GoBackSeconds(-0.1, videoPlayerContainer1.VideoPlayer);
                 e.SuppressKeyPress = true;
             }
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
             {
                 Utilities.ShowHelp("#sync");
                 e.SuppressKeyPress = true;

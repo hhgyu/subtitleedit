@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         //*         00001.00-00003.00 02.01 00.0 1 0001 00 16-090-090
         //*         00138.10-00143.05 00.00 00.0 1 0003 00 16-090-090
-        private static Regex regexTimeCodes = new Regex(@"^\*\s+\d\d\d\d\d\.\d\d-\d\d\d\d\d\.\d\d \d\d.\d\d \d\d.\d\ \d \d\d\d\d \d\d \d\d-\d\d\d-\d\d\d$", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^\*\s+\d\d\d\d\d\.\d\d-\d\d\d\d\d\.\d\d \d\d.\d\d \d\d.\d\ \d \d\d\d\d \d\d \d\d-\d\d\d-\d\d\d$", RegexOptions.Compiled);
 
         public override string Extension
         {
@@ -73,15 +73,16 @@ ST 0 EB 3.10
                 sb.AppendLine(line);
 
             string rtf = sb.ToString().Trim();
-            if (!rtf.StartsWith("{\\rtf"))
+            if (!rtf.StartsWith("{\\rtf", StringComparison.Ordinal))
                 return;
 
             string[] arr = rtf.FromRtf().SplitToLines();
             Paragraph p = null;
             subtitle.Paragraphs.Clear();
+            char[] splitChar = { '.' };
             foreach (string line in arr)
             {
-                if (regexTimeCodes.IsMatch(line.Trim()))
+                if (RegexTimeCodes.IsMatch(line.Trim()))
                 {
                     string[] temp = line.Substring(1).Trim().Substring(0, 17).Split('-');
                     if (temp.Length == 2)
@@ -89,11 +90,11 @@ ST 0 EB 3.10
                         string start = temp[0];
                         string end = temp[1];
 
-                        string[] startParts = start.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-                        string[] endParts = end.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] startParts = start.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
+                        string[] endParts = end.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
                         if (startParts.Length == 2 && endParts.Length == 2)
                         {
-                            p = new Paragraph(DecodeTimeCode(startParts), DecodeTimeCode(endParts), string.Empty);
+                            p = new Paragraph(DecodeTimeCodeFramesTwoParts(startParts), DecodeTimeCodeFramesTwoParts(endParts), string.Empty); //00119.12
                             subtitle.Paragraphs.Add(p);
                         }
                     }
@@ -113,15 +114,6 @@ ST 0 EB 3.10
                 }
             }
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00119.12
-            string seconds = parts[0];
-            string frames = parts[1];
-            TimeCode tc = new TimeCode(0, 0, int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
-            return tc;
         }
 
     }

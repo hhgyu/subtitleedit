@@ -130,18 +130,6 @@ namespace Nikse.SubtitleEdit.Core
         private readonly List<string> _arrayOfCodingMode = new List<string> { "MPEG1", "MPEG2" };
         private readonly List<string> _arrayOfNtscResolution = new List<string> { "720x480", "704x480", "352x480", "352x240" };
         private readonly List<string> _arrayOfPalResolution = new List<string> { "720x576", "704x576", "352x576", "352x288" };
-        public static List<string> ArrayOfLanguageCode = new List<string> { "  ", "aa", "ab", "af", "am", "ar", "as", "ay", "az", "ba", "be", "bg", "bh", "bi", "bn", "bo", "br", "ca", "co", "cs", "cy", "da", "de", "dz", "el",
-           "en", "eo", "es", "et", "eu", "fa", "fi", "fj", "fo", "fr", "fy", "ga", "gd", "gl", "gn", "gu", "ha", "he", "hi", "hr", "hu", "hy", "ia", "id", "ie", "ik",
-           "in", "is", "it", "iu", "iw", "ja", "ji", "jw", "ka", "kk", "kl", "km", "kn", "ko", "ks", "ku", "ky", "la", "ln", "lo", "lt", "lv", "mg", "mi", "mk", "ml",
-           "mn", "mo", "mr", "ms", "mt", "my", "na", "ne", "nl", "no", "oc", "om", "or", "pa", "pl", "ps", "pt", "qu", "rm", "rn", "ro", "ru", "rw", "sa", "sd", "sg",
-           "sh", "si", "sk", "sl", "sm", "sn", "so", "sq", "sr", "ss", "st", "su", "sv", "sw", "ta", "te", "tg", "th", "ti", "tk", "tl", "tn", "to", "tr", "ts", "tt",
-           "tw", "ug", "uk", "ur", "uz", "vi", "vo", "wo", "xh", "yi", "yo", "za", "zh", "zu", ""};
-        public static List<string> ArrayOfLanguage = new List<string> { "Not Specified", "Afar", "Abkhazian", "Afrikaans", "Amharic", "Arabic", "Assamese", "Aymara", "Azerbaijani", "Bashkir", "Byelorussian", "Bulgarian", "Bihari", "Bislama", "Bengali; Bangla", "Tibetan", "Breton", "Catalan", "Corsican", "Czech(Ceske)", "Welsh", "Dansk", "Deutsch", "Bhutani", "Greek",
-           "English", "Esperanto", "Espanol", "Estonian", "Basque", "Persian", "Suomi", "Fiji", "Faroese", "Français", "Frisian", "Irish", "Scots Gaelic", "Galician", "Guarani", "Gujarati", "Hausa", "Hebrew", "Hindi", "Hrvatski", "Magyar", "Armenian", "Interlingua", "Indonesian", "Interlingue", "Inupiak",
-           "Indonesian", "Islenska", "Italiano", "Inuktitut", "Hebrew", "Japanese", "Yiddish", "Javanese", "Georgian", "Kazakh", "Greenlandic", "Cambodian", "Kannada", "Korean", "Kashmiri", "Kurdish", "Kirghiz", "Latin", "Lingala", "Laothian", "Lithuanian", "Latvian, Lettish", "Malagasy", "Maori", "Macedonian", "Malayalam",
-           "Mongolian", "Moldavian", "Marathi", "Malay", "Maltese", "Burmese", "Nauru", "Nepali", "Nederlands", "Norsk", "Occitan", "(Afan) Oromo", "Oriya", "Punjabi", "Polish", "Pashto, Pushto", "Portugues", "Quechua", "Rhaeto-Romance", "Kirundi", "Romanian", "Russian", "Kinyarwanda", "Sanskrit", "Sindhi", "Sangho",
-           "Serbo-Croatian", "Sinhalese", "Slovak", "Slovenian", "Samoan", "Shona", "Somali", "Albanian", "Serbian", "Siswati", "Sesotho", "Sundanese", "Svenska", "Swahili", "Tamil", "Telugu", "Tajik", "Thai", "Tigrinya", "Turkmen", "Tagalog", "Setswana", "Tonga", "Turkish", "Tsonga", "Tatar",
-           "Twi", "Uighur", "Ukrainian", "Urdu", "Uzbek", "Vietnamese", "Volapuk", "Wolof", "Xhosa", "Yiddish", "Yoruba", "Zhuang", "Chinese", "Zulu", "???"};
 
         public VtsPgci VideoTitleSetProgramChainTable { get { return _vtsPgci; } }
         public VtsVobs VideoTitleSetVobs { get { return _vtsVobs; } }
@@ -203,8 +191,9 @@ namespace Nikse.SubtitleEdit.Core
                 audioStream.Channels = BinToInt(MidStr(data, 13, 3)) + 1;
                 _fs.Read(buffer, 0, 2);
                 audioStream.LanguageCode = new string(new[] { Convert.ToChar(buffer[0]), Convert.ToChar(buffer[1]) });
-                if (ArrayOfLanguageCode.Contains(audioStream.LanguageCode))
-                    audioStream.Language = ArrayOfLanguage[ArrayOfLanguageCode.IndexOf(audioStream.LanguageCode)];
+                var language = DvdSubtitleLanguage.GetLanguageOrNull(audioStream.LanguageCode);
+                if (language != null)
+                    audioStream.Language = language.NativeName;
                 _fs.Seek(1, SeekOrigin.Current);
                 audioStream.Extension = _arrayOfAudioExtension[_fs.ReadByte()];
                 _fs.Seek(2, SeekOrigin.Current);
@@ -219,7 +208,7 @@ namespace Nikse.SubtitleEdit.Core
             {
                 _fs.Read(buffer, 0, 2);
                 var languageTwoLetter = new string(new[] { Convert.ToChar(buffer[0]), Convert.ToChar(buffer[1]) });
-                _vtsVobs.Subtitles.Add(InterpretLanguageCode(languageTwoLetter));
+                _vtsVobs.Subtitles.Add(DvdSubtitleLanguage.GetNativeLanguageName(languageTwoLetter));
                 _fs.Read(buffer, 0, 2); // reserved for language code extension + code extension
 
                 //switch (buffer[0])      // 4, 8, 10-12 unused
@@ -268,16 +257,6 @@ namespace Nikse.SubtitleEdit.Core
                 result = (result << 8) + b;
             }
             return result;
-        }
-
-        private static string InterpretLanguageCode(string code)
-        {
-            int i = 0;
-            while (ArrayOfLanguageCode[i] != code && i < 143)
-            {
-                i++;
-            }
-            return ArrayOfLanguage[i];
         }
 
         private void ParseVtsPgci()

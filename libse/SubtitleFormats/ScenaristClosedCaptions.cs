@@ -572,45 +572,21 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string FixMax4LinesAndMax32CharsPerLine(string text, string language)
         {
+            // fix attempt 1
             var lines = text.Trim().SplitToLines();
-            bool allOk = true;
-            foreach (string line in lines)
-            {
-                if (line.Length > 32)
-                    allOk = false;
-            }
-            if (lines.Length > 4)
-                allOk = false;
-
-            if (allOk)
+            if (IsAllOkay(lines))
                 return text;
 
+            // fix attempt 2
             text = Utilities.AutoBreakLine(text, 1, 4, language);
             lines = text.Trim().SplitToLines();
-            allOk = true;
-            foreach (string line in lines)
-            {
-                if (line.Length > 32)
-                    allOk = false;
-            }
-            if (lines.Length > 4)
-                allOk = false;
-
-            if (allOk)
+            if (IsAllOkay(lines))
                 return text;
 
+            // fix attempt 3
             text = AutoBreakLineMax4Lines(text, 32);
             lines = text.Trim().SplitToLines();
-            allOk = true;
-            foreach (string line in lines)
-            {
-                if (line.Length > 32)
-                    allOk = false;
-            }
-            if (lines.Length > 4)
-                allOk = false;
-
-            if (allOk)
+            if (IsAllOkay(lines))
                 return text;
 
             var sb = new StringBuilder();
@@ -629,18 +605,26 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return sb.ToString().Trim();
         }
 
+        private static bool IsAllOkay(string[] lines)
+        {
+            if (lines.Length > 4)
+                return false;
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (lines[i].Length > 32)
+                    return false;
+            }
+            return true;
+        }
+
         private static int GetLastIndexOfSpace(string s, int endCount)
         {
-            int end = endCount;
-            if (end >= s.Length)
-                end = s.Length - 1;
-
-            int i = end;
-            while (i > 0)
+            var end = Math.Min(endCount, s.Length - 1);
+            while (end > 0)
             {
-                if (s[i] == ' ')
-                    return i;
-                i--;
+                if (s[end] == ' ')
+                    return end;
+                end--;
             }
             return -1;
         }
@@ -756,6 +740,25 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         i += 3;
                         italic--;
                     }
+                    else if (text.Substring(i).StartsWith("’"))
+                    {
+                        if (code.Length == 4)
+                        {
+                            sb.Append(code + " ");
+                            code = string.Empty;
+                        }
+                        if (code.Length == 0)
+                        {
+                            code = "80";
+                        }
+                        if (code.Length == 2)
+                        {
+                            code += "a7";
+                            sb.Append(code + " ");
+                        }
+                        code = "9229";
+                        newCode = "";
+                    }
                     else if (index < 0)
                         newCode = LetterCodes[Letters.IndexOf(" ")];
                     else
@@ -830,24 +833,32 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             int columnRest = left % 4;
             int column = left - columnRest;
 
-            List<string> columnCodes = null;
+            List<string> columnCodes;
             switch (column)
             {
-                case 0: columnCodes = new List<string> { "d0", "70", "d0", "70", "d0", "70", "d0", "70", "d0", "70", "d0", "d0", "70", "d0", "70" };
+                case 0:
+                    columnCodes = new List<string> { "d0", "70", "d0", "70", "d0", "70", "d0", "70", "d0", "70", "d0", "d0", "70", "d0", "70" };
                     break;
-                case 4: columnCodes = new List<string> { "52", "f2", "52", "f2", "52", "f2", "52", "f2", "52", "f2", "52", "52", "f2", "52", "f2" };
+                case 4:
+                    columnCodes = new List<string> { "52", "f2", "52", "f2", "52", "f2", "52", "f2", "52", "f2", "52", "52", "f2", "52", "f2" };
                     break;
-                case 8: columnCodes = new List<string> { "54", "f4", "54", "f4", "54", "f4", "54", "f4", "54", "f4", "54", "54", "f4", "54", "f4" };
+                case 8:
+                    columnCodes = new List<string> { "54", "f4", "54", "f4", "54", "f4", "54", "f4", "54", "f4", "54", "54", "f4", "54", "f4" };
                     break;
-                case 12: columnCodes = new List<string> { "d6", "76", "d6", "76", "d6", "76", "d6", "76", "d6", "76", "d6", "d6", "76", "d6", "76" };
+                case 12:
+                    columnCodes = new List<string> { "d6", "76", "d6", "76", "d6", "76", "d6", "76", "d6", "76", "d6", "d6", "76", "d6", "76" };
                     break;
-                case 16: columnCodes = new List<string> { "58", "f8", "58", "f8", "58", "f8", "58", "f8", "58", "f8", "58", "58", "f8", "58", "f8" };
+                case 16:
+                    columnCodes = new List<string> { "58", "f8", "58", "f8", "58", "f8", "58", "f8", "58", "f8", "58", "58", "f8", "58", "f8" };
                     break;
-                case 20: columnCodes = new List<string> { "da", "7a", "da", "7a", "da", "7a", "da", "7a", "da", "7a", "da", "da", "7a", "da", "7a" };
+                case 20:
+                    columnCodes = new List<string> { "da", "7a", "da", "7a", "da", "7a", "da", "7a", "da", "7a", "da", "da", "7a", "da", "7a" };
                     break;
-                case 24: columnCodes = new List<string> { "dc", "7c", "dc", "7c", "dc", "7c", "dc", "7c", "dc", "7c", "dc", "dc", "7c", "dc", "7c" };
+                case 24:
+                    columnCodes = new List<string> { "dc", "7c", "dc", "7c", "dc", "7c", "dc", "7c", "dc", "7c", "dc", "dc", "7c", "dc", "7c" };
                     break;
-                case 28: columnCodes = new List<string> { "5e", "fe", "5e", "fe", "5e", "fe", "5e", "fe", "5e", "fe", "5e", "5e", "fe", "5e", "fe" };
+                default: // 28
+                    columnCodes = new List<string> { "5e", "fe", "5e", "fe", "5e", "fe", "5e", "fe", "5e", "fe", "5e", "5e", "fe", "5e", "fe" };
                     break;
             }
             string code = rowCode + columnCodes[row];
@@ -1621,7 +1632,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                     if (text == "942c 942c" || text == "942c")
                     {
-                        p.EndTime = new TimeCode(startTime.TotalMilliseconds);
+                        if (p != null)
+                        {
+                            p.EndTime = new TimeCode(startTime.TotalMilliseconds);
+                        }
                     }
                     else
                     {
@@ -1634,7 +1648,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 p = subtitle.GetParagraphOrDefault(i);
                 Paragraph next = subtitle.GetParagraphOrDefault(i + 1);
-                if (p != null && next != null && p.EndTime.TotalMilliseconds == p.StartTime.TotalMilliseconds)
+                if (p != null && next != null && Math.Abs(p.EndTime.TotalMilliseconds - p.StartTime.TotalMilliseconds) < 0.001)
                     p.EndTime = new TimeCode(next.StartTime.TotalMilliseconds);
                 if (next != null && string.IsNullOrEmpty(next.Text))
                     subtitle.Paragraphs.Remove(next);
@@ -1659,13 +1673,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 string part = parts[k];
                 if (part.Length == 4)
                 {
-                    if (part != "94ae" && part != "9420" && part != "94ad" && part != "9426")
+                    if (part != "94ae" && part != "9420" && part != "94ad" && part != "9426" && part != "946e" && part != "91ce" && part != "13ce" && part != "9425" && part != "9429")
                     {
                         //  Spanish inverted question mark (extended char)
                         if (part == "91b3" && k < parts.Length - 1 && parts[k + 1] == "91b3")
                         {
                             sb.Append("¿");
-                            k+=2;
+                            k += 2;
                             continue;
                         }
 
@@ -1674,6 +1688,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         {
                             sb.Append("¡");
                             k += 3;
+                            continue;
+                        }
+
+                        // skewed apos "’"
+                        if (part == "9229" && k < parts.Length - 1 && parts[k + 1] == "9229" && sb.EndsWith('\''))
+                        {
+                            sb.Remove(sb.Length - 1, 1);
+                            sb.Append("’");
+                            k += 2;
                             continue;
                         }
 
@@ -1779,7 +1802,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             string[] arr = start.Split(new[] { ':', ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            int milliseconds = (int)((1000 / Configuration.Settings.General.CurrentFrameRate) * int.Parse(arr[3]));
+            int milliseconds = (int)Math.Round(1000.0 / Configuration.Settings.General.CurrentFrameRate * int.Parse(arr[3]));
             if (milliseconds > 999)
                 milliseconds = 999;
 

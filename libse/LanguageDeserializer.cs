@@ -112,9 +112,6 @@ namespace Nikse.SubtitleEdit.Core
                 case "General/VideoInformation":
                     language.General.VideoInformation = reader.Value;
                     break;
-                case "General/PositionX":
-                    language.General.PositionX = reader.Value;
-                    break;
                 case "General/StartTime":
                     language.General.StartTime = reader.Value;
                     break;
@@ -123,6 +120,18 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "General/Duration":
                     language.General.Duration = reader.Value;
+                    break;
+                case "General/CharsPerSec":
+                    language.General.CharsPerSec = reader.Value;
+                    break;
+                case "General/WordsPerMin":
+                    language.General.WordsPerMin = reader.Value;
+                    break;
+                case "General/Actor":
+                    language.General.Actor = reader.Value;
+                    break;
+                case "General/Region":
+                    language.General.Region = reader.Value;
                     break;
                 case "General/NumberSymbol":
                     language.General.NumberSymbol = reader.Value;
@@ -460,9 +469,6 @@ namespace Nikse.SubtitleEdit.Core
                 case "BatchConvert/Converted":
                     language.BatchConvert.Converted = reader.Value;
                     break;
-                case "BatchConvert/ConvertedX":
-                    language.BatchConvert.ConvertedX = reader.Value;
-                    break;
                 case "BatchConvert/Settings":
                     language.BatchConvert.Settings = reader.Value;
                     break;
@@ -555,6 +561,9 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "ChangeCasingNames/LinesFoundX":
                     language.ChangeCasingNames.LinesFoundX = reader.Value;
+                    break;
+                case "ChangeCasingNames/ExtraNames":
+                    language.ChangeCasingNames.ExtraNames = reader.Value;
                     break;
                 case "ChangeFrameRate/Title":
                     language.ChangeFrameRate.Title = reader.Value;
@@ -895,6 +904,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "EbuSaveOptions/DisplayStandardCode":
                     language.EbuSaveOptions.DisplayStandardCode = reader.Value;
                     break;
+                case "EbuSaveOptions/ColorRequiresTeletext":
+                    language.EbuSaveOptions.ColorRequiresTeletext = reader.Value;
+                    break;
                 case "EbuSaveOptions/CharacterCodeTable":
                     language.EbuSaveOptions.CharacterCodeTable = reader.Value;
                     break;
@@ -951,6 +963,18 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "EbuSaveOptions/JustificationCode":
                     language.EbuSaveOptions.JustificationCode = reader.Value;
+                    break;
+                case "EbuSaveOptions/VerticalPosition":
+                    language.EbuSaveOptions.VerticalPosition = reader.Value;
+                    break;
+                case "EbuSaveOptions/MarginTop":
+                    language.EbuSaveOptions.MarginTop = reader.Value;
+                    break;
+                case "EbuSaveOptions/MarginBottom":
+                    language.EbuSaveOptions.MarginBottom = reader.Value;
+                    break;
+                case "EbuSaveOptions/NewLineRows":
+                    language.EbuSaveOptions.NewLineRows = reader.Value;
                     break;
                 case "EbuSaveOptions/Teletext":
                     language.EbuSaveOptions.Teletext = reader.Value;
@@ -1675,12 +1699,6 @@ namespace Nikse.SubtitleEdit.Core
                 case "GetDictionaries/GetDictionariesHere":
                     language.GetDictionaries.GetDictionariesHere = reader.Value;
                     break;
-                case "GetDictionaries/OpenOpenOfficeWiki":
-                    language.GetDictionaries.OpenOpenOfficeWiki = reader.Value;
-                    break;
-                case "GetDictionaries/GetAllDictionaries":
-                    language.GetDictionaries.GetAllDictionaries = reader.Value;
-                    break;
                 case "GetDictionaries/ChooseLanguageAndClickDownload":
                     language.GetDictionaries.ChooseLanguageAndClickDownload = reader.Value;
                     break;
@@ -1704,12 +1722,6 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "GetTesseractDictionaries/GetDictionariesHere":
                     language.GetTesseractDictionaries.GetDictionariesHere = reader.Value;
-                    break;
-                case "GetTesseractDictionaries/OpenOpenOfficeWiki":
-                    language.GetTesseractDictionaries.OpenOpenOfficeWiki = reader.Value;
-                    break;
-                case "GetTesseractDictionaries/GetAllDictionaries":
-                    language.GetTesseractDictionaries.GetAllDictionaries = reader.Value;
                     break;
                 case "GetTesseractDictionaries/ChooseLanguageAndClickDownload":
                     language.GetTesseractDictionaries.ChooseLanguageAndClickDownload = reader.Value;
@@ -1813,6 +1825,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "ImportSceneChanges/Milliseconds":
                     language.ImportSceneChanges.Milliseconds = reader.Value;
                     break;
+                case "ImportSceneChanges/GetSceneChangesWithFfmpeg":
+                    language.ImportSceneChanges.GetSceneChangesWithFfmpeg = reader.Value;
+                    break;
                 case "ImportText/Title":
                     language.ImportText.Title = reader.Value;
                     break;
@@ -1906,6 +1921,432 @@ namespace Nikse.SubtitleEdit.Core
                 case "JoinSubtitles/Note":
                     language.JoinSubtitles.Note = reader.Value;
                     break;
+                case "LanguageNames/NotSpecified":
+                    language.LanguageNames.NotSpecified = reader.Value;
+                    break;
+                case "LanguageNames/UnknownCodeX":
+                    language.LanguageNames.UnknownCodeX = reader.Value;
+                    break;
+                case "LanguageNames/aaName":
+                    language.LanguageNames.aaName = reader.Value;
+                    break;
+                case "LanguageNames/abName":
+                    language.LanguageNames.abName = reader.Value;
+                    break;
+                case "LanguageNames/afName":
+                    language.LanguageNames.afName = reader.Value;
+                    break;
+                case "LanguageNames/amName":
+                    language.LanguageNames.amName = reader.Value;
+                    break;
+                case "LanguageNames/arName":
+                    language.LanguageNames.arName = reader.Value;
+                    break;
+                case "LanguageNames/asName":
+                    language.LanguageNames.asName = reader.Value;
+                    break;
+                case "LanguageNames/ayName":
+                    language.LanguageNames.ayName = reader.Value;
+                    break;
+                case "LanguageNames/azName":
+                    language.LanguageNames.azName = reader.Value;
+                    break;
+                case "LanguageNames/baName":
+                    language.LanguageNames.baName = reader.Value;
+                    break;
+                case "LanguageNames/beName":
+                    language.LanguageNames.beName = reader.Value;
+                    break;
+                case "LanguageNames/bgName":
+                    language.LanguageNames.bgName = reader.Value;
+                    break;
+                case "LanguageNames/bhName":
+                    language.LanguageNames.bhName = reader.Value;
+                    break;
+                case "LanguageNames/biName":
+                    language.LanguageNames.biName = reader.Value;
+                    break;
+                case "LanguageNames/bnName":
+                    language.LanguageNames.bnName = reader.Value;
+                    break;
+                case "LanguageNames/boName":
+                    language.LanguageNames.boName = reader.Value;
+                    break;
+                case "LanguageNames/brName":
+                    language.LanguageNames.brName = reader.Value;
+                    break;
+                case "LanguageNames/caName":
+                    language.LanguageNames.caName = reader.Value;
+                    break;
+                case "LanguageNames/coName":
+                    language.LanguageNames.coName = reader.Value;
+                    break;
+                case "LanguageNames/csName":
+                    language.LanguageNames.csName = reader.Value;
+                    break;
+                case "LanguageNames/cyName":
+                    language.LanguageNames.cyName = reader.Value;
+                    break;
+                case "LanguageNames/daName":
+                    language.LanguageNames.daName = reader.Value;
+                    break;
+                case "LanguageNames/deName":
+                    language.LanguageNames.deName = reader.Value;
+                    break;
+                case "LanguageNames/dzName":
+                    language.LanguageNames.dzName = reader.Value;
+                    break;
+                case "LanguageNames/elName":
+                    language.LanguageNames.elName = reader.Value;
+                    break;
+                case "LanguageNames/enName":
+                    language.LanguageNames.enName = reader.Value;
+                    break;
+                case "LanguageNames/eoName":
+                    language.LanguageNames.eoName = reader.Value;
+                    break;
+                case "LanguageNames/esName":
+                    language.LanguageNames.esName = reader.Value;
+                    break;
+                case "LanguageNames/etName":
+                    language.LanguageNames.etName = reader.Value;
+                    break;
+                case "LanguageNames/euName":
+                    language.LanguageNames.euName = reader.Value;
+                    break;
+                case "LanguageNames/faName":
+                    language.LanguageNames.faName = reader.Value;
+                    break;
+                case "LanguageNames/fiName":
+                    language.LanguageNames.fiName = reader.Value;
+                    break;
+                case "LanguageNames/fjName":
+                    language.LanguageNames.fjName = reader.Value;
+                    break;
+                case "LanguageNames/foName":
+                    language.LanguageNames.foName = reader.Value;
+                    break;
+                case "LanguageNames/frName":
+                    language.LanguageNames.frName = reader.Value;
+                    break;
+                case "LanguageNames/fyName":
+                    language.LanguageNames.fyName = reader.Value;
+                    break;
+                case "LanguageNames/gaName":
+                    language.LanguageNames.gaName = reader.Value;
+                    break;
+                case "LanguageNames/gdName":
+                    language.LanguageNames.gdName = reader.Value;
+                    break;
+                case "LanguageNames/glName":
+                    language.LanguageNames.glName = reader.Value;
+                    break;
+                case "LanguageNames/gnName":
+                    language.LanguageNames.gnName = reader.Value;
+                    break;
+                case "LanguageNames/guName":
+                    language.LanguageNames.guName = reader.Value;
+                    break;
+                case "LanguageNames/haName":
+                    language.LanguageNames.haName = reader.Value;
+                    break;
+                case "LanguageNames/heName":
+                    language.LanguageNames.heName = reader.Value;
+                    break;
+                case "LanguageNames/hiName":
+                    language.LanguageNames.hiName = reader.Value;
+                    break;
+                case "LanguageNames/hrName":
+                    language.LanguageNames.hrName = reader.Value;
+                    break;
+                case "LanguageNames/huName":
+                    language.LanguageNames.huName = reader.Value;
+                    break;
+                case "LanguageNames/hyName":
+                    language.LanguageNames.hyName = reader.Value;
+                    break;
+                case "LanguageNames/iaName":
+                    language.LanguageNames.iaName = reader.Value;
+                    break;
+                case "LanguageNames/idName":
+                    language.LanguageNames.idName = reader.Value;
+                    break;
+                case "LanguageNames/ieName":
+                    language.LanguageNames.ieName = reader.Value;
+                    break;
+                case "LanguageNames/ikName":
+                    language.LanguageNames.ikName = reader.Value;
+                    break;
+                case "LanguageNames/isName":
+                    language.LanguageNames.isName = reader.Value;
+                    break;
+                case "LanguageNames/itName":
+                    language.LanguageNames.itName = reader.Value;
+                    break;
+                case "LanguageNames/iuName":
+                    language.LanguageNames.iuName = reader.Value;
+                    break;
+                case "LanguageNames/jaName":
+                    language.LanguageNames.jaName = reader.Value;
+                    break;
+                case "LanguageNames/jvName":
+                    language.LanguageNames.jvName = reader.Value;
+                    break;
+                case "LanguageNames/kaName":
+                    language.LanguageNames.kaName = reader.Value;
+                    break;
+                case "LanguageNames/kkName":
+                    language.LanguageNames.kkName = reader.Value;
+                    break;
+                case "LanguageNames/klName":
+                    language.LanguageNames.klName = reader.Value;
+                    break;
+                case "LanguageNames/kmName":
+                    language.LanguageNames.kmName = reader.Value;
+                    break;
+                case "LanguageNames/knName":
+                    language.LanguageNames.knName = reader.Value;
+                    break;
+                case "LanguageNames/koName":
+                    language.LanguageNames.koName = reader.Value;
+                    break;
+                case "LanguageNames/ksName":
+                    language.LanguageNames.ksName = reader.Value;
+                    break;
+                case "LanguageNames/kuName":
+                    language.LanguageNames.kuName = reader.Value;
+                    break;
+                case "LanguageNames/kyName":
+                    language.LanguageNames.kyName = reader.Value;
+                    break;
+                case "LanguageNames/laName":
+                    language.LanguageNames.laName = reader.Value;
+                    break;
+                case "LanguageNames/lbName":
+                    language.LanguageNames.lbName = reader.Value;
+                    break;
+                case "LanguageNames/lnName":
+                    language.LanguageNames.lnName = reader.Value;
+                    break;
+                case "LanguageNames/loName":
+                    language.LanguageNames.loName = reader.Value;
+                    break;
+                case "LanguageNames/ltName":
+                    language.LanguageNames.ltName = reader.Value;
+                    break;
+                case "LanguageNames/lvName":
+                    language.LanguageNames.lvName = reader.Value;
+                    break;
+                case "LanguageNames/mgName":
+                    language.LanguageNames.mgName = reader.Value;
+                    break;
+                case "LanguageNames/miName":
+                    language.LanguageNames.miName = reader.Value;
+                    break;
+                case "LanguageNames/mkName":
+                    language.LanguageNames.mkName = reader.Value;
+                    break;
+                case "LanguageNames/mlName":
+                    language.LanguageNames.mlName = reader.Value;
+                    break;
+                case "LanguageNames/mnName":
+                    language.LanguageNames.mnName = reader.Value;
+                    break;
+                case "LanguageNames/moName":
+                    language.LanguageNames.moName = reader.Value;
+                    break;
+                case "LanguageNames/mrName":
+                    language.LanguageNames.mrName = reader.Value;
+                    break;
+                case "LanguageNames/msName":
+                    language.LanguageNames.msName = reader.Value;
+                    break;
+                case "LanguageNames/mtName":
+                    language.LanguageNames.mtName = reader.Value;
+                    break;
+                case "LanguageNames/myName":
+                    language.LanguageNames.myName = reader.Value;
+                    break;
+                case "LanguageNames/naName":
+                    language.LanguageNames.naName = reader.Value;
+                    break;
+                case "LanguageNames/neName":
+                    language.LanguageNames.neName = reader.Value;
+                    break;
+                case "LanguageNames/nlName":
+                    language.LanguageNames.nlName = reader.Value;
+                    break;
+                case "LanguageNames/noName":
+                    language.LanguageNames.noName = reader.Value;
+                    break;
+                case "LanguageNames/ocName":
+                    language.LanguageNames.ocName = reader.Value;
+                    break;
+                case "LanguageNames/omName":
+                    language.LanguageNames.omName = reader.Value;
+                    break;
+                case "LanguageNames/orName":
+                    language.LanguageNames.orName = reader.Value;
+                    break;
+                case "LanguageNames/paName":
+                    language.LanguageNames.paName = reader.Value;
+                    break;
+                case "LanguageNames/plName":
+                    language.LanguageNames.plName = reader.Value;
+                    break;
+                case "LanguageNames/psName":
+                    language.LanguageNames.psName = reader.Value;
+                    break;
+                case "LanguageNames/ptName":
+                    language.LanguageNames.ptName = reader.Value;
+                    break;
+                case "LanguageNames/quName":
+                    language.LanguageNames.quName = reader.Value;
+                    break;
+                case "LanguageNames/rmName":
+                    language.LanguageNames.rmName = reader.Value;
+                    break;
+                case "LanguageNames/rnName":
+                    language.LanguageNames.rnName = reader.Value;
+                    break;
+                case "LanguageNames/roName":
+                    language.LanguageNames.roName = reader.Value;
+                    break;
+                case "LanguageNames/ruName":
+                    language.LanguageNames.ruName = reader.Value;
+                    break;
+                case "LanguageNames/rwName":
+                    language.LanguageNames.rwName = reader.Value;
+                    break;
+                case "LanguageNames/saName":
+                    language.LanguageNames.saName = reader.Value;
+                    break;
+                case "LanguageNames/sdName":
+                    language.LanguageNames.sdName = reader.Value;
+                    break;
+                case "LanguageNames/sgName":
+                    language.LanguageNames.sgName = reader.Value;
+                    break;
+                case "LanguageNames/shName":
+                    language.LanguageNames.shName = reader.Value;
+                    break;
+                case "LanguageNames/siName":
+                    language.LanguageNames.siName = reader.Value;
+                    break;
+                case "LanguageNames/skName":
+                    language.LanguageNames.skName = reader.Value;
+                    break;
+                case "LanguageNames/slName":
+                    language.LanguageNames.slName = reader.Value;
+                    break;
+                case "LanguageNames/smName":
+                    language.LanguageNames.smName = reader.Value;
+                    break;
+                case "LanguageNames/snName":
+                    language.LanguageNames.snName = reader.Value;
+                    break;
+                case "LanguageNames/soName":
+                    language.LanguageNames.soName = reader.Value;
+                    break;
+                case "LanguageNames/sqName":
+                    language.LanguageNames.sqName = reader.Value;
+                    break;
+                case "LanguageNames/srName":
+                    language.LanguageNames.srName = reader.Value;
+                    break;
+                case "LanguageNames/ssName":
+                    language.LanguageNames.ssName = reader.Value;
+                    break;
+                case "LanguageNames/stName":
+                    language.LanguageNames.stName = reader.Value;
+                    break;
+                case "LanguageNames/suName":
+                    language.LanguageNames.suName = reader.Value;
+                    break;
+                case "LanguageNames/svName":
+                    language.LanguageNames.svName = reader.Value;
+                    break;
+                case "LanguageNames/swName":
+                    language.LanguageNames.swName = reader.Value;
+                    break;
+                case "LanguageNames/taName":
+                    language.LanguageNames.taName = reader.Value;
+                    break;
+                case "LanguageNames/teName":
+                    language.LanguageNames.teName = reader.Value;
+                    break;
+                case "LanguageNames/tgName":
+                    language.LanguageNames.tgName = reader.Value;
+                    break;
+                case "LanguageNames/thName":
+                    language.LanguageNames.thName = reader.Value;
+                    break;
+                case "LanguageNames/tiName":
+                    language.LanguageNames.tiName = reader.Value;
+                    break;
+                case "LanguageNames/tkName":
+                    language.LanguageNames.tkName = reader.Value;
+                    break;
+                case "LanguageNames/tlName":
+                    language.LanguageNames.tlName = reader.Value;
+                    break;
+                case "LanguageNames/tnName":
+                    language.LanguageNames.tnName = reader.Value;
+                    break;
+                case "LanguageNames/toName":
+                    language.LanguageNames.toName = reader.Value;
+                    break;
+                case "LanguageNames/trName":
+                    language.LanguageNames.trName = reader.Value;
+                    break;
+                case "LanguageNames/tsName":
+                    language.LanguageNames.tsName = reader.Value;
+                    break;
+                case "LanguageNames/ttName":
+                    language.LanguageNames.ttName = reader.Value;
+                    break;
+                case "LanguageNames/twName":
+                    language.LanguageNames.twName = reader.Value;
+                    break;
+                case "LanguageNames/ugName":
+                    language.LanguageNames.ugName = reader.Value;
+                    break;
+                case "LanguageNames/ukName":
+                    language.LanguageNames.ukName = reader.Value;
+                    break;
+                case "LanguageNames/urName":
+                    language.LanguageNames.urName = reader.Value;
+                    break;
+                case "LanguageNames/uzName":
+                    language.LanguageNames.uzName = reader.Value;
+                    break;
+                case "LanguageNames/viName":
+                    language.LanguageNames.viName = reader.Value;
+                    break;
+                case "LanguageNames/voName":
+                    language.LanguageNames.voName = reader.Value;
+                    break;
+                case "LanguageNames/woName":
+                    language.LanguageNames.woName = reader.Value;
+                    break;
+                case "LanguageNames/xhName":
+                    language.LanguageNames.xhName = reader.Value;
+                    break;
+                case "LanguageNames/yiName":
+                    language.LanguageNames.yiName = reader.Value;
+                    break;
+                case "LanguageNames/yoName":
+                    language.LanguageNames.yoName = reader.Value;
+                    break;
+                case "LanguageNames/zaName":
+                    language.LanguageNames.zaName = reader.Value;
+                    break;
+                case "LanguageNames/zhName":
+                    language.LanguageNames.zhName = reader.Value;
+                    break;
+                case "LanguageNames/zuName":
+                    language.LanguageNames.zuName = reader.Value;
+                    break;
                 case "Main/SaveChangesToUntitled":
                     language.Main.SaveChangesToUntitled = reader.Value;
                     break;
@@ -1941,9 +2382,6 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Main/VisualSyncPerformed":
                     language.Main.VisualSyncPerformed = reader.Value;
-                    break;
-                case "Main/ImportThisVobSubSubtitle":
-                    language.Main.ImportThisVobSubSubtitle = reader.Value;
                     break;
                 case "Main/FileXIsLargerThan10MB":
                     language.Main.FileXIsLargerThan10MB = reader.Value;
@@ -2938,6 +3376,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Main/Menu/Tools/SortBy":
                     language.Main.Menu.Tools.SortBy = reader.Value;
                     break;
+                case "Main/Menu/Tools/NetflixQualityCheck":
+                    language.Main.Menu.Tools.NetflixQualityCheck = reader.Value;
+                    break;
                 case "Main/Menu/Tools/Number":
                     language.Main.Menu.Tools.Number = reader.Value;
                     break;
@@ -3012,6 +3453,9 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Main/Menu/Video/CloseVideo":
                     language.Main.Menu.Video.CloseVideo = reader.Value;
+                    break;
+                case "Main/Menu/Video/SetVideoOffset":
+                    language.Main.Menu.Video.SetVideoOffset = reader.Value;
                     break;
                 case "Main/Menu/Video/ImportSceneChanges":
                     language.Main.Menu.Video.ImportSceneChanges = reader.Value;
@@ -3145,11 +3589,17 @@ namespace Nikse.SubtitleEdit.Core
                 case "Main/Menu/ToolBar/FixCommonErrors":
                     language.Main.Menu.ToolBar.FixCommonErrors = reader.Value;
                     break;
+                case "Main/Menu/ToolBar/RemoveTextForHi":
+                    language.Main.Menu.ToolBar.RemoveTextForHi = reader.Value;
+                    break;
                 case "Main/Menu/ToolBar/VisualSync":
                     language.Main.Menu.ToolBar.VisualSync = reader.Value;
                     break;
                 case "Main/Menu/ToolBar/SpellCheck":
                     language.Main.Menu.ToolBar.SpellCheck = reader.Value;
+                    break;
+                case "Main/Menu/ToolBar/NetflixQualityCheck":
+                    language.Main.Menu.ToolBar.NetflixQualityCheck = reader.Value;
                     break;
                 case "Main/Menu/ToolBar/Settings":
                     language.Main.Menu.ToolBar.Settings = reader.Value;
@@ -3163,17 +3613,26 @@ namespace Nikse.SubtitleEdit.Core
                 case "Main/Menu/ToolBar/ShowHideVideo":
                     language.Main.Menu.ToolBar.ShowHideVideo = reader.Value;
                     break;
+                case "Main/Menu/ContextMenu/SizeAllColumnsToFit":
+                    language.Main.Menu.ContextMenu.SizeAllColumnsToFit = reader.Value;
+                    break;
                 case "Main/Menu/ContextMenu/AdvancedSubStationAlphaSetStyle":
                     language.Main.Menu.ContextMenu.AdvancedSubStationAlphaSetStyle = reader.Value;
                     break;
                 case "Main/Menu/ContextMenu/SubStationAlphaSetStyle":
                     language.Main.Menu.ContextMenu.SubStationAlphaSetStyle = reader.Value;
                     break;
+                case "Main/Menu/ContextMenu/SetActor":
+                    language.Main.Menu.ContextMenu.SetActor = reader.Value;
+                    break;
                 case "Main/Menu/ContextMenu/SubStationAlphaStyles":
                     language.Main.Menu.ContextMenu.SubStationAlphaStyles = reader.Value;
                     break;
                 case "Main/Menu/ContextMenu/AdvancedSubStationAlphaStyles":
                     language.Main.Menu.ContextMenu.AdvancedSubStationAlphaStyles = reader.Value;
+                    break;
+                case "Main/Menu/ContextMenu/TimedTextSetRegion":
+                    language.Main.Menu.ContextMenu.TimedTextSetRegion = reader.Value;
                     break;
                 case "Main/Menu/ContextMenu/TimedTextSetStyle":
                     language.Main.Menu.ContextMenu.TimedTextSetStyle = reader.Value;
@@ -3321,6 +3780,12 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Main/Menu/ContextMenu/WebVTTRemoveVoices":
                     language.Main.Menu.ContextMenu.WebVTTRemoveVoices = reader.Value;
+                    break;
+                case "Main/Menu/ContextMenu/NewActor":
+                    language.Main.Menu.ContextMenu.NewActor = reader.Value;
+                    break;
+                case "Main/Menu/ContextMenu/RemoveActors":
+                    language.Main.Menu.ContextMenu.RemoveActors = reader.Value;
                     break;
                 case "Main/Controls/SubtitleFormat":
                     language.Main.Controls.SubtitleFormat = reader.Value;
@@ -3496,6 +3961,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "MatroskaSubtitleChooser/Title":
                     language.MatroskaSubtitleChooser.Title = reader.Value;
                     break;
+                case "MatroskaSubtitleChooser/TitleMp4":
+                    language.MatroskaSubtitleChooser.TitleMp4 = reader.Value;
+                    break;
                 case "MatroskaSubtitleChooser/PleaseChoose":
                     language.MatroskaSubtitleChooser.PleaseChoose = reader.Value;
                     break;
@@ -3655,8 +4123,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "MultipleReplace/LinesFoundX":
                     language.MultipleReplace.LinesFoundX = reader.Value;
                     break;
-                case "MultipleReplace/Delete":
-                    language.MultipleReplace.Delete = reader.Value;
+                case "MultipleReplace/Remove":
+                    language.MultipleReplace.Remove = reader.Value;
                     break;
                 case "MultipleReplace/Add":
                     language.MultipleReplace.Add = reader.Value;
@@ -3693,6 +4161,24 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "MultipleReplace/MoveToBottom":
                     language.MultipleReplace.MoveToBottom = reader.Value;
+                    break;
+                case "MultipleReplace/MoveSelectedRulesToGroup":
+                    language.MultipleReplace.MoveSelectedRulesToGroup = reader.Value;
+                    break;
+                case "MultipleReplace/Groups":
+                    language.MultipleReplace.Groups = reader.Value;
+                    break;
+                case "MultipleReplace/RulesForGroupX":
+                    language.MultipleReplace.RulesForGroupX = reader.Value;
+                    break;
+                case "MultipleReplace/GroupName":
+                    language.MultipleReplace.GroupName = reader.Value;
+                    break;
+                case "MultipleReplace/RenameGroup":
+                    language.MultipleReplace.RenameGroup = reader.Value;
+                    break;
+                case "MultipleReplace/NewGroup":
+                    language.MultipleReplace.NewGroup = reader.Value;
                     break;
                 case "NetworkChat/Title":
                     language.NetworkChat.Title = reader.Value;
@@ -4042,6 +4528,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/SpellCheck":
                     language.Settings.SpellCheck = reader.Value;
                     break;
+                case "Settings/NetflixQualityCheck":
+                    language.Settings.NetflixQualityCheck = reader.Value;
+                    break;
                 case "Settings/SettingsName":
                     language.Settings.SettingsName = reader.Value;
                     break;
@@ -4066,6 +4555,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/MaximumCharactersPerSecond":
                     language.Settings.MaximumCharactersPerSecond = reader.Value;
                     break;
+                case "Settings/MaximumWordssPerMinute":
+                    language.Settings.MaximumWordssPerMinute = reader.Value;
+                    break;
                 case "Settings/AutoWrapWhileTyping":
                     language.Settings.AutoWrapWhileTyping = reader.Value;
                     break;
@@ -4078,6 +4570,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/MinimumGapMilliseconds":
                     language.Settings.MinimumGapMilliseconds = reader.Value;
                     break;
+                case "Settings/MaximumLines":
+                    language.Settings.MaximumLines = reader.Value;
+                    break;
                 case "Settings/SubtitleFont":
                     language.Settings.SubtitleFont = reader.Value;
                     break;
@@ -4086,6 +4581,9 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Settings/SubtitleBold":
                     language.Settings.SubtitleBold = reader.Value;
+                    break;
+                case "Settings/VideoAutoOpen":
+                    language.Settings.VideoAutoOpen = reader.Value;
                     break;
                 case "Settings/SubtitleCenter":
                     language.Settings.SubtitleCenter = reader.Value;
@@ -4123,6 +4621,12 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/MainListViewDoubleClickAction":
                     language.Settings.MainListViewDoubleClickAction = reader.Value;
                     break;
+                case "Settings/MainListViewColumns":
+                    language.Settings.MainListViewColumns = reader.Value;
+                    break;
+                case "Settings/MainListViewColumnsInfo":
+                    language.Settings.MainListViewColumnsInfo = reader.Value;
+                    break;
                 case "Settings/MainListViewNothing":
                     language.Settings.MainListViewNothing = reader.Value;
                     break;
@@ -4159,6 +4663,18 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/AutoBackupEveryFifteenMinutes":
                     language.Settings.AutoBackupEveryFifteenMinutes = reader.Value;
                     break;
+                case "Settings/AutoBackupDeleteAfter":
+                    language.Settings.AutoBackupDeleteAfter = reader.Value;
+                    break;
+                case "Settings/AutoBackupDeleteAfterOneMonth":
+                    language.Settings.AutoBackupDeleteAfterOneMonth = reader.Value;
+                    break;
+                case "Settings/AutoBackupDeleteAfterThreeMonths":
+                    language.Settings.AutoBackupDeleteAfterThreeMonths = reader.Value;
+                    break;
+                case "Settings/AutoBackupDeleteAfterSixMonths":
+                    language.Settings.AutoBackupDeleteAfterSixMonths = reader.Value;
+                    break;
                 case "Settings/CheckForUpdates":
                     language.Settings.CheckForUpdates = reader.Value;
                     break;
@@ -4186,23 +4702,20 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/DirectShowDescription":
                     language.Settings.DirectShowDescription = reader.Value;
                     break;
-                case "Settings/ManagedDirectX":
-                    language.Settings.ManagedDirectX = reader.Value;
-                    break;
-                case "Settings/ManagedDirectXDescription":
-                    language.Settings.ManagedDirectXDescription = reader.Value;
-                    break;
                 case "Settings/MpcHc":
                     language.Settings.MpcHc = reader.Value;
                     break;
                 case "Settings/MpcHcDescription":
                     language.Settings.MpcHcDescription = reader.Value;
                     break;
-                case "Settings/MPlayer":
-                    language.Settings.MPlayer = reader.Value;
+                case "Settings/MpvPlayer":
+                    language.Settings.MpvPlayer = reader.Value;
                     break;
-                case "Settings/MPlayerDescription":
-                    language.Settings.MPlayerDescription = reader.Value;
+                case "Settings/MpvPlayerDescription":
+                    language.Settings.MpvPlayerDescription = reader.Value;
+                    break;
+                case "Settings/MpvHandlesPreviewText":
+                    language.Settings.MpvHandlesPreviewText = reader.Value;
                     break;
                 case "Settings/VlcMediaPlayer":
                     language.Settings.VlcMediaPlayer = reader.Value;
@@ -4240,11 +4753,20 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/WaveformShowGridLines":
                     language.Settings.WaveformShowGridLines = reader.Value;
                     break;
+                case "Settings/WaveformShowCps":
+                    language.Settings.WaveformShowCps = reader.Value;
+                    break;
+                case "Settings/WaveformShowWpm":
+                    language.Settings.WaveformShowWpm = reader.Value;
+                    break;
                 case "Settings/ReverseMouseWheelScrollDirection":
                     language.Settings.ReverseMouseWheelScrollDirection = reader.Value;
                     break;
                 case "Settings/WaveformAllowOverlap":
                     language.Settings.WaveformAllowOverlap = reader.Value;
+                    break;
+                case "Settings/WaveformSetVideoPosMoveStartEnd":
+                    language.Settings.WaveformSetVideoPosMoveStartEnd = reader.Value;
                     break;
                 case "Settings/WaveformFocusMouseEnter":
                     language.Settings.WaveformFocusMouseEnter = reader.Value;
@@ -4308,9 +4830,6 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Settings/SubStationAlphaStyle":
                     language.Settings.SubStationAlphaStyle = reader.Value;
-                    break;
-                case "Settings/ChooseFont":
-                    language.Settings.ChooseFont = reader.Value;
                     break;
                 case "Settings/ChooseColor":
                     language.Settings.ChooseColor = reader.Value;
@@ -4414,6 +4933,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/FixCommonerrors":
                     language.Settings.FixCommonerrors = reader.Value;
                     break;
+                case "Settings/RemoveTextForHi":
+                    language.Settings.RemoveTextForHi = reader.Value;
+                    break;
                 case "Settings/MergeLinesShorterThan":
                     language.Settings.MergeLinesShorterThan = reader.Value;
                     break;
@@ -4456,9 +4978,6 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/UpdateShortcut":
                     language.Settings.UpdateShortcut = reader.Value;
                     break;
-                case "Settings/ShortcutIsNotValid":
-                    language.Settings.ShortcutIsNotValid = reader.Value;
-                    break;
                 case "Settings/ToggleDockUndockOfVideoControls":
                     language.Settings.ToggleDockUndockOfVideoControls = reader.Value;
                     break;
@@ -4495,6 +5014,12 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/AdjustSetEndAndOffsetTheRestAndGoToNext":
                     language.Settings.AdjustSetEndAndOffsetTheRestAndGoToNext = reader.Value;
                     break;
+                case "Settings/AdjustExtendCurrentSubtitle":
+                    language.Settings.AdjustExtendCurrentSubtitle = reader.Value;
+                    break;
+                case "Settings/RecalculateDurationOfCurrentSubtitle":
+                    language.Settings.RecalculateDurationOfCurrentSubtitle = reader.Value;
+                    break;
                 case "Settings/MainCreateStartDownEndUp":
                     language.Settings.MainCreateStartDownEndUp = reader.Value;
                     break;
@@ -4512,6 +5037,12 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Settings/GoToCurrentSubtitleEnd":
                     language.Settings.GoToCurrentSubtitleEnd = reader.Value;
+                    break;
+                case "Settings/GoToPreviousSubtitleAndFocusVideo":
+                    language.Settings.GoToPreviousSubtitleAndFocusVideo = reader.Value;
+                    break;
+                case "Settings/GoToNextSubtitleAndFocusVideo":
+                    language.Settings.GoToNextSubtitleAndFocusVideo = reader.Value;
                     break;
                 case "Settings/ToggleFocus":
                     language.Settings.ToggleFocus = reader.Value;
@@ -4564,6 +5095,12 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/WaveformFocusListView":
                     language.Settings.WaveformFocusListView = reader.Value;
                     break;
+                case "Settings/WaveformGoToNextSceneChange":
+                    language.Settings.WaveformGoToNextSceneChange = reader.Value;
+                    break;
+                case "Settings/WaveformToggleSceneChange":
+                    language.Settings.WaveformToggleSceneChange = reader.Value;
+                    break;
                 case "Settings/GoBack1Frame":
                     language.Settings.GoBack1Frame = reader.Value;
                     break;
@@ -4587,6 +5124,12 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Settings/GoForward1Second":
                     language.Settings.GoForward1Second = reader.Value;
+                    break;
+                case "Settings/GoBack5Seconds":
+                    language.Settings.GoBack5Seconds = reader.Value;
+                    break;
+                case "Settings/GoForward5Seconds":
+                    language.Settings.GoForward5Seconds = reader.Value;
                     break;
                 case "Settings/TogglePlayPause":
                     language.Settings.TogglePlayPause = reader.Value;
@@ -4630,8 +5173,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/SyntaxColorTextIfTooLong":
                     language.Settings.SyntaxColorTextIfTooLong = reader.Value;
                     break;
-                case "Settings/SyntaxColorTextMoreThanXLines":
-                    language.Settings.SyntaxColorTextMoreThanXLines = reader.Value;
+                case "Settings/SyntaxColorTextMoreThanMaxLines":
+                    language.Settings.SyntaxColorTextMoreThanMaxLines = reader.Value;
                     break;
                 case "Settings/SyntaxColorOverlap":
                     language.Settings.SyntaxColorOverlap = reader.Value;
@@ -4659,6 +5202,12 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Settings/MergeOriginalAndTranslation":
                     language.Settings.MergeOriginalAndTranslation = reader.Value;
+                    break;
+                case "Settings/MergeWithNext":
+                    language.Settings.MergeWithNext = reader.Value;
+                    break;
+                case "Settings/MergeWithPrevious":
+                    language.Settings.MergeWithPrevious = reader.Value;
                     break;
                 case "Settings/ShortcutIsAlreadyDefinedX":
                     language.Settings.ShortcutIsAlreadyDefinedX = reader.Value;
@@ -4711,8 +5260,35 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/Miscellaneous":
                     language.Settings.Miscellaneous = reader.Value;
                     break;
+                case "Settings/CpsIncludesSpace":
+                    language.Settings.CpsIncludesSpace = reader.Value;
+                    break;
                 case "Settings/UseDoNotBreakAfterList":
                     language.Settings.UseDoNotBreakAfterList = reader.Value;
+                    break;
+                case "Settings/MicrosoftBingTranslator":
+                    language.Settings.MicrosoftBingTranslator = reader.Value;
+                    break;
+                case "Settings/HowToSignUp":
+                    language.Settings.HowToSignUp = reader.Value;
+                    break;
+                case "Settings/ClientId":
+                    language.Settings.ClientId = reader.Value;
+                    break;
+                case "Settings/ClientSecret":
+                    language.Settings.ClientSecret = reader.Value;
+                    break;
+                case "SettingsMpv/Title":
+                    language.SettingsMpv.Title = reader.Value;
+                    break;
+                case "SettingsMpv/DownloadMpv":
+                    language.SettingsMpv.DownloadMpv = reader.Value;
+                    break;
+                case "SettingsMpv/DownloadMpvFailed":
+                    language.SettingsMpv.DownloadMpvFailed = reader.Value;
+                    break;
+                case "SettingsMpv/DownloadMpvOk":
+                    language.SettingsMpv.DownloadMpvOk = reader.Value;
                     break;
                 case "SetVideoOffset/Title":
                     language.SetVideoOffset.Title = reader.Value;
@@ -4722,6 +5298,12 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "SetVideoOffset/RelativeToCurrentVideoPosition":
                     language.SetVideoOffset.RelativeToCurrentVideoPosition = reader.Value;
+                    break;
+                case "SetVideoOffset/KeepTimeCodes":
+                    language.SetVideoOffset.KeepTimeCodes = reader.Value;
+                    break;
+                case "SetVideoOffset/Reset":
+                    language.SetVideoOffset.Reset = reader.Value;
                     break;
                 case "ShowEarlierLater/Title":
                     language.ShowEarlierLater.Title = reader.Value;
@@ -4845,6 +5427,21 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "SpellCheck/UndoX":
                     language.SpellCheck.UndoX = reader.Value;
+                    break;
+                case "NetflixQualityCheck/GlyphCheckReport":
+                    language.NetflixQualityCheck.GlyphCheckReport = reader.Value;
+                    break;
+                case "NetflixQualityCheck/WhiteSpaceCheckReport":
+                    language.NetflixQualityCheck.WhiteSpaceCheckReport = reader.Value;
+                    break;
+                case "NetflixQualityCheck/ReportPrompt":
+                    language.NetflixQualityCheck.ReportPrompt = reader.Value;
+                    break;
+                case "NetflixQualityCheck/FoundXIssues":
+                    language.NetflixQualityCheck.FoundXIssues = reader.Value;
+                    break;
+                case "NetflixQualityCheck/CheckOk":
+                    language.NetflixQualityCheck.CheckOk = reader.Value;
                     break;
                 case "Split/Title":
                     language.Split.Title = reader.Value;
@@ -4989,6 +5586,9 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Statistics/TotalCharsPerSecond":
                     language.Statistics.TotalCharsPerSecond = reader.Value;
+                    break;
+                case "Statistics/TotalWords":
+                    language.Statistics.TotalWords = reader.Value;
                     break;
                 case "Statistics/NumberOfItalicTags":
                     language.Statistics.NumberOfItalicTags = reader.Value;
@@ -5587,6 +6187,33 @@ namespace Nikse.SubtitleEdit.Core
                 case "VobSubOcrSetItalicFactor/Description":
                     language.VobSubOcrSetItalicFactor.Description = reader.Value;
                     break;
+                case "Watermark/Title":
+                    language.Watermark.Title = reader.Value;
+                    break;
+                case "Watermark/WatermarkX":
+                    language.Watermark.WatermarkX = reader.Value;
+                    break;
+                case "Watermark/GenerateWatermarkTitle":
+                    language.Watermark.GenerateWatermarkTitle = reader.Value;
+                    break;
+                case "Watermark/SpreadOverEntireSubtitle":
+                    language.Watermark.SpreadOverEntireSubtitle = reader.Value;
+                    break;
+                case "Watermark/CurrentLineOnlyX":
+                    language.Watermark.CurrentLineOnlyX = reader.Value;
+                    break;
+                case "Watermark/Generate":
+                    language.Watermark.Generate = reader.Value;
+                    break;
+                case "Watermark/Remove":
+                    language.Watermark.Remove = reader.Value;
+                    break;
+                case "Watermark/BeforeWatermark":
+                    language.Watermark.BeforeWatermark = reader.Value;
+                    break;
+                case "Watermark/ErrorUnicodeEncodingOnly":
+                    language.Watermark.ErrorUnicodeEncodingOnly = reader.Value;
+                    break;
                 case "Waveform/ClickToAddWaveform":
                     language.Waveform.ClickToAddWaveform = reader.Value;
                     break;
@@ -5638,11 +6265,23 @@ namespace Nikse.SubtitleEdit.Core
                 case "Waveform/ShowSpectrogramOnly":
                     language.Waveform.ShowSpectrogramOnly = reader.Value;
                     break;
+                case "Waveform/AddSceneChange":
+                    language.Waveform.AddSceneChange = reader.Value;
+                    break;
+                case "Waveform/RemoveSceneChange":
+                    language.Waveform.RemoveSceneChange = reader.Value;
+                    break;
                 case "Waveform/GuessTimeCodes":
                     language.Waveform.GuessTimeCodes = reader.Value;
                     break;
                 case "Waveform/SeekSilence":
                     language.Waveform.SeekSilence = reader.Value;
+                    break;
+                case "Waveform/CharsSecX":
+                    language.Waveform.CharsSecX = reader.Value;
+                    break;
+                case "Waveform/WordsMinX":
+                    language.Waveform.WordsMinX = reader.Value;
                     break;
                 case "WaveformGenerateTimeCodes/Title":
                     language.WaveformGenerateTimeCodes.Title = reader.Value;

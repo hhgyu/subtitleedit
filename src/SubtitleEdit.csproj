@@ -66,7 +66,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="zlib.net">
       <HintPath>packages\zlib.net.1.0.4.0\lib\zlib.net.dll</HintPath>
-      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -94,6 +93,12 @@
     <Compile Include="Forms\AddWaveformBatch.Designer.cs">
       <DependentUpon>AddWaveformBatch.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Cavena890SaveOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Cavena890SaveOptions.Designer.cs">
+      <DependentUpon>Cavena890SaveOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\CheckForUpdates.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,9 +107,6 @@
     </Compile>
     <Compile Include="Forms\ColorChooser.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\DCinema\DCinemaPropertiesForm.cs">
-      <SubType>form</SubType>
     </Compile>
     <Compile Include="Forms\DCinema\DCinemaPropertiesInterop.cs">
       <SubType>form</SubType>
@@ -139,10 +141,10 @@
     <Compile Include="Forms\AddToNames.Designer.cs">
       <DependentUpon>AddToNames.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\AddToOcrReplaceList.cs">
+    <Compile Include="Forms\Ocr\AddToOcrReplaceList.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\AddToOcrReplaceList.Designer.cs">
+    <Compile Include="Forms\Ocr\AddToOcrReplaceList.Designer.cs">
       <DependentUpon>AddToOcrReplaceList.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\AddToUserDic.cs">
@@ -259,6 +261,12 @@
     <Compile Include="Forms\DurationsBridgeGaps.Designer.cs">
       <DependentUpon>DurationsBridgeGaps.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\EbuColorPicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\EbuColorPicker.Designer.cs">
+      <DependentUpon>EbuColorPicker.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ExportCustomText.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -318,6 +326,18 @@
     </Compile>
     <Compile Include="Forms\MergeTextWithSameTimeCodes.Designer.cs">
       <DependentUpon>MergeTextWithSameTimeCodes.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\MultipleReplaceNewGroup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\MultipleReplaceNewGroup.Designer.cs">
+      <DependentUpon>MultipleReplaceNewGroup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\NetflixQCResult.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\NetflixQCResult.Designer.cs">
+      <DependentUpon>NetflixQCResult.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\NuendoProperties.cs">
       <SubType>Form</SubType>
@@ -433,28 +453,28 @@
     <Compile Include="Forms\ModifySelection.Designer.cs">
       <DependentUpon>ModifySelection.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\NetworkChat.cs">
+    <Compile Include="Forms\Networking\NetworkChat.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\NetworkChat.Designer.cs">
+    <Compile Include="Forms\Networking\NetworkChat.Designer.cs">
       <DependentUpon>NetworkChat.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\NetworkJoin.cs">
+    <Compile Include="Forms\Networking\NetworkJoin.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\NetworkJoin.Designer.cs">
+    <Compile Include="Forms\Networking\NetworkJoin.Designer.cs">
       <DependentUpon>NetworkJoin.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\NetworkLogAndInfo.cs">
+    <Compile Include="Forms\Networking\NetworkLogAndInfo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\NetworkLogAndInfo.Designer.cs">
+    <Compile Include="Forms\Networking\NetworkLogAndInfo.Designer.cs">
       <DependentUpon>NetworkLogAndInfo.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\NetworkStart.cs">
+    <Compile Include="Forms\Networking\NetworkStart.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\NetworkStart.Designer.cs">
+    <Compile Include="Forms\Networking\NetworkStart.Designer.cs">
       <DependentUpon>NetworkStart.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\OpenVideoDvd.cs">
@@ -544,10 +564,10 @@
     <Compile Include="Forms\MultipleReplace.Designer.cs">
       <DependentUpon>MultipleReplace.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\OCRSpellCheck.cs">
+    <Compile Include="Forms\Ocr\OCRSpellCheck.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\OCRSpellCheck.Designer.cs">
+    <Compile Include="Forms\Ocr\OCRSpellCheck.Designer.cs">
       <DependentUpon>OCRSpellCheck.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\RemoveTextFromHearImpaired.cs">
@@ -573,6 +593,18 @@
     </Compile>
     <Compile Include="Forms\Settings.Designer.cs">
       <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SettingsListViewColumns.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SettingsListViewColumns.Designer.cs">
+      <DependentUpon>SettingsListViewColumns.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\SettingsMpv.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\SettingsMpv.Designer.cs">
+      <DependentUpon>SettingsMpv.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\SetVideoOffset.cs">
       <SubType>Form</SubType>
@@ -661,6 +693,12 @@
     <Compile Include="Forms\Styles\SubStationAlphaStyles.Designer.cs">
       <DependentUpon>SubStationAlphaStyles.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\TimedTextNewLanguage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TimedTextNewLanguage.Designer.cs">
+      <DependentUpon>TimedTextNewLanguage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\TimedTextProperties.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -709,64 +747,70 @@
     <Compile Include="Forms\VisualSync.Designer.cs">
       <DependentUpon>VisualSync.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubEditCharacters.cs">
+    <Compile Include="Forms\Ocr\VobSubCharactersImport.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubEditCharacters.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubCharactersImport.Designer.cs">
+      <DependentUpon>VobSubCharactersImport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Ocr\VobSubEditCharacters.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Ocr\VobSubEditCharacters.Designer.cs">
       <DependentUpon>VobSubEditCharacters.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubNOcrCharacterInspect.cs">
+    <Compile Include="Forms\Ocr\VobSubNOcrCharacterInspect.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubNOcrCharacterInspect.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubNOcrCharacterInspect.Designer.cs">
       <DependentUpon>VobSubNOcrCharacterInspect.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubNOcrEdit.cs">
+    <Compile Include="Forms\Ocr\VobSubNOcrEdit.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubNOcrEdit.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubNOcrEdit.Designer.cs">
       <DependentUpon>VobSubNOcrEdit.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubNOcrTrain.cs">
+    <Compile Include="Forms\Ocr\VobSubNOcrTrain.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubNOcrTrain.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubNOcrTrain.Designer.cs">
       <DependentUpon>VobSubNOcrTrain.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubOcr.cs">
+    <Compile Include="Forms\Ocr\VobSubOcr.cs">
       <SubType>form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubOcr.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubOcr.Designer.cs">
       <DependentUpon>VobSubOcr.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubOcrCharacter.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrCharacter.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubOcrCharacter.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrCharacter.Designer.cs">
       <DependentUpon>VobSubOcrCharacter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubOcrCharacterInspect.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrCharacterInspect.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubOcrCharacterInspect.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrCharacterInspect.Designer.cs">
       <DependentUpon>VobSubOcrCharacterInspect.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubOcrNewFolder.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrNewFolder.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubOcrNewFolder.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrNewFolder.Designer.cs">
       <DependentUpon>VobSubOcrNewFolder.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubOcrNOcrCharacter.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrNOcrCharacter.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubOcrNOcrCharacter.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrNOcrCharacter.Designer.cs">
       <DependentUpon>VobSubOcrNOcrCharacter.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\VobSubOcrSetItalicFactor.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrSetItalicFactor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\VobSubOcrSetItalicFactor.Designer.cs">
+    <Compile Include="Forms\Ocr\VobSubOcrSetItalicFactor.Designer.cs">
       <DependentUpon>VobSubOcrSetItalicFactor.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Watermark.cs">
@@ -793,11 +837,11 @@
     <Compile Include="Forms\GoogleOrMicrosoftTranslate.Designer.cs">
       <DependentUpon>GoogleOrMicrosoftTranslate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\WebVttNewVoice.cs">
+    <Compile Include="Forms\TextPrompt.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\WebVttNewVoice.Designer.cs">
-      <DependentUpon>WebVttNewVoice.cs</DependentUpon>
+    <Compile Include="Forms\TextPrompt.Designer.cs">
+      <DependentUpon>TextPrompt.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\YouTubeAnnotationsImport.cs">
       <SubType>Form</SubType>
@@ -838,10 +882,13 @@
     <Compile Include="Logic\SpellCheck\MacHunspell.cs" />
     <Compile Include="Logic\SpellCheck\VoikkoSpellCheck.cs" />
     <Compile Include="Logic\SpellCheck\WindowsHunspell.cs" />
+    <Compile Include="Logic\TextEncodingListItem.cs" />
     <Compile Include="Logic\UiEbuSaveHelper.cs" />
     <Compile Include="Logic\UiGetPacEncoding.cs" />
     <Compile Include="Logic\UiGetYouTubeAnnotationStyles.cs" />
     <Compile Include="Logic\UiUtil.cs" />
+    <Compile Include="Logic\VideoPlayers\LibMpvMono.cs" />
+    <Compile Include="Logic\VideoPlayers\LibMpvDynamic.cs" />
     <Compile Include="Logic\VideoPlayers\LibVlcDynamic.cs" />
     <Compile Include="Logic\VideoPlayers\LibVlcMono.cs" />
     <Compile Include="Logic\VideoPlayers\ManagedDirectXPlayer.cs" />
@@ -887,6 +934,9 @@
     <EmbeddedResource Include="Forms\AddWaveformBatch.resx">
       <DependentUpon>AddWaveformBatch.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Cavena890SaveOptions.resx">
+      <DependentUpon>Cavena890SaveOptions.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\CheckForUpdates.resx">
       <DependentUpon>CheckForUpdates.cs</DependentUpon>
     </EmbeddedResource>
@@ -909,7 +959,7 @@
     <EmbeddedResource Include="Forms\AddToNames.resx">
       <DependentUpon>AddToNames.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\AddToOcrReplaceList.resx">
+    <EmbeddedResource Include="Forms\Ocr\AddToOcrReplaceList.resx">
       <DependentUpon>AddToOcrReplaceList.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddToUserDic.resx">
@@ -961,6 +1011,9 @@
     <EmbeddedResource Include="Forms\DurationsBridgeGaps.resx">
       <DependentUpon>DurationsBridgeGaps.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\EbuColorPicker.resx">
+      <DependentUpon>EbuColorPicker.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\ExportCustomText.resx">
       <DependentUpon>ExportCustomText.cs</DependentUpon>
     </EmbeddedResource>
@@ -990,6 +1043,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\MergeTextWithSameTimeCodes.resx">
       <DependentUpon>MergeTextWithSameTimeCodes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\MultipleReplaceNewGroup.resx">
+      <DependentUpon>MultipleReplaceNewGroup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\NetflixQCResult.resx">
+      <DependentUpon>NetflixQCResult.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\NuendoProperties.resx">
       <DependentUpon>NuendoProperties.cs</DependentUpon>
@@ -1054,16 +1113,16 @@
     <EmbeddedResource Include="Forms\ModifySelection.resx">
       <DependentUpon>ModifySelection.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\NetworkChat.resx">
+    <EmbeddedResource Include="Forms\Networking\NetworkChat.resx">
       <DependentUpon>NetworkChat.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\NetworkJoin.resx">
+    <EmbeddedResource Include="Forms\Networking\NetworkJoin.resx">
       <DependentUpon>NetworkJoin.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\NetworkLogAndInfo.resx">
+    <EmbeddedResource Include="Forms\Networking\NetworkLogAndInfo.resx">
       <DependentUpon>NetworkLogAndInfo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\NetworkStart.resx">
+    <EmbeddedResource Include="Forms\Networking\NetworkStart.resx">
       <DependentUpon>NetworkStart.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\OpenVideoDvd.resx">
@@ -1120,6 +1179,12 @@
       <DependentUpon>Settings.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SettingsListViewColumns.resx">
+      <DependentUpon>SettingsListViewColumns.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\SettingsMpv.resx">
+      <DependentUpon>SettingsMpv.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\SetVideoOffset.resx">
       <DependentUpon>SetVideoOffset.cs</DependentUpon>
     </EmbeddedResource>
@@ -1163,6 +1228,9 @@
     <EmbeddedResource Include="Forms\Styles\SubStationAlphaStyles.resx">
       <DependentUpon>SubStationAlphaStyles.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TimedTextNewLanguage.resx">
+      <DependentUpon>TimedTextNewLanguage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\TimedTextProperties.resx">
       <DependentUpon>TimedTextProperties.cs</DependentUpon>
     </EmbeddedResource>
@@ -1186,34 +1254,37 @@
       <DependentUpon>VisualSync.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubNOcrCharacterInspect.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubCharactersImport.resx">
+      <DependentUpon>VobSubCharactersImport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Ocr\VobSubNOcrCharacterInspect.resx">
       <DependentUpon>VobSubNOcrCharacterInspect.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubNOcrEdit.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubNOcrEdit.resx">
       <DependentUpon>VobSubNOcrEdit.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubNOcrTrain.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubNOcrTrain.resx">
       <DependentUpon>VobSubNOcrTrain.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubOcr.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubOcr.resx">
       <DependentUpon>VobSubOcr.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubOcrCharacter.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubOcrCharacter.resx">
       <DependentUpon>VobSubOcrCharacter.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubOcrCharacterInspect.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubOcrCharacterInspect.resx">
       <DependentUpon>VobSubOcrCharacterInspect.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubOcrNewFolder.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubOcrNewFolder.resx">
       <DependentUpon>VobSubOcrNewFolder.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubOcrNOcrCharacter.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubOcrNOcrCharacter.resx">
       <DependentUpon>VobSubOcrNOcrCharacter.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubOcrSetItalicFactor.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubOcrSetItalicFactor.resx">
       <DependentUpon>VobSubOcrSetItalicFactor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Watermark.resx">
@@ -1228,8 +1299,8 @@
     <EmbeddedResource Include="Forms\GoogleOrMicrosoftTranslate.resx">
       <DependentUpon>GoogleOrMicrosoftTranslate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebVttNewVoice.resx">
-      <DependentUpon>WebVttNewVoice.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\TextPrompt.resx">
+      <DependentUpon>TextPrompt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\YouTubeAnnotationsImport.resx">
       <DependentUpon>YouTubeAnnotationsImport.cs</DependentUpon>
@@ -1255,7 +1326,7 @@
       <DependentUpon>SyncPointsSync.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
-    <None Include="packages\packages.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -1265,8 +1336,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="Resources\OpenOfficeDictionaries.xml.gz" />
     <EmbeddedResource Include="Resources\HunspellDictionaries.xml.gz" />
+    <EmbeddedResource Include="Resources\HunspellBackupDictionaries.xml.gz" />
     <EmbeddedResource Include="Resources\TesseractDictionaries.xml.gz" />
     <None Include="Resources\nOCR_TesseractHelper.xml.gz" />
     <None Include="Resources\SMPTE-428-7-2007-DCST.xsd">
@@ -1320,16 +1391,14 @@
     <None Include="Resources\Transparent Background.png" />
     <Content Include="DLLs\Voikkox64.dll" />
     <Content Include="DLLs\Voikkox86.dll" />
-    <None Include="Hunspellx64.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="Hunspellx86.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    <Content Include="Icons\RemoveTextForHI.png" />
     <Content Include="Languages\ar-EG.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Languages\bg-BG.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Languages\br-FR.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Languages\ca-ES.xml">
@@ -1383,6 +1452,9 @@
     <Content Include="Languages\ja-JP.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Languages\nb-NO.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Languages\nl-NL.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1428,7 +1500,7 @@
     <Content Include="Languages\zh-Hans.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Languages\zh-tw.xml">
+    <Content Include="Languages\zh-TW.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Resources\pictureBoxNoFSOver.Image.png" />
@@ -1437,7 +1509,7 @@
     <None Include="Web References\SeNetworkService\SeService.disco" />
     <None Include="DLLs\Interop.QuartzTypeLib.dll" />
     <Content Include="..\Changelog.txt" />
-    <Content Include="..\gpl.txt" />
+    <Content Include="..\LICENSE.txt" />
     <EmbeddedResource Include="Controls\VideoPlayerContainer.resx">
       <DependentUpon>VideoPlayerContainer.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -1462,7 +1534,7 @@
       <DependentUpon>MultipleReplace.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\OCRSpellCheck.resx">
+    <EmbeddedResource Include="Forms\Ocr\OCRSpellCheck.resx">
       <DependentUpon>OCRSpellCheck.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -1474,52 +1546,26 @@
       <DependentUpon>VideoError.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\VobSubEditCharacters.resx">
+    <EmbeddedResource Include="Forms\Ocr\VobSubEditCharacters.resx">
       <DependentUpon>VobSubEditCharacters.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Icons\connect.png" />
     <None Include="Icons\Donate.png" />
     <Content Include="Icons\SE.ico" />
-    <Content Include="Icons\Find.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\FixCommonErrors.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\Help.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\New.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\Open.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\Replace.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\Save.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\SaveAs.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\Settings.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\SpellCheck.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\VideoToggle.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\VisualSync.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Icons\WaveformToggle.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Icons\Find.png" />
+    <Content Include="Icons\FixCommonErrors.png" />
+    <Content Include="Icons\Help.png" />
+    <Content Include="Icons\New.png" />
+    <Content Include="Icons\Open.png" />
+    <Content Include="Icons\Replace.png" />
+    <Content Include="Icons\Save.png" />
+    <Content Include="Icons\SaveAs.png" />
+    <Content Include="Icons\Settings.png" />
+    <Content Include="Icons\SpellCheck.png" />
+    <Content Include="Icons\VideoToggle.png" />
+    <Content Include="Icons\VisualSync.png" />
+    <Content Include="Icons\WaveformToggle.png" />
     <None Include="Resources\pictureBoxFS.Image.png" />
     <None Include="Resources\pictureBoxFSDown.Image.png" />
     <None Include="Resources\pictureBoxFSOver.Image.png" />
@@ -1532,10 +1578,10 @@
     <Content Include="Resources\TesseractDictionaries.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\HunspellDictionaries.xml">
+    <Content Include="Resources\HunspellBackupDictionaries.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\OpenOfficeDictionaries.xml">
+    <Content Include="Resources\HunspellDictionaries.xml">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
@@ -1611,12 +1657,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PreBuildEvent>"$(ProjectDir)..\build_helpers.bat" rev $(ConfigurationName)</PreBuildEvent>
-  </PropertyGroup>
-  <PropertyGroup>
-    <PostBuildEvent>COPY /Y /V "$(ProjectDir)packages\NHunspell.1.2.5554.16953\content\*.dll" "$(TargetDir)"</PostBuildEvent>
-  </PropertyGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them. For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
@@ -1624,6 +1664,27 @@
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
   </Target>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <ItemGroup>
+    <HunspellAssemblies Include="Hunspellx64.dll">
+      <Visible>false</Visible>
+    </HunspellAssemblies>
+    <HunspellAssemblies Include="Hunspellx86.dll">
+      <Visible>false</Visible>
+    </HunspellAssemblies>
+  </ItemGroup>
+  <Target Name="BeforeCompile">
+    <XmlPeek XmlInputPath="$(PackagesConfig)" Query="//package[@id='NHunspell']/@version">
+      <Output TaskParameter="Result" PropertyName="HunspellVersion" />
+    </XmlPeek>
+    <PropertyGroup>
+      <HunspellDir>packages\NHunspell.$(HunspellVersion)\content\</HunspellDir>
+    </PropertyGroup>
+    <Copy SourceFiles="@(HunspellAssemblies -> '$(HunspellDir)%(Identity)')" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="True" />
+    <Exec Command="%22$(SolutionDir)..\build_helpers.bat%22 rev %22$(ConfigurationName)%22" />
+  </Target>
+  <Target Name="BeforeClean">
+    <Delete Files="@(HunspellAssemblies -> '$(OutputPath)%(Identity)')" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

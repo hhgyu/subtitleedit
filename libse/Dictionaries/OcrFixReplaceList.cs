@@ -14,7 +14,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         private static readonly Regex RegExTime1 = new Regex(@"[a-zæøåöääöéèàùâêîôûëï]0", RegexOptions.Compiled);
         private static readonly Regex RegExTime2 = new Regex(@"0[a-zæøåöääöéèàùâêîôûëï]", RegexOptions.Compiled);
         private static readonly Regex HexNumber = new Regex(@"^#?[\dABDEFabcdef]+$", RegexOptions.Compiled);
-        private static readonly Regex StartEndEndsWithNumber = new Regex(@"^\d+.+\d$", RegexOptions.Compiled);
+        private static readonly Regex StartsAndEndsWithNumber = new Regex(@"^\d+.+\d$", RegexOptions.Compiled);
 
         public readonly Dictionary<string, string> WordReplaceList;
         public readonly Dictionary<string, string> PartialLineWordBoundaryReplaceList;
@@ -78,7 +78,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
 
         public static OcrFixReplaceList FromLanguageId(string languageId)
         {
-            return new OcrFixReplaceList(Configuration.DictionariesFolder + languageId + "_OCRFixReplaceList.xml");
+            return new OcrFixReplaceList(Configuration.DictionariesDirectory + languageId + "_OCRFixReplaceList.xml");
         }
 
         private static Dictionary<string, string> LoadReplaceList(XmlDocument doc, string name)
@@ -182,27 +182,19 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 {
                     if (s.Contains(from))
                     {
-                        if (s.StartsWith(from))
-                            s = s.Remove(0, from.Length).Insert(0, _beginLineReplaceList[from]);
-                        if (s.Contains(". " + from))
-                            s = s.Replace(". " + from, ". " + _beginLineReplaceList[from]);
-                        if (s.Contains("! " + from))
-                            s = s.Replace("! " + from, "! " + _beginLineReplaceList[from]);
-                        if (s.Contains("? " + from))
-                            s = s.Replace("? " + from, "? " + _beginLineReplaceList[from]);
-                        if (s.Contains("." + Environment.NewLine + from))
-                            s = s.Replace(". " + Environment.NewLine + from, ". " + Environment.NewLine + _beginLineReplaceList[from]);
-                        if (s.Contains("! " + Environment.NewLine + from))
-                            s = s.Replace("! " + Environment.NewLine + from, "! " + Environment.NewLine + _beginLineReplaceList[from]);
-                        if (s.Contains("? " + Environment.NewLine + from))
-                            s = s.Replace("? " + Environment.NewLine + from, "? " + Environment.NewLine + _beginLineReplaceList[from]);
-                        if (s.StartsWith('"') && !from.StartsWith('"') && s.StartsWith("\"" + from))
-                            s = s.Replace("\"" + from, "\"" + _beginLineReplaceList[from]);
+                        string with = _beginLineReplaceList[from];
+                        if (s.StartsWith(from, StringComparison.Ordinal))
+                            s = s.Remove(0, from.Length).Insert(0, with);
+                        s = s.Replace(". " + from, ". " + with);
+                        s = s.Replace("! " + from, "! " + with);
+                        s = s.Replace("? " + from, "? " + with);
+                        if (s.StartsWith("\"" + from, StringComparison.Ordinal) && !from.StartsWith('"'))
+                            s = s.Replace("\"" + from, "\"" + with);
                     }
                 }
                 sb.AppendLine(s);
             }
-            newText = pre + sb.ToString().TrimEnd('\r', '\n');
+            newText = pre + sb.ToString().TrimEnd(Utilities.NewLineChars);
 
             string post = string.Empty;
             if (newText.EndsWith("</i>", StringComparison.Ordinal))
@@ -289,30 +281,24 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         {
             if (Configuration.Settings.Tools.OcrFixUseHardcodedRules)
             {
+                // common Latin ligatures from legacy encodings;
+                // Unicode includes them only for compatibility and discourages their use
+                word = word.Replace("ﬀ", "ff");
                 word = word.Replace("ﬁ", "fi");
-                word = word.Replace('ν', 'v'); // NOTE: first 'v' is a special unicode character!!!!
+                word = word.Replace("ﬂ", "fl");
+                word = word.Replace("ﬃ", "ffi");
+                word = word.Replace("ﬄ", "ffl");
 
-                if (word.Contains('’'))
-                    word = word.Replace('’', '\'');
-
-                if (word.Contains('`'))
-                    word = word.Replace('`', '\'');
-
-                if (word.Contains('‘'))
-                    word = word.Replace('‘', '\'');
-
-                if (word.Contains('—'))
-                    word = word.Replace('—', '-');
-
-                while (word.Contains("--"))
+                word = word.Replace('ν', 'v'); // first 'v' is U+03BD GREEK SMALL LETTER NU
+                word = word.Replace('’', '\'');
+                word = word.Replace('`', '\'');
+                word = word.Replace('´', '\'');
+                word = word.Replace('‘', '\'');
+                word = word.Replace('—', '-');
+                while(word.Contains("--"))
                     word = word.Replace("--", "-");
-
-                if (word.Contains('|'))
-                    word = word.Replace('|', 'l');
-
-                if (word.Contains("vx/"))
-                    word = word.Replace("vx/", "w");
-
+                word = word.Replace('|', 'l');
+                word = word.Replace("vx/", "w");
                 if (word.Contains('¤'))
                 {
                     if (Regex.IsMatch(word, "[A-ZÆØÅÄÖÉÈÀÙÂÊÎÔÛËÏa-zæøåäöéèàùâêîôûëï]¤"))
@@ -482,7 +468,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
 
         public static string FixIor1InsideLowerCaseWord(string word)
         {
-            if (StartEndEndsWithNumber.IsMatch(word))
+            if (StartsAndEndsWithNumber.IsMatch(word))
                 return word;
 
             if (word.Contains(new[] { '2', '3', '4', '5', '6', '7', '8', '9' }))
@@ -518,7 +504,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
 
         public static string Fix0InsideLowerCaseWord(string word)
         {
-            if (StartEndEndsWithNumber.IsMatch(word))
+            if (StartsAndEndsWithNumber.IsMatch(word))
                 return word;
 
             if (word.Contains(new[] { '1', '2', '3', '4', '5', '6', '7', '8', '9' }) ||

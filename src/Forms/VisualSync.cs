@@ -181,7 +181,7 @@ namespace Nikse.SubtitleEdit.Forms
             }
             else
             {
-                UiUtil.InitializeVideoPlayerAndContainer(MediaPlayerStart.VideoPlayer.VideoFileName, _videoInfo, MediaPlayerEnd, VideoEndLoaded, VideoEndEnded);
+                UiUtil.InitializeVideoPlayerAndContainer(VideoFileName, _videoInfo, MediaPlayerEnd, VideoEndLoaded, VideoEndEnded);
             }
             timer1.Start();
             timerProgressBarRefresh.Start();
@@ -190,6 +190,11 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 var libVlc = (LibVlcDynamic)MediaPlayerStart.VideoPlayer;
                 libVlc.AudioTrackNumber = AudioTrackNumber;
+            }
+            else if (AudioTrackNumber >= 0 && MediaPlayerStart.VideoPlayer is LibMpvDynamic)
+            {
+                var libMpv = (LibMpvDynamic)MediaPlayerStart.VideoPlayer;
+                libMpv.AudioTrackNumber = AudioTrackNumber;
             }
         }
 
@@ -211,6 +216,11 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 var libVlc = (LibVlcDynamic)MediaPlayerEnd.VideoPlayer;
                 libVlc.AudioTrackNumber = AudioTrackNumber;
+            }
+            else if (AudioTrackNumber >= 0 && MediaPlayerEnd.VideoPlayer is LibMpvDynamic)
+            {
+                var libMpv = (LibMpvDynamic)MediaPlayerEnd.VideoPlayer;
+                libMpv.AudioTrackNumber = AudioTrackNumber;
             }
         }
 
@@ -245,7 +255,7 @@ namespace Nikse.SubtitleEdit.Forms
                         MediaPlayerStart.CurrentPosition = _startGoBackPosition;
                         _startStopPosition = -1;
                     }
-                    UiUtil.ShowSubtitle(_paragraphs, MediaPlayerStart);
+                    UiUtil.ShowSubtitle(new Subtitle(_paragraphs), MediaPlayerStart);
                 }
                 if (!MediaPlayerEnd.IsPaused)
                 {
@@ -256,7 +266,7 @@ namespace Nikse.SubtitleEdit.Forms
                         MediaPlayerEnd.CurrentPosition = _endGoBackPosition;
                         _endStopPosition = -1;
                     }
-                    UiUtil.ShowSubtitle(_paragraphs, MediaPlayerEnd);
+                    UiUtil.ShowSubtitle(new Subtitle(_paragraphs), MediaPlayerEnd);
                 }
             }
         }
@@ -359,7 +369,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             string movieFileName = null;
 
-            foreach (string extension in Utilities.GetMovieFileExtensions())
+            foreach (string extension in Utilities.VideoFileExtensions)
             {
                 movieFileName = fileNameNoExtension + extension;
                 if (File.Exists(movieFileName))
@@ -389,27 +399,31 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void ButtonSyncClick(object sender, EventArgs e)
         {
-            double startPos = MediaPlayerStart.CurrentPosition;
-            double endPos = MediaPlayerEnd.CurrentPosition;
-            if (!(endPos > startPos))
+            // Video player current start and end position.
+            double videoPlayerCurrentStartPos = MediaPlayerStart.CurrentPosition;
+            double videoPlayerCurrentEndPos = MediaPlayerEnd.CurrentPosition;
+
+            // Subtitle start and end time in seconds.
+            double subStart = _paragraphs[comboBoxStartTexts.SelectedIndex].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
+            double subEnd = _paragraphs[comboBoxEndTexts.SelectedIndex].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
+
+            // Both end times must be greater than start time.
+            if (!(videoPlayerCurrentEndPos > videoPlayerCurrentStartPos && subEnd > videoPlayerCurrentStartPos))
             {
                 MessageBox.Show(_language.StartSceneMustComeBeforeEndScene, "", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
 
-            SetSyncFactorLabel();
-
-            double subStart = _paragraphs[comboBoxStartTexts.SelectedIndex].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
-            double subEnd = _paragraphs[comboBoxEndTexts.SelectedIndex].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
+            SetSyncFactorLabel(videoPlayerCurrentStartPos, videoPlayerCurrentEndPos);
 
             double subDiff = subEnd - subStart;
-            double realDiff = endPos - startPos;
+            double realDiff = videoPlayerCurrentEndPos - videoPlayerCurrentStartPos;
 
             // speed factor
             double factor = realDiff / subDiff;
 
             // adjust to starting position
-            double adjust = startPos - subStart * factor;
+            double adjust = videoPlayerCurrentStartPos - subStart * factor;
 
             foreach (Paragraph p in _paragraphs)
             {
@@ -439,8 +453,8 @@ namespace Nikse.SubtitleEdit.Forms
             if (mediaPlayer.CurrentPosition > seconds)
                 mediaPlayer.CurrentPosition -= seconds;
             else
-                mediaPlayer.CurrentPosition = 0;
-            UiUtil.ShowSubtitle(_paragraphs, mediaPlayer);
+                mediaPlayer.CurrentPosition = 0;            
+            UiUtil.ShowSubtitle(new Subtitle( _paragraphs), mediaPlayer);
         }
 
         private void ButtonStartHalfASecondBackClick(object sender, EventArgs e)
@@ -558,7 +572,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 DialogResult = DialogResult.Cancel;
             }
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
             {
                 Utilities.ShowHelp("#visual_sync");
             }
@@ -742,27 +756,25 @@ namespace Nikse.SubtitleEdit.Forms
             timerProgressBarRefresh.Start();
         }
 
-        private void SetSyncFactorLabel()
+        private void SetSyncFactorLabel(double videoPlayerCurrentStartPos, double videoPlayerCurrentEndPos)
         {
-            _adjustInfo = string.Empty;
             if (string.IsNullOrWhiteSpace(VideoFileName))
                 return;
 
-            double startPos = MediaPlayerStart.CurrentPosition;
-            double endPos = MediaPlayerEnd.CurrentPosition;
-            if (endPos > startPos)
+            _adjustInfo = string.Empty;
+            if (videoPlayerCurrentEndPos > videoPlayerCurrentStartPos)
             {
                 double subStart = _paragraphs[comboBoxStartTexts.SelectedIndex].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
                 double subEnd = _paragraphs[comboBoxEndTexts.SelectedIndex].StartTime.TotalMilliseconds / TimeCode.BaseUnit;
 
                 double subDiff = subEnd - subStart;
-                double realDiff = endPos - startPos;
+                double realDiff = videoPlayerCurrentEndPos - videoPlayerCurrentStartPos;
 
                 // speed factor
                 double factor = realDiff / subDiff;
 
                 // adjust to starting position
-                double adjust = startPos - subStart * factor;
+                double adjust = videoPlayerCurrentStartPos - subStart * factor;
 
                 if (Math.Abs(adjust) > 0.001 || (Math.Abs(1 - factor)) > 0.001)
                     _adjustInfo = string.Format("*{0:0.000}, {1:+0.000;-0.000}", factor, adjust);

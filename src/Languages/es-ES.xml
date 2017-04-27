@@ -19,7 +19,6 @@
     <OpenVideoFileTitle>Abrir video...</OpenVideoFileTitle>
     <NoVideoLoaded>Ningún video cargado</NoVideoLoaded>
     <VideoInformation>Info del Video</VideoInformation>
-    <PositionX>Posición / duración: {0}</PositionX>
     <StartTime>Tiempo inicio</StartTime>
     <EndTime>Tiempo fin</EndTime>
     <Duration>Duración</Duration>
@@ -367,8 +366,6 @@ Email: mailto:nikse.dk@gmail.com</AboutText1>
     <DescriptionLine1>La revisión ortográfica de Subtitle Edit está basada en al motor NHunspell</DescriptionLine1>
     <DescriptionLine2>que usa los diccionarios de Open Office.</DescriptionLine2>
     <GetDictionariesHere>Consiga diccionarios aquí:</GetDictionariesHere>
-    <OpenOpenOfficeWiki>Lista de Diccionarios de Open Office Wiki</OpenOpenOfficeWiki>
-    <GetAllDictionaries>Conseguir todos los diccionarios</GetAllDictionaries>
     <ChooseLanguageAndClickDownload>Seleccione idioma y clique descargar</ChooseLanguageAndClickDownload>
     <OpenDictionariesFolder>Carpeta de Open 'Dictionaries'</OpenDictionariesFolder>
     <Download>Descarga</Download>
@@ -416,6 +413,146 @@ Email: mailto:nikse.dk@gmail.com</AboutText1>
   <Interjections>
     <Title>Interjecciones</Title>
   </Interjections>
+  <LanguageNames>
+    <aaName>afar</aaName>
+    <abName>abjasio</abName>
+    <afName>afrikáans</afName>
+    <amName>amárico</amName>
+    <arName>árabe</arName>
+    <asName>asamés</asName>
+    <ayName>aimara</ayName>
+    <azName>azerbaiyano</azName>
+    <baName>baskir</baName>
+    <beName>bielorruso</beName>
+    <bgName>búlgaro</bgName>
+    <biName>bislama</biName>
+    <bnName>bengalí</bnName>
+    <boName>tibetano</boName>
+    <brName>bretón</brName>
+    <caName>catalán</caName>
+    <coName>corso</coName>
+    <csName>checo</csName>
+    <cyName>galés</cyName>
+    <daName>danés</daName>
+    <deName>alemán</deName>
+    <dzName>dzongkha</dzName>
+    <elName>griego</elName>
+    <enName>inglés</enName>
+    <eoName>esperanto</eoName>
+    <esName>español</esName>
+    <etName>estonio</etName>
+    <euName>euskera</euName>
+    <faName>persa</faName>
+    <fiName>finés</fiName>
+    <fjName>fiyiano</fjName>
+    <foName>feroés</foName>
+    <frName>francés</frName>
+    <fyName>frisón occidental</fyName>
+    <gaName>irlandés</gaName>
+    <gdName>gaélico escocés</gdName>
+    <glName>gallego</glName>
+    <gnName>guaraní</gnName>
+    <guName>gujarati</guName>
+    <haName>hausa</haName>
+    <heName>hebreo</heName>
+    <hiName>hindi</hiName>
+    <hrName>croata</hrName>
+    <huName>húngaro</huName>
+    <hyName>armenio</hyName>
+    <iaName>interlingua</iaName>
+    <idName>indonesio</idName>
+    <ieName>interlingue</ieName>
+    <ikName>inupiaq</ikName>
+    <isName>islandés</isName>
+    <itName>italiano</itName>
+    <iuName>inuktitut</iuName>
+    <jaName>japonés</jaName>
+    <jvName>javanés</jvName>
+    <kaName>georgiano</kaName>
+    <kkName>kazajo</kkName>
+    <klName>groenlandés</klName>
+    <kmName>jemer</kmName>
+    <knName>canarés</knName>
+    <koName>coreano</koName>
+    <ksName>cachemiro</ksName>
+    <kuName>kurdo</kuName>
+    <kyName>kirguís</kyName>
+    <laName>latín</laName>
+    <lbName>luxemburgués</lbName>
+    <lnName>lingala</lnName>
+    <loName>laosiano</loName>
+    <ltName>lituano</ltName>
+    <lvName>letón</lvName>
+    <mgName>malgache</mgName>
+    <miName>maorí</miName>
+    <mkName>macedonio</mkName>
+    <mlName>malayalam</mlName>
+    <mnName>mongol</mnName>
+    <mrName>maratí</mrName>
+    <msName>malayo</msName>
+    <mtName>maltés</mtName>
+    <myName>birmano</myName>
+    <naName>nauruano</naName>
+    <neName>nepalí</neName>
+    <nlName>neerlandés</nlName>
+    <noName>noruego</noName>
+    <ocName>occitano</ocName>
+    <omName>oromo</omName>
+    <orName>oriya</orName>
+    <paName>panyabí</paName>
+    <plName>polaco</plName>
+    <psName>pastún</psName>
+    <ptName>portugués</ptName>
+    <quName>quechua</quName>
+    <rmName>retorrománico</rmName>
+    <rnName>kiroundi</rnName>
+    <roName>rumano</roName>
+    <ruName>ruso</ruName>
+    <rwName>kinyarwanda</rwName>
+    <saName>sánscrito</saName>
+    <sdName>sindhi</sdName>
+    <sgName>sango</sgName>
+    <shName>serbocroata</shName>
+    <siName>cingalés</siName>
+    <skName>eslovaco</skName>
+    <slName>esloveno</slName>
+    <smName>samoano</smName>
+    <snName>shona</snName>
+    <soName>somalí</soName>
+    <sqName>albanés</sqName>
+    <srName>serbio</srName>
+    <ssName>siswati</ssName>
+    <stName>sesotho meridional</stName>
+    <suName>sundanés</suName>
+    <svName>sueco</svName>
+    <swName>suajili</swName>
+    <taName>tamil</taName>
+    <teName>telugu</teName>
+    <tgName>tayiko</tgName>
+    <thName>tailandés</thName>
+    <tiName>tigriña</tiName>
+    <tkName>turcomano</tkName>
+    <tlName>tagalo</tlName>
+    <tnName>setchwana</tnName>
+    <toName>tongano</toName>
+    <trName>turco</trName>
+    <tsName>tsonga</tsName>
+    <ttName>tártaro</ttName>
+    <twName>twi</twName>
+    <ugName>uigur</ugName>
+    <ukName>ucraniano</ukName>
+    <urName>urdu</urName>
+    <uzName>uzbeko</uzName>
+    <viName>vietnamita</viName>
+    <voName>volapük</voName>
+    <woName>wolof</woName>
+    <xhName>xhosa</xhName>
+    <yiName>yídish</yiName>
+    <yoName>yoruba</yoName>
+    <zaName>zhuang</zaName>
+    <zhName>chino</zhName>
+    <zuName>zulú</zuName>
+  </LanguageNames>
   <Main>
     <Menu>
       <File>
@@ -651,7 +788,6 @@ Email: mailto:nikse.dk@gmail.com</AboutText1>
     <BeforeVisualSync>Sincronización visual antes</BeforeVisualSync>
     <VisualSyncPerformedOnSelectedLines>Sincronización visual aplicada a las líneas seleccionadas</VisualSyncPerformedOnSelectedLines>
     <VisualSyncPerformed>Sincronización visual realizada</VisualSyncPerformed>
-    <ImportThisVobSubSubtitle>¿Importar este subtítulo VobSub?</ImportThisVobSubSubtitle>
     <FileXIsLargerThan10MB>El archivo es mayor de 10 MB: {0}</FileXIsLargerThan10MB>
     <ContinueAnyway>¿Continuar de todas formas?</ContinueAnyway>
     <BeforeLoadOf>Antes de carga de {0}</BeforeLoadOf>
@@ -860,7 +996,7 @@ con el archivo de vídeo, al subtítulo actual cargado.
     <CaseSensitive>Sensible a mayúsculas</CaseSensitive>
     <RegularExpression>Expresión regular</RegularExpression>
     <LinesFoundX>Líneas encontradas: {0}</LinesFoundX>
-    <Delete>Eliminar</Delete>
+    <Remove>Eliminar</Remove>
     <Add>Añadir</Add>
     <Update>Act&amp;ualizar</Update>
     <Enabled>Habilitado</Enabled>
@@ -982,10 +1118,6 @@ puede editar el mismo archivo de subtítulo (colaboración)</Information>
     <VideoEngine>Motor de vídeo</VideoEngine>
     <DirectShow>DirectShow</DirectShow>
     <DirectShowDescription>quartz.dll en la carpeta system32</DirectShowDescription>
-    <ManagedDirectX>Gestión de DirectX</ManagedDirectX>
-    <ManagedDirectXDescription>Microsoft.DirectX.AudioVideoPlayback - .NET Código gestionado desde DirectX</ManagedDirectXDescription>
-    <MPlayer>MPlayer</MPlayer>
-    <MPlayerDescription>MPlayer2/Mplayer</MPlayerDescription>
     <VlcMediaPlayer>VLC media player</VlcMediaPlayer>
     <VlcMediaPlayerDescription>libvlc.dll de VLC media player 1.1.0 o superior</VlcMediaPlayerDescription>
     <ShowStopButton>Mostrar el botón stop</ShowStopButton>
@@ -1008,7 +1140,6 @@ puede editar el mismo archivo de subtítulo (colaboración)</Information>
     <SpectrogramOneColorGradient>Degradado de color</SpectrogramOneColorGradient>
     <SpectrogramClassic>Clásico</SpectrogramClassic>
     <SubStationAlphaStyle>Estilo Sub Station Alpha</SubStationAlphaStyle>
-    <ChooseFont>Elegir fuente</ChooseFont>
     <ChooseColor>Elegir color</ChooseColor>
     <Testing123>Probando 123...</Testing123>
     <Language>Idioma</Language>
@@ -1050,7 +1181,6 @@ puede editar el mismo archivo de subtítulo (colaboración)</Information>
     <Key>Tecla</Key>
     <TextBox>Cuadro de texto</TextBox>
     <UpdateShortcut>Actualizar</UpdateShortcut>
-    <ShortcutIsNotValid>Acceso directo no válido: {0}</ShortcutIsNotValid>
     <ToggleDockUndockOfVideoControls>Cambiar acoplar/desacoplar controles de vídeo</ToggleDockUndockOfVideoControls>
     <AdjustViaEndAutoStartAndGoToNext>Ajustar posición final e ir al siguiente</AdjustViaEndAutoStartAndGoToNext>
     <AdjustSetStartAutoDurationAndGoToNext>Ajustar inicio de autoduración e ir al siguiente</AdjustSetStartAutoDurationAndGoToNext>

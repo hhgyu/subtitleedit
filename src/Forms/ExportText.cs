@@ -1,4 +1,5 @@
 ﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
 using System;
 using System.IO;
 using System.Text;
@@ -8,8 +9,25 @@ namespace Nikse.SubtitleEdit.Forms
 {
     public sealed partial class ExportText : Form
     {
+        public class ExportOptions
+        {
+            public bool ShowLineNumbers { get; set; }
+            public bool AddNewlineAfterLineNumber { get; set; }
+            public bool ShowTimecodes { get; set; }
+            public bool TimeCodeSrt { get; set; }
+            public bool TimeCodeHHMMSSFF { get; set; }
+            public bool AddNewlineAfterTimeCodes { get; set; }
+            public string TimeCodeSeparator { get; set; }
+            public bool RemoveStyling { get; set; }
+            public bool FormatUnbreak { get; set; }
+            public bool AddNewAfterText { get; set; }
+            public bool AddNewAfterText2 { get; set; }
+            public bool FormatMergeAll { get; set; }
+        }
+
         private Subtitle _subtitle;
         private string _fileName;
+        private bool _loading;
 
         public ExportText()
         {
@@ -37,6 +55,20 @@ namespace Nikse.SubtitleEdit.Forms
             labelEncoding.Text = Configuration.Settings.Language.Main.Controls.FileEncoding;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
             buttonOK.Text = Configuration.Settings.Language.Main.Menu.File.SaveAs;
+            _loading = true;
+            if (Configuration.Settings.Tools.ExportTextFormatText == "None")
+                radioButtonFormatNone.Checked = true;
+            else if (Configuration.Settings.Tools.ExportTextFormatText == "Unbreak")
+                radioButtonFormatUnbreak.Checked = true;
+            else
+                radioButtonFormatMergeAll.Checked = true;
+            checkBoxRemoveStyling.Checked = Configuration.Settings.Tools.ExportTextRemoveStyling;
+            checkBoxShowLineNumbers.Checked = Configuration.Settings.Tools.ExportTextShowLineNumbers;
+            checkBoxAddNewlineAfterLineNumber.Checked = Configuration.Settings.Tools.ExportTextShowLineNumbersNewLine;
+            checkBoxShowTimeCodes.Checked = Configuration.Settings.Tools.ExportTextShowTimeCodes;
+            checkBoxAddNewlineAfterTimeCodes.Checked = Configuration.Settings.Tools.ExportTextShowTimeCodesNewLine;
+            checkBoxAddAfterText.Checked = Configuration.Settings.Tools.ExportTextNewLineAfterText;
+            checkBoxAddNewLine2.Checked = Configuration.Settings.Tools.ExportTextNewLineBetweenSubtitles;
         }
 
         internal void Initialize(Subtitle subtitle, string fileName)
@@ -45,110 +77,102 @@ namespace Nikse.SubtitleEdit.Forms
             _fileName = fileName;
             textBoxText.ReadOnly = true;
             comboBoxTimeCodeSeparator.SelectedIndex = 0;
+            _loading = false;
             GeneratePreview();
 
-            comboBoxEncoding.Items.Clear();
-            int encodingSelectedIndex = 0;
-            comboBoxEncoding.Items.Add(Encoding.UTF8.EncodingName);
-            foreach (EncodingInfo ei in Encoding.GetEncodings())
-            {
-                if (ei.Name != Encoding.UTF8.BodyName && ei.CodePage >= 949 && !ei.DisplayName.Contains("EBCDIC") && ei.CodePage != 1047)
-                {
-                    comboBoxEncoding.Items.Add(ei.CodePage + ": " + ei.DisplayName);
-                    if (ei.Name == Configuration.Settings.General.DefaultEncoding)
-                        encodingSelectedIndex = comboBoxEncoding.Items.Count - 1;
-                }
-            }
-            comboBoxEncoding.SelectedIndex = encodingSelectedIndex;
+            UiUtil.InitializeTextEncodingComboBox(comboBoxEncoding);
         }
 
         private void GeneratePreview()
         {
+            if (_loading)
+                return;
+
             groupBoxTimeCodeFormat.Enabled = checkBoxShowTimeCodes.Checked;
             checkBoxAddAfterText.Enabled = !radioButtonFormatMergeAll.Checked;
             checkBoxAddNewLine2.Enabled = !radioButtonFormatMergeAll.Checked;
             checkBoxAddNewlineAfterLineNumber.Enabled = checkBoxShowLineNumbers.Checked;
             checkBoxAddNewlineAfterTimeCodes.Enabled = checkBoxShowTimeCodes.Checked;
 
-            string text = GeneratePlainText(_subtitle, checkBoxShowLineNumbers.Checked, checkBoxAddNewlineAfterLineNumber.Checked, checkBoxShowTimeCodes.Checked,
-                                            radioButtonTimeCodeSrt.Checked, radioButtonTimeCodeHHMMSSFF.Checked, checkBoxAddNewlineAfterTimeCodes.Checked,
-                                            comboBoxTimeCodeSeparator.Text, checkBoxRemoveStyling.Checked, radioButtonFormatUnbreak.Checked, checkBoxAddAfterText.Checked,
-                                            checkBoxAddNewLine2.Checked, radioButtonFormatMergeAll.Checked);
+            var exportOptions = new ExportOptions
+            {
+                ShowLineNumbers = checkBoxShowLineNumbers.Checked,
+                AddNewlineAfterLineNumber = checkBoxAddNewlineAfterLineNumber.Checked,
+                ShowTimecodes = checkBoxShowTimeCodes.Checked,
+                TimeCodeSrt = radioButtonTimeCodeSrt.Checked,
+                TimeCodeHHMMSSFF = radioButtonTimeCodeHHMMSSFF.Checked,
+                AddNewlineAfterTimeCodes = checkBoxAddNewlineAfterTimeCodes.Checked,
+                TimeCodeSeparator = comboBoxTimeCodeSeparator.Text,
+                RemoveStyling = checkBoxRemoveStyling.Checked,
+                FormatUnbreak = radioButtonFormatUnbreak.Checked,
+                AddNewAfterText = checkBoxAddAfterText.Checked,
+                AddNewAfterText2 = checkBoxAddNewLine2.Checked,
+                FormatMergeAll = radioButtonFormatMergeAll.Checked
+            };
+
+            string text = GeneratePlainText(_subtitle, exportOptions);
             textBoxText.Text = text;
         }
 
-        public static string GeneratePlainText(Subtitle subtitle, bool showLineNumbers, bool addNewlineAfterLineNumber, bool showTimecodes,
-                                         bool timeCodeSrt, bool timeCodeHHMMSSFF, bool addNewlineAfterTimeCodes, string timeCodeSeparator,
-                                         bool removeStyling, bool formatUnbreak, bool addAfterText, bool checkBoxAddNewLine2, bool formatMergeAll)
+        public static string GeneratePlainText(Subtitle subtitle, ExportOptions exportOptions)
         {
             var sb = new StringBuilder();
             foreach (Paragraph p in subtitle.Paragraphs)
             {
-                if (showLineNumbers)
+                if (exportOptions.ShowLineNumbers)
                 {
                     sb.Append(p.Number);
-                    if (addNewlineAfterLineNumber)
+                    if (exportOptions.AddNewlineAfterLineNumber)
                         sb.AppendLine();
                     else
                         sb.Append(' ');
                 }
-                if (showTimecodes)
+                if (exportOptions.ShowTimecodes)
                 {
-                    if (timeCodeSrt)
-                        sb.Append(p.StartTime + timeCodeSeparator + p.EndTime);
-                    else if (timeCodeHHMMSSFF)
-                        sb.Append(p.StartTime.ToHHMMSSFF() + timeCodeSeparator + p.EndTime.ToHHMMSSFF());
+                    if (exportOptions.TimeCodeSrt)
+                        sb.Append(p.StartTime + exportOptions.TimeCodeSeparator + p.EndTime);
+                    else if (exportOptions.TimeCodeHHMMSSFF)
+                        sb.Append(p.StartTime.ToHHMMSSFF() + exportOptions.TimeCodeSeparator + p.EndTime.ToHHMMSSFF());
                     else
-                        sb.Append(p.StartTime.TotalMilliseconds + timeCodeSeparator + p.EndTime.TotalMilliseconds);
+                        sb.Append(p.StartTime.TotalMilliseconds + exportOptions.TimeCodeSeparator + p.EndTime.TotalMilliseconds);
 
-                    if (addNewlineAfterTimeCodes)
+                    if (exportOptions.AddNewlineAfterTimeCodes)
                         sb.AppendLine();
                     else
                         sb.Append(' ');
                 }
                 string s = p.Text;
-                if (removeStyling)
+                if (exportOptions.RemoveStyling)
                 {
                     s = HtmlUtil.RemoveHtmlTags(s, true);
                 }
-                if (formatUnbreak)
+                if (exportOptions.FormatUnbreak)
                 {
-                    sb.Append(s.Replace(Environment.NewLine, " ").Replace("  ", " "));
+                    sb.Append(Utilities.UnbreakLine(s));
                 }
                 else
                 {
                     sb.Append(s);
                 }
-                if (addAfterText)
+                if (exportOptions.AddNewAfterText)
                     sb.AppendLine();
-                if (checkBoxAddNewLine2)
+                if (exportOptions.AddNewAfterText2)
                     sb.AppendLine();
-                if (!addAfterText && !checkBoxAddNewLine2)
+                if (!exportOptions.AddNewAfterText && !exportOptions.AddNewAfterText2)
                     sb.Append(' ');
             }
             string text = sb.ToString().Trim();
-            if (formatMergeAll)
+            if (exportOptions.FormatMergeAll)
             {
                 text = text.Replace(Environment.NewLine, " ");
-                text = text.Replace("  ", " ").Replace("  ", " ");
+                text = text.FixExtraSpaces();
             }
             return text;
         }
 
         private Encoding GetCurrentEncoding()
         {
-            if (comboBoxEncoding.Text == Encoding.UTF8.BodyName || comboBoxEncoding.Text == Encoding.UTF8.EncodingName || comboBoxEncoding.Text == "utf-8")
-            {
-                return Encoding.UTF8;
-            }
-
-            foreach (EncodingInfo ei in Encoding.GetEncodings())
-            {
-                if (ei.CodePage + ": " + ei.DisplayName == comboBoxEncoding.Text)
-                    return ei.GetEncoding();
-            }
-
-            return Encoding.UTF8;
+            return UiUtil.GetTextEncodingComboBoxCurrentEncoding(comboBoxEncoding);
         }
 
         private void buttonOK_Click(object sender, EventArgs e)
@@ -181,6 +205,32 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 DialogResult = DialogResult.Cancel;
             }
+        }
+
+        private void ExportText_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (radioButtonFormatNone.Checked)
+                Configuration.Settings.Tools.ExportTextFormatText = "None";
+            else if (radioButtonFormatUnbreak.Checked)
+                Configuration.Settings.Tools.ExportTextFormatText = "Unbreak";
+            else
+                Configuration.Settings.Tools.ExportTextFormatText = "MergeAll";
+            Configuration.Settings.Tools.ExportTextRemoveStyling = checkBoxRemoveStyling.Checked;
+            Configuration.Settings.Tools.ExportTextShowLineNumbers = checkBoxShowLineNumbers.Checked;
+            Configuration.Settings.Tools.ExportTextShowLineNumbersNewLine = checkBoxAddNewlineAfterLineNumber.Checked;
+            Configuration.Settings.Tools.ExportTextShowTimeCodes = checkBoxShowTimeCodes.Checked;
+            Configuration.Settings.Tools.ExportTextShowTimeCodesNewLine = checkBoxAddNewlineAfterTimeCodes.Checked;
+            Configuration.Settings.Tools.ExportTextNewLineAfterText = checkBoxAddAfterText.Checked;
+            Configuration.Settings.Tools.ExportTextNewLineBetweenSubtitles = checkBoxAddNewLine2.Checked;
+        }
+
+        public void PrepareForBatchSettings()
+        {
+            groupBoxTimeCodeFormat.Visible = false;
+            labelEncoding.Visible = false;
+            comboBoxEncoding.Visible = false;
+            buttonOK.Visible = false;
+            buttonCancel.Text = Configuration.Settings.Language.General.Ok;
         }
 
     }

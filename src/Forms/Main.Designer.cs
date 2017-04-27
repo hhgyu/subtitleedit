@@ -38,6 +38,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
+            Nikse.SubtitleEdit.Core.TimeCode timeCode1 = new Nikse.SubtitleEdit.Core.TimeCode();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.labelStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripSelected = new System.Windows.Forms.ToolStripStatusLabel();
@@ -53,8 +54,10 @@
             this.toolStripButtonReplace = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparatorFixSyncSpell = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonFixCommonErrors = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonRemoveTextForHi = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonVisualSync = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonSpellCheck = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButtonNetflixQualityCheck = new System.Windows.Forms.ToolStripButton();
             this.toolStripButtonSettings = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparatorHelp = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButtonHelp = new System.Windows.Forms.ToolStripButton();
@@ -111,6 +114,7 @@
             this.toolStripMenuItemExport = new System.Windows.Forms.ToolStripMenuItem();
             this.adobeEncoreFABImageScriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAvidStl = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemExportAyato = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemExportPngXml = new System.Windows.Forms.ToolStripMenuItem();
             this.bluraySupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemExportBdTextSt = new System.Windows.Forms.ToolStripMenuItem();
@@ -122,7 +126,8 @@
             this.toolStripMenuItemDost = new System.Windows.Forms.ToolStripMenuItem();
             this.DvdStudioProStl = new System.Windows.Forms.ToolStripMenuItem();
             this.eBUSTLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemEdl = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemEdlClipName = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemExportFcpIImage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemImagePerFrame = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemTextTimeCodePair = new System.Windows.Forms.ToolStripMenuItem();
@@ -163,7 +168,7 @@
             this.toolStripMenuItemDurationBridgeGaps = new System.Windows.Forms.ToolStripMenuItem();
             this.fixToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startNumberingFromToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.removeTextForHearImparedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeTextForHearImpairedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ChangeCasingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAutoMergeShortLines = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemMergeDuplicateText = new System.Windows.Forms.ToolStripMenuItem();
@@ -185,6 +190,7 @@
             this.toolStripSeparatorAscOrDesc = new System.Windows.Forms.ToolStripSeparator();
             this.AscendingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.descendingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.netflixQualityCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator23 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripMenuItemMakeEmptyFromCurrent = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemBatchConvert = new System.Windows.Forms.ToolStripMenuItem();
@@ -194,6 +200,14 @@
             this.splitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.appendTextVisuallyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.joinSubtitlesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSpellCheckMain = new System.Windows.Forms.ToolStripMenuItem();
+            this.spellCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSpellCheckFromCurrentLine = new System.Windows.Forms.ToolStripMenuItem();
+            this.findDoubleWordsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.FindDoubleLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
+            this.GetDictionariesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addWordToNamesetcListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemVideo = new System.Windows.Forms.ToolStripMenuItem();
             this.openVideoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemOpenDvd = new System.Windows.Forms.ToolStripMenuItem();
@@ -209,14 +223,6 @@
             this.toolStripSeparator19 = new System.Windows.Forms.ToolStripSeparator();
             this.undockVideoControlsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.redockVideoControlsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSpellCheckMain = new System.Windows.Forms.ToolStripMenuItem();
-            this.spellCheckToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItemSpellCheckFromCurrentLine = new System.Windows.Forms.ToolStripMenuItem();
-            this.findDoubleWordsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.FindDoubleLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator9 = new System.Windows.Forms.ToolStripSeparator();
-            this.GetDictionariesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.addWordToNamesetcListToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSynchronization = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAdjustAllTimes = new System.Windows.Forms.ToolStripMenuItem();
             this.visualSyncToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -244,6 +250,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStripListview = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.setStylesForSelectedLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.setActorForSelectedLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemAssStyles = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemSetLanguage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItemWebVTT = new System.Windows.Forms.ToolStripMenuItem();
@@ -394,6 +401,8 @@
             this.showOnlyWaveformToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showOnlySpectrogramToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparatorGuessTimeCodes = new System.Windows.Forms.ToolStripSeparator();
+            this.removeSceneChangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addSceneChangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.guessTimeCodesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.seekSilenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainerMain = new System.Windows.Forms.SplitContainer();
@@ -464,7 +473,7 @@
             this.imageListPlayRate = new System.Windows.Forms.ImageList(this.components);
             this.timerTextUndo = new System.Windows.Forms.Timer(this.components);
             this.timerAlternateTextUndo = new System.Windows.Forms.Timer(this.components);
-            this.toolStripMenuItemExportAyato = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItemSetRegion = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -571,8 +580,10 @@
             this.toolStripButtonReplace,
             this.toolStripSeparatorFixSyncSpell,
             this.toolStripButtonFixCommonErrors,
+            this.toolStripButtonRemoveTextForHi,
             this.toolStripButtonVisualSync,
             this.toolStripButtonSpellCheck,
+            this.toolStripButtonNetflixQualityCheck,
             this.toolStripButtonSettings,
             this.toolStripSeparatorHelp,
             this.toolStripButtonHelp,
@@ -695,6 +706,19 @@
             this.toolStripButtonFixCommonErrors.ToolTipText = "Fix common errors";
             this.toolStripButtonFixCommonErrors.Click += new System.EventHandler(this.toolStripButtonFixCommonErrors_Click);
             // 
+            // toolStripButtonRemoveTextForHi
+            // 
+            this.toolStripButtonRemoveTextForHi.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonRemoveTextForHi.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.toolStripButtonRemoveTextForHi.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonRemoveTextForHi.Image")));
+            this.toolStripButtonRemoveTextForHi.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripButtonRemoveTextForHi.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonRemoveTextForHi.Name = "toolStripButtonRemoveTextForHi";
+            this.toolStripButtonRemoveTextForHi.Size = new System.Drawing.Size(36, 37);
+            this.toolStripButtonRemoveTextForHi.Text = "Remove text for HI";
+            this.toolStripButtonRemoveTextForHi.ToolTipText = "Fix common errors";
+            this.toolStripButtonRemoveTextForHi.Click += new System.EventHandler(this.toolStripButtonRemoveTextForHi_Click);
+            // 
             // toolStripButtonVisualSync
             // 
             this.toolStripButtonVisualSync.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -718,6 +742,17 @@
             this.toolStripButtonSpellCheck.Size = new System.Drawing.Size(36, 37);
             this.toolStripButtonSpellCheck.Text = "Spell check";
             this.toolStripButtonSpellCheck.Click += new System.EventHandler(this.ToolStripButtonSpellCheckClick);
+            // 
+            // toolStripButtonNetflixQualityCheck
+            // 
+            this.toolStripButtonNetflixQualityCheck.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButtonNetflixQualityCheck.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButtonNetflixQualityCheck.Image")));
+            this.toolStripButtonNetflixQualityCheck.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None;
+            this.toolStripButtonNetflixQualityCheck.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButtonNetflixQualityCheck.Name = "toolStripButtonNetflixQualityCheck";
+            this.toolStripButtonNetflixQualityCheck.Size = new System.Drawing.Size(36, 37);
+            this.toolStripButtonNetflixQualityCheck.Text = "Netflix quality check";
+            this.toolStripButtonNetflixQualityCheck.Click += new System.EventHandler(this.toolStripButtonNetflixGlyphCheck_Click);
             // 
             // toolStripButtonSettings
             // 
@@ -792,13 +827,14 @@
             // 
             // comboBoxSubtitleFormats
             // 
-            this.comboBoxSubtitleFormats.DropDownHeight = 220;
+            this.comboBoxSubtitleFormats.DropDownHeight = 215;
             this.comboBoxSubtitleFormats.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxSubtitleFormats.DropDownWidth = 230;
             this.comboBoxSubtitleFormats.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
             this.comboBoxSubtitleFormats.IntegralHeight = false;
             this.comboBoxSubtitleFormats.Name = "comboBoxSubtitleFormats";
             this.comboBoxSubtitleFormats.Size = new System.Drawing.Size(150, 40);
+            this.comboBoxSubtitleFormats.DropDown += new System.EventHandler(this.MenuOpened);
+            this.comboBoxSubtitleFormats.DropDownClosed += new System.EventHandler(this.MenuClosed);
             this.comboBoxSubtitleFormats.SelectedIndexChanged += new System.EventHandler(this.ComboBoxSubtitleFormatsSelectedIndexChanged);
             this.comboBoxSubtitleFormats.Enter += new System.EventHandler(this.ComboBoxSubtitleFormatsEnter);
             // 
@@ -815,9 +851,8 @@
             // 
             // comboBoxEncoding
             // 
-            this.comboBoxEncoding.DropDownHeight = 220;
+            this.comboBoxEncoding.DropDownHeight = 215;
             this.comboBoxEncoding.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBoxEncoding.DropDownWidth = 240;
             this.comboBoxEncoding.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
             this.comboBoxEncoding.IntegralHeight = false;
             this.comboBoxEncoding.Items.AddRange(new object[] {
@@ -827,7 +862,9 @@
             "Unicode",
             "Unicode (big endian)"});
             this.comboBoxEncoding.Name = "comboBoxEncoding";
-            this.comboBoxEncoding.Size = new System.Drawing.Size(122, 40);
+            this.comboBoxEncoding.Size = new System.Drawing.Size(125, 23);
+            this.comboBoxEncoding.DropDown += new System.EventHandler(this.MenuOpened);
+            this.comboBoxEncoding.DropDownClosed += new System.EventHandler(this.MenuClosed);
             // 
             // toolStripSeparatorFrameRate
             // 
@@ -846,6 +883,8 @@
             this.toolStripComboBoxFrameRate.FlatStyle = System.Windows.Forms.FlatStyle.Standard;
             this.toolStripComboBoxFrameRate.Name = "toolStripComboBoxFrameRate";
             this.toolStripComboBoxFrameRate.Size = new System.Drawing.Size(75, 23);
+            this.toolStripComboBoxFrameRate.DropDown += new System.EventHandler(this.MenuOpened);
+            this.toolStripComboBoxFrameRate.DropDownClosed += new System.EventHandler(this.MenuClosed);
             this.toolStripComboBoxFrameRate.TextChanged += new System.EventHandler(this.ToolStripComboBoxFrameRateTextChanged);
             // 
             // toolStripButtonGetFrameRate
@@ -866,8 +905,8 @@
             this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
             this.toolsToolStripMenuItem,
-            this.toolStripMenuItemVideo,
             this.toolStripMenuItemSpellCheckMain,
+            this.toolStripMenuItemVideo,
             this.toolStripMenuItemSynchronization,
             this.toolStripMenuItemAutoTranslate,
             this.optionsToolStripMenuItem,
@@ -1181,7 +1220,8 @@
             this.toolStripMenuItemDost,
             this.DvdStudioProStl,
             this.eBUSTLToolStripMenuItem,
-            this.toolStripMenuItem3,
+            this.toolStripMenuItemEdl,
+            this.toolStripMenuItemEdlClipName,
             this.toolStripMenuItemExportFcpIImage,
             this.toolStripMenuItemImagePerFrame,
             this.toolStripMenuItemTextTimeCodePair,
@@ -1210,6 +1250,13 @@
             this.toolStripMenuItemAvidStl.Size = new System.Drawing.Size(258, 22);
             this.toolStripMenuItemAvidStl.Text = "Avid STL...";
             this.toolStripMenuItemAvidStl.Click += new System.EventHandler(this.toolStripMenuItemAvidStl_Click);
+            // 
+            // toolStripMenuItemExportAyato
+            // 
+            this.toolStripMenuItemExportAyato.Name = "toolStripMenuItemExportAyato";
+            this.toolStripMenuItemExportAyato.Size = new System.Drawing.Size(258, 22);
+            this.toolStripMenuItemExportAyato.Text = "Ayato...";
+            this.toolStripMenuItemExportAyato.Click += new System.EventHandler(this.toolStripMenuItemExportAyato_Click);
             // 
             // toolStripMenuItemExportPngXml
             // 
@@ -1288,12 +1335,19 @@
             this.eBUSTLToolStripMenuItem.Text = "EBU STL...";
             this.eBUSTLToolStripMenuItem.Click += new System.EventHandler(this.EBustlToolStripMenuItemClick);
             // 
-            // toolStripMenuItem3
+            // toolStripMenuItemEdl
             // 
-            this.toolStripMenuItem3.Name = "toolStripMenuItem3";
-            this.toolStripMenuItem3.Size = new System.Drawing.Size(258, 22);
-            this.toolStripMenuItem3.Text = "EDL...";
-            this.toolStripMenuItem3.Click += new System.EventHandler(this.toolStripMenuItemExportEdlClick);
+            this.toolStripMenuItemEdl.Name = "toolStripMenuItemEdl";
+            this.toolStripMenuItemEdl.Size = new System.Drawing.Size(258, 22);
+            this.toolStripMenuItemEdl.Text = "EDL...";
+            this.toolStripMenuItemEdl.Click += new System.EventHandler(this.ExportToEdl);
+            // 
+            // toolStripMenuItemEdlClipName
+            // 
+            this.toolStripMenuItemEdlClipName.Name = "toolStripMenuItemEdlClipName";
+            this.toolStripMenuItemEdlClipName.Size = new System.Drawing.Size(258, 22);
+            this.toolStripMenuItemEdlClipName.Text = "EDL/CLIPNAME...";
+            this.toolStripMenuItemEdlClipName.Click += new System.EventHandler(this.ExportToEdlWithClipName);
             // 
             // toolStripMenuItemExportFcpIImage
             // 
@@ -1556,7 +1610,7 @@
             this.toolStripMenuItemDurationBridgeGaps,
             this.fixToolStripMenuItem,
             this.startNumberingFromToolStripMenuItem,
-            this.removeTextForHearImparedToolStripMenuItem,
+            this.removeTextForHearImpairedToolStripMenuItem,
             this.ChangeCasingToolStripMenuItem,
             this.toolStripMenuItemAutoMergeShortLines,
             this.toolStripMenuItemMergeDuplicateText,
@@ -1564,6 +1618,7 @@
             this.toolStripMenuItemAutoSplitLongLines,
             this.setMinimumDisplayTimeBetweenParagraphsToolStripMenuItem,
             this.toolStripMenuItem1,
+            this.netflixQualityCheckToolStripMenuItem,
             this.toolStripSeparator23,
             this.toolStripMenuItemMakeEmptyFromCurrent,
             this.toolStripMenuItemBatchConvert,
@@ -1617,14 +1672,14 @@
             this.startNumberingFromToolStripMenuItem.Text = "Start numbering from...";
             this.startNumberingFromToolStripMenuItem.Click += new System.EventHandler(this.StartNumberingFromToolStripMenuItemClick);
             // 
-            // removeTextForHearImparedToolStripMenuItem
+            // removeTextForHearImpairedToolStripMenuItem
             // 
-            this.removeTextForHearImparedToolStripMenuItem.Name = "removeTextForHearImparedToolStripMenuItem";
-            this.removeTextForHearImparedToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            this.removeTextForHearImpairedToolStripMenuItem.Name = "removeTextForHearImpairedToolStripMenuItem";
+            this.removeTextForHearImpairedToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
             | System.Windows.Forms.Keys.H)));
-            this.removeTextForHearImparedToolStripMenuItem.Size = new System.Drawing.Size(346, 22);
-            this.removeTextForHearImparedToolStripMenuItem.Text = "Remove text for hearing impaired...";
-            this.removeTextForHearImparedToolStripMenuItem.Click += new System.EventHandler(this.RemoveTextForHearImparedToolStripMenuItemClick);
+            this.removeTextForHearImpairedToolStripMenuItem.Size = new System.Drawing.Size(346, 22);
+            this.removeTextForHearImpairedToolStripMenuItem.Text = "Remove text for hearing impaired...";
+            this.removeTextForHearImpairedToolStripMenuItem.Click += new System.EventHandler(this.RemoveTextForHearImpairedToolStripMenuItemClick);
             // 
             // ChangeCasingToolStripMenuItem
             // 
@@ -1789,6 +1844,13 @@
             this.descendingToolStripMenuItem.Text = "Descending";
             this.descendingToolStripMenuItem.Click += new System.EventHandler(this.descendingToolStripMenuItem_Click);
             // 
+            // netflixQualityCheckToolStripMenuItem
+            // 
+            this.netflixQualityCheckToolStripMenuItem.Name = "netflixQualityCheckToolStripMenuItem";
+            this.netflixQualityCheckToolStripMenuItem.Size = new System.Drawing.Size(346, 22);
+            this.netflixQualityCheckToolStripMenuItem.Text = "Netflix quality check";
+            this.netflixQualityCheckToolStripMenuItem.Click += new System.EventHandler(this.netflixGlyphCheckToolStripMenuItem_Click);
+            // 
             // toolStripSeparator23
             // 
             this.toolStripSeparator23.Name = "toolStripSeparator23";
@@ -1847,6 +1909,74 @@
             this.joinSubtitlesToolStripMenuItem.Size = new System.Drawing.Size(346, 22);
             this.joinSubtitlesToolStripMenuItem.Text = "Join subtitles...";
             this.joinSubtitlesToolStripMenuItem.Click += new System.EventHandler(this.joinSubtitlesToolStripMenuItem_Click);
+            // 
+            // toolStripMenuItemSpellCheckMain
+            // 
+            this.toolStripMenuItemSpellCheckMain.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.spellCheckToolStripMenuItem,
+            this.toolStripMenuItemSpellCheckFromCurrentLine,
+            this.findDoubleWordsToolStripMenuItem,
+            this.FindDoubleLinesToolStripMenuItem,
+            this.toolStripSeparator9,
+            this.GetDictionariesToolStripMenuItem,
+            this.addWordToNamesetcListToolStripMenuItem});
+            this.toolStripMenuItemSpellCheckMain.Name = "toolStripMenuItemSpellCheckMain";
+            this.toolStripMenuItemSpellCheckMain.Size = new System.Drawing.Size(80, 20);
+            this.toolStripMenuItemSpellCheckMain.Text = "Spell check";
+            this.toolStripMenuItemSpellCheckMain.DropDownOpening += new System.EventHandler(this.ToolStripMenuItemSpellCheckMainDropDownOpening);
+            // 
+            // spellCheckToolStripMenuItem
+            // 
+            this.spellCheckToolStripMenuItem.Name = "spellCheckToolStripMenuItem";
+            this.spellCheckToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.S)));
+            this.spellCheckToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
+            this.spellCheckToolStripMenuItem.Text = "Spell check...";
+            this.spellCheckToolStripMenuItem.Click += new System.EventHandler(this.SpellCheckToolStripMenuItemClick);
+            // 
+            // toolStripMenuItemSpellCheckFromCurrentLine
+            // 
+            this.toolStripMenuItemSpellCheckFromCurrentLine.Name = "toolStripMenuItemSpellCheckFromCurrentLine";
+            this.toolStripMenuItemSpellCheckFromCurrentLine.Size = new System.Drawing.Size(296, 22);
+            this.toolStripMenuItemSpellCheckFromCurrentLine.Text = "Spell check from current line...";
+            this.toolStripMenuItemSpellCheckFromCurrentLine.Click += new System.EventHandler(this.toolStripMenuItemSpellCheckFromCurrentLine_Click);
+            // 
+            // findDoubleWordsToolStripMenuItem
+            // 
+            this.findDoubleWordsToolStripMenuItem.Name = "findDoubleWordsToolStripMenuItem";
+            this.findDoubleWordsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.D)));
+            this.findDoubleWordsToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
+            this.findDoubleWordsToolStripMenuItem.Text = "Find double words";
+            this.findDoubleWordsToolStripMenuItem.Click += new System.EventHandler(this.FindDoubleWordsToolStripMenuItemClick);
+            // 
+            // FindDoubleLinesToolStripMenuItem
+            // 
+            this.FindDoubleLinesToolStripMenuItem.Name = "FindDoubleLinesToolStripMenuItem";
+            this.FindDoubleLinesToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
+            this.FindDoubleLinesToolStripMenuItem.Text = "Find double lines";
+            this.FindDoubleLinesToolStripMenuItem.Click += new System.EventHandler(this.FindDoubleLinesToolStripMenuItemClick);
+            // 
+            // toolStripSeparator9
+            // 
+            this.toolStripSeparator9.Name = "toolStripSeparator9";
+            this.toolStripSeparator9.Size = new System.Drawing.Size(293, 6);
+            // 
+            // GetDictionariesToolStripMenuItem
+            // 
+            this.GetDictionariesToolStripMenuItem.Name = "GetDictionariesToolStripMenuItem";
+            this.GetDictionariesToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
+            this.GetDictionariesToolStripMenuItem.Text = "Get dictionary...";
+            this.GetDictionariesToolStripMenuItem.Click += new System.EventHandler(this.GetDictionariesToolStripMenuItem_Click);
+            // 
+            // addWordToNamesetcListToolStripMenuItem
+            // 
+            this.addWordToNamesetcListToolStripMenuItem.Name = "addWordToNamesetcListToolStripMenuItem";
+            this.addWordToNamesetcListToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
+            | System.Windows.Forms.Keys.L)));
+            this.addWordToNamesetcListToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
+            this.addWordToNamesetcListToolStripMenuItem.Text = "Add word to names/etc list";
+            this.addWordToNamesetcListToolStripMenuItem.Click += new System.EventHandler(this.AddWordToNamesetcListToolStripMenuItemClick);
             // 
             // toolStripMenuItemVideo
             // 
@@ -1964,74 +2094,6 @@
             this.redockVideoControlsToolStripMenuItem.Text = "Re-dock video controls";
             this.redockVideoControlsToolStripMenuItem.Visible = false;
             this.redockVideoControlsToolStripMenuItem.Click += new System.EventHandler(this.RedockVideoControlsToolStripMenuItemClick);
-            // 
-            // toolStripMenuItemSpellCheckMain
-            // 
-            this.toolStripMenuItemSpellCheckMain.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.spellCheckToolStripMenuItem,
-            this.toolStripMenuItemSpellCheckFromCurrentLine,
-            this.findDoubleWordsToolStripMenuItem,
-            this.FindDoubleLinesToolStripMenuItem,
-            this.toolStripSeparator9,
-            this.GetDictionariesToolStripMenuItem,
-            this.addWordToNamesetcListToolStripMenuItem});
-            this.toolStripMenuItemSpellCheckMain.Name = "toolStripMenuItemSpellCheckMain";
-            this.toolStripMenuItemSpellCheckMain.Size = new System.Drawing.Size(80, 20);
-            this.toolStripMenuItemSpellCheckMain.Text = "Spell check";
-            this.toolStripMenuItemSpellCheckMain.DropDownOpening += new System.EventHandler(this.ToolStripMenuItemSpellCheckMainDropDownOpening);
-            // 
-            // spellCheckToolStripMenuItem
-            // 
-            this.spellCheckToolStripMenuItem.Name = "spellCheckToolStripMenuItem";
-            this.spellCheckToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.S)));
-            this.spellCheckToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
-            this.spellCheckToolStripMenuItem.Text = "Spell check...";
-            this.spellCheckToolStripMenuItem.Click += new System.EventHandler(this.SpellCheckToolStripMenuItemClick);
-            // 
-            // toolStripMenuItemSpellCheckFromCurrentLine
-            // 
-            this.toolStripMenuItemSpellCheckFromCurrentLine.Name = "toolStripMenuItemSpellCheckFromCurrentLine";
-            this.toolStripMenuItemSpellCheckFromCurrentLine.Size = new System.Drawing.Size(296, 22);
-            this.toolStripMenuItemSpellCheckFromCurrentLine.Text = "Spell check from current line...";
-            this.toolStripMenuItemSpellCheckFromCurrentLine.Click += new System.EventHandler(this.toolStripMenuItemSpellCheckFromCurrentLine_Click);
-            // 
-            // findDoubleWordsToolStripMenuItem
-            // 
-            this.findDoubleWordsToolStripMenuItem.Name = "findDoubleWordsToolStripMenuItem";
-            this.findDoubleWordsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.D)));
-            this.findDoubleWordsToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
-            this.findDoubleWordsToolStripMenuItem.Text = "Find double words";
-            this.findDoubleWordsToolStripMenuItem.Click += new System.EventHandler(this.FindDoubleWordsToolStripMenuItemClick);
-            // 
-            // FindDoubleLinesToolStripMenuItem
-            // 
-            this.FindDoubleLinesToolStripMenuItem.Name = "FindDoubleLinesToolStripMenuItem";
-            this.FindDoubleLinesToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
-            this.FindDoubleLinesToolStripMenuItem.Text = "Find double lines";
-            this.FindDoubleLinesToolStripMenuItem.Click += new System.EventHandler(this.FindDoubleLinesToolStripMenuItemClick);
-            // 
-            // toolStripSeparator9
-            // 
-            this.toolStripSeparator9.Name = "toolStripSeparator9";
-            this.toolStripSeparator9.Size = new System.Drawing.Size(293, 6);
-            // 
-            // GetDictionariesToolStripMenuItem
-            // 
-            this.GetDictionariesToolStripMenuItem.Name = "GetDictionariesToolStripMenuItem";
-            this.GetDictionariesToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
-            this.GetDictionariesToolStripMenuItem.Text = "Get dictionary...";
-            this.GetDictionariesToolStripMenuItem.Click += new System.EventHandler(this.GetDictionariesToolStripMenuItem_Click);
-            // 
-            // addWordToNamesetcListToolStripMenuItem
-            // 
-            this.addWordToNamesetcListToolStripMenuItem.Name = "addWordToNamesetcListToolStripMenuItem";
-            this.addWordToNamesetcListToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)(((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Shift) 
-            | System.Windows.Forms.Keys.L)));
-            this.addWordToNamesetcListToolStripMenuItem.Size = new System.Drawing.Size(296, 22);
-            this.addWordToNamesetcListToolStripMenuItem.Text = "Add word to names/etc list";
-            this.addWordToNamesetcListToolStripMenuItem.Click += new System.EventHandler(this.AddWordToNamesetcListToolStripMenuItemClick);
             // 
             // toolStripMenuItemSynchronization
             // 
@@ -2208,6 +2270,8 @@
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
             this.helpToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
             this.helpToolStripMenuItem.Text = "Help";
+            this.helpToolStripMenuItem.DropDownClosed += new System.EventHandler(this.MenuClosed);
+            this.helpToolStripMenuItem.DropDownOpening += new System.EventHandler(this.MenuOpened);
             // 
             // checkForUpdatesToolStripMenuItem
             // 
@@ -2240,7 +2304,9 @@
             // 
             this.contextMenuStripListview.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.setStylesForSelectedLinesToolStripMenuItem,
+            this.setActorForSelectedLinesToolStripMenuItem,
             this.toolStripMenuItemAssStyles,
+            this.toolStripMenuItemSetRegion,
             this.toolStripMenuItemSetLanguage,
             this.toolStripMenuItemWebVTT,
             this.toolStripMenuItemDelete,
@@ -2280,14 +2346,22 @@
             this.changeCasingForSelectedLinesToolStripMenuItem,
             this.toolStripMenuItemSaveSelectedLines});
             this.contextMenuStripListview.Name = "contextMenuStripListview";
-            this.contextMenuStripListview.Size = new System.Drawing.Size(285, 804);
+            this.contextMenuStripListview.Size = new System.Drawing.Size(285, 870);
+            this.contextMenuStripListview.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.MenuClosed);
             this.contextMenuStripListview.Opening += new System.ComponentModel.CancelEventHandler(this.ContextMenuStripListviewOpening);
+            this.contextMenuStripListview.Opened += new System.EventHandler(this.MenuOpened);
             // 
             // setStylesForSelectedLinesToolStripMenuItem
             // 
             this.setStylesForSelectedLinesToolStripMenuItem.Name = "setStylesForSelectedLinesToolStripMenuItem";
             this.setStylesForSelectedLinesToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
             this.setStylesForSelectedLinesToolStripMenuItem.Text = "ASS: Set styles for selected lines...";
+            // 
+            // setActorForSelectedLinesToolStripMenuItem
+            // 
+            this.setActorForSelectedLinesToolStripMenuItem.Name = "setActorForSelectedLinesToolStripMenuItem";
+            this.setActorForSelectedLinesToolStripMenuItem.Size = new System.Drawing.Size(284, 22);
+            this.setActorForSelectedLinesToolStripMenuItem.Text = "ASS: Set styles for selected lines...";
             // 
             // toolStripMenuItemAssStyles
             // 
@@ -2656,7 +2730,6 @@
             this.audioVisualizer.Margin = new System.Windows.Forms.Padding(0);
             this.audioVisualizer.Name = "audioVisualizer";
             this.audioVisualizer.NewSelectionParagraph = null;
-            this.audioVisualizer.Offset = 0D;
             this.audioVisualizer.ParagraphColor = System.Drawing.Color.LimeGreen;
             this.audioVisualizer.SceneChanges = ((System.Collections.Generic.List<double>)(resources.GetObject("audioVisualizer.SceneChanges")));
             this.audioVisualizer.SelectedColor = System.Drawing.Color.Red;
@@ -3147,6 +3220,15 @@
             this.timeUpDownVideoPosition.Name = "timeUpDownVideoPosition";
             this.timeUpDownVideoPosition.Size = new System.Drawing.Size(96, 25);
             this.timeUpDownVideoPosition.TabIndex = 12;
+            timeCode1.Hours = 99;
+            timeCode1.Milliseconds = 999;
+            timeCode1.Minutes = 59;
+            timeCode1.Seconds = 59;
+            timeCode1.TimeSpan = System.TimeSpan.Parse("4.03:59:59.9990000");
+            timeCode1.TotalMilliseconds = 359999999D;
+            timeCode1.TotalSeconds = 359999.999D;
+            this.timeUpDownVideoPosition.TimeCode = timeCode1;
+            this.timeUpDownVideoPosition.UseVideoOffset = false;
             // 
             // buttonGotoSub
             // 
@@ -3591,6 +3673,8 @@
             this.timeUpDownVideoPositionAdjust.Name = "timeUpDownVideoPositionAdjust";
             this.timeUpDownVideoPositionAdjust.Size = new System.Drawing.Size(96, 25);
             this.timeUpDownVideoPositionAdjust.TabIndex = 13;
+            this.timeUpDownVideoPositionAdjust.TimeCode = timeCode1;
+            this.timeUpDownVideoPositionAdjust.UseVideoOffset = false;
             // 
             // ShowSubtitleTimer
             // 
@@ -3634,10 +3718,12 @@
             this.showOnlyWaveformToolStripMenuItem,
             this.showOnlySpectrogramToolStripMenuItem,
             this.toolStripSeparatorGuessTimeCodes,
+            this.removeSceneChangeToolStripMenuItem,
+            this.addSceneChangeToolStripMenuItem,
             this.guessTimeCodesToolStripMenuItem,
             this.seekSilenceToolStripMenuItem});
             this.contextMenuStripWaveform.Name = "contextMenuStripWaveform";
-            this.contextMenuStripWaveform.Size = new System.Drawing.Size(275, 308);
+            this.contextMenuStripWaveform.Size = new System.Drawing.Size(275, 352);
             this.contextMenuStripWaveform.Closing += new System.Windows.Forms.ToolStripDropDownClosingEventHandler(this.contextMenuStripWaveform_Closing);
             this.contextMenuStripWaveform.Opening += new System.ComponentModel.CancelEventHandler(this.ContextMenuStripWaveformOpening);
             // 
@@ -3732,6 +3818,20 @@
             // 
             this.toolStripSeparatorGuessTimeCodes.Name = "toolStripSeparatorGuessTimeCodes";
             this.toolStripSeparatorGuessTimeCodes.Size = new System.Drawing.Size(271, 6);
+            // 
+            // removeSceneChangeToolStripMenuItem
+            // 
+            this.removeSceneChangeToolStripMenuItem.Name = "removeSceneChangeToolStripMenuItem";
+            this.removeSceneChangeToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
+            this.removeSceneChangeToolStripMenuItem.Text = "Remove scene change";
+            this.removeSceneChangeToolStripMenuItem.Click += new System.EventHandler(this.removeSceneChangeToolStripMenuItem_Click);
+            // 
+            // addSceneChangeToolStripMenuItem
+            // 
+            this.addSceneChangeToolStripMenuItem.Name = "addSceneChangeToolStripMenuItem";
+            this.addSceneChangeToolStripMenuItem.Size = new System.Drawing.Size(274, 22);
+            this.addSceneChangeToolStripMenuItem.Text = "Add scene change";
+            this.addSceneChangeToolStripMenuItem.Click += new System.EventHandler(this.addSceneChangeToolStripMenuItem_Click);
             // 
             // guessTimeCodesToolStripMenuItem
             // 
@@ -3834,14 +3934,15 @@
             // 
             // SubtitleListview1
             // 
+            this.SubtitleListview1.AllowColumnReorder = true;
             this.SubtitleListview1.AllowDrop = true;
             this.SubtitleListview1.ContextMenuStrip = this.contextMenuStripListview;
-            this.SubtitleListview1.DisplayExtraFromExtra = false;
             this.SubtitleListview1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.SubtitleListview1.FirstVisibleIndex = -1;
             this.SubtitleListview1.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SubtitleListview1.FullRowSelect = true;
             this.SubtitleListview1.GridLines = true;
+            this.SubtitleListview1.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.SubtitleListview1.HideSelection = false;
             this.SubtitleListview1.Location = new System.Drawing.Point(0, 0);
             this.SubtitleListview1.Name = "SubtitleListview1";
@@ -4044,7 +4145,9 @@
             this.subscriptToolStripMenuItem});
             this.contextMenuStripTextBoxListView.Name = "contextMenuStripTextBoxListView";
             this.contextMenuStripTextBoxListView.Size = new System.Drawing.Size(243, 402);
+            this.contextMenuStripTextBoxListView.Closed += new System.Windows.Forms.ToolStripDropDownClosedEventHandler(this.MenuClosed);
             this.contextMenuStripTextBoxListView.Opening += new System.ComponentModel.CancelEventHandler(this.ContextMenuStripTextBoxListViewOpening);
+            this.contextMenuStripTextBoxListView.Opened += new System.EventHandler(this.MenuOpened);
             // 
             // toolStripMenuItemWebVttVoice
             // 
@@ -4297,6 +4400,8 @@
             this.timeUpDownStartTime.Name = "timeUpDownStartTime";
             this.timeUpDownStartTime.Size = new System.Drawing.Size(96, 25);
             this.timeUpDownStartTime.TabIndex = 0;
+            this.timeUpDownStartTime.TimeCode = timeCode1;
+            this.timeUpDownStartTime.UseVideoOffset = false;
             // 
             // numericUpDownDuration
             // 
@@ -4411,7 +4516,7 @@
             this.textBoxSource.MaxLength = 0;
             this.textBoxSource.Multiline = true;
             this.textBoxSource.Name = "textBoxSource";
-            this.textBoxSource.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBoxSource.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBoxSource.Size = new System.Drawing.Size(724, 216);
             this.textBoxSource.TabIndex = 12;
             this.textBoxSource.WordWrap = false;
@@ -4420,6 +4525,7 @@
             this.textBoxSource.DragDrop += new System.Windows.Forms.DragEventHandler(this.TextBoxSourceDragDrop);
             this.textBoxSource.DragEnter += new System.Windows.Forms.DragEventHandler(this.TextBoxSourceDragEnter);
             this.textBoxSource.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TextBoxSourceKeyDown);
+            this.textBoxSource.KeyUp += new System.Windows.Forms.KeyEventHandler(this.textBoxSource_KeyUp);
             this.textBoxSource.Leave += new System.EventHandler(this.TextBoxSourceLeave);
             // 
             // panelVideoPlayer
@@ -4442,10 +4548,10 @@
             this.mediaPlayer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(18)))), ((int)(((byte)(18)))), ((int)(((byte)(18)))));
             this.mediaPlayer.CurrentPosition = 0D;
             this.mediaPlayer.FontSizeFactor = 1F;
+            this.mediaPlayer.LastParagraph = null;
             this.mediaPlayer.Location = new System.Drawing.Point(0, 0);
             this.mediaPlayer.Margin = new System.Windows.Forms.Padding(0);
             this.mediaPlayer.Name = "mediaPlayer";
-            this.mediaPlayer.Offset = 0D;
             this.mediaPlayer.ShowFullscreenButton = true;
             this.mediaPlayer.ShowMuteButton = true;
             this.mediaPlayer.ShowStopButton = true;
@@ -4491,12 +4597,11 @@
             this.timerAlternateTextUndo.Interval = 700;
             this.timerAlternateTextUndo.Tick += new System.EventHandler(this.TimerAlternateTextUndoTick);
             // 
-            // toolStripMenuItemExportAyato
+            // toolStripMenuItemSetRegion
             // 
-            this.toolStripMenuItemExportAyato.Name = "toolStripMenuItemExportAyato";
-            this.toolStripMenuItemExportAyato.Size = new System.Drawing.Size(258, 22);
-            this.toolStripMenuItemExportAyato.Text = "Ayato...";
-            this.toolStripMenuItemExportAyato.Click += new System.EventHandler(this.toolStripMenuItemExportAyato_Click);
+            this.toolStripMenuItemSetRegion.Name = "toolStripMenuItemSetRegion";
+            this.toolStripMenuItemSetRegion.Size = new System.Drawing.Size(284, 22);
+            this.toolStripMenuItemSetRegion.Text = "Timed text - set region";
             // 
             // Main
             // 
@@ -4626,7 +4731,7 @@
         private System.Windows.Forms.ToolStripMenuItem adjustDisplayTimeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem fixToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem startNumberingFromToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem removeTextForHearImparedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeTextForHearImpairedToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem splitToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem appendTextVisuallyToolStripMenuItem;
@@ -4994,18 +5099,26 @@
         private System.Windows.Forms.ToolStripMenuItem startOfRighttoleftOverrideRLOToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemRtlUnicodeControlChars;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemImportImages;
-        private System.Windows.Forms.ToolStripButton toolStripButtonFixCommonErrors;
+        private System.Windows.Forms.ToolStripButton toolStripButtonRemoveTextForHi;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemExportDcinemaInterop;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemMergeLinesWithSameTimeCodes;
         private System.Windows.Forms.ToolStripMenuItem checkForUpdatesToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItemSplitterCheckForUpdates;
         private System.Windows.Forms.ToolStripMenuItem setVideoOffsetToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEbuProperties;
-        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdlClipName;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddWaveformBatch;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemExportBdTextSt;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabelProgress;
         private System.Windows.Forms.ToolStripMenuItem uniPacExportToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemExportAyato;
+        private System.Windows.Forms.ToolStripButton toolStripButtonFixCommonErrors;
+        private System.Windows.Forms.ToolStripMenuItem removeSceneChangeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addSceneChangeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem netflixQualityCheckToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton toolStripButtonNetflixQualityCheck;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemEdl;
+        private System.Windows.Forms.ToolStripMenuItem setActorForSelectedLinesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemSetRegion;
     }
 }

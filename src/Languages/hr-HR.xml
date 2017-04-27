@@ -2,8 +2,8 @@
 <Language Name="hrvatski">
   <General>
     <Title>Subtitle Edit</Title>
-    <Version>3.4.10</Version>
-    <TranslatedBy>Prijevod: Jozo Marić</TranslatedBy>
+    <Version>3.5.2</Version>
+    <TranslatedBy>Prijevod: Jozo Marić &amp; diomed</TranslatedBy>
     <CultureName>hr-HR</CultureName>
     <HelpFile />
     <Ok>&amp;OK</Ok>
@@ -21,7 +21,6 @@
     <OpenVideoFileTitle>Otvaranje video datoteke</OpenVideoFileTitle>
     <NoVideoLoaded>Video datoteka nije učitana</NoVideoLoaded>
     <VideoInformation>Podaci o video datoteci</VideoInformation>
-    <PositionX>Pozicija/trajanje: {0}</PositionX>
     <StartTime>Početak</StartTime>
     <EndTime>Kraj</EndTime>
     <Duration>Trajanje</Duration>
@@ -173,7 +172,6 @@ Napomena: Provjeri slobodan prostor prostor na disku.</WaveFileMalformed>
     <PleaseChooseOutputFolder>Odaberi izlaznu mapu</PleaseChooseOutputFolder>
     <NotConverted>Nije uspjelo</NotConverted>
     <Converted>Pretvoreno</Converted>
-    <ConvertedX>Pretvoreno ({0})</ConvertedX>
     <Settings>Postavke</Settings>
     <SplitLongLines>Razdvoji duge linije</SplitLongLines>
     <AutoBalance>Automatska ravnoteža linija</AutoBalance>
@@ -341,7 +339,7 @@ Napomena: Provjeri slobodan prostor prostor na disku.</WaveFileMalformed>
   <DvdSubRipChooseLanguage>
     <Title>Odabir jezika</Title>
     <ChooseLanguageStreamId>Izaberite željeni jezik ispod:</ChooseLanguageStreamId>
-    <UnknownLanguage>Nepoznat Jezik</UnknownLanguage>
+    <UnknownLanguage>Nepoznat jezik</UnknownLanguage>
     <SubtitleImageXofYAndWidthXHeight>Slika podnaslova ({0}/{1} – {2}×{3})</SubtitleImageXofYAndWidthXHeight>
     <SubtitleImage>Slika podnaslova</SubtitleImage>
   </DvdSubRipChooseLanguage>
@@ -624,8 +622,6 @@ Napomena: Provjeri slobodan prostor prostor na disku.</WaveFileMalformed>
     <DescriptionLine1>Provjera pisanja zasnovana je na dodatku NHunspell</DescriptionLine1>
     <DescriptionLine2>koji koristi rječnike iz paketa Open office.</DescriptionLine2>
     <GetDictionariesHere>Preuzmi rječnike ovdje:</GetDictionariesHere>
-    <OpenOpenOfficeWiki>Open office wiki popis rječnika</OpenOpenOfficeWiki>
-    <GetAllDictionaries>Preuzmi sve rječnike</GetAllDictionaries>
     <ChooseLanguageAndClickDownload>Izaberi jezik i klikni na gumb za preuzimanje.</ChooseLanguageAndClickDownload>
     <OpenDictionariesFolder>Otvori mapu sa rječnicima</OpenDictionariesFolder>
     <Download>&amp;Preuzmi</Download>
@@ -716,6 +712,146 @@ Napomena: Provjeri slobodan prostor prostor na disku.</WaveFileMalformed>
     <TotalNumberOfLinesX>Ukupni broj linija: {0:#,###,###}</TotalNumberOfLinesX>
     <Note>Napomena: Datoteke već imaju točne vremenske kodove</Note>
   </JoinSubtitles>
+  <LanguageNames>
+    <aaName>afarski</aaName>
+    <abName>abhaski</abName>
+    <afName>afrikaans</afName>
+    <amName>amharski</amName>
+    <arName>arapski</arName>
+    <asName>asamski</asName>
+    <ayName>aymara</ayName>
+    <azName>azerbajdžanski</azName>
+    <baName>baškirski</baName>
+    <beName>bjeloruski</beName>
+    <bgName>bugarski</bgName>
+    <biName>bislama</biName>
+    <bnName>bengalski</bnName>
+    <boName>tibetanski</boName>
+    <brName>bretonski</brName>
+    <caName>katalonski</caName>
+    <coName>korzički</coName>
+    <csName>češki</csName>
+    <cyName>velški</cyName>
+    <daName>danski</daName>
+    <deName>njemački</deName>
+    <dzName>dzongkha</dzName>
+    <elName>grčki</elName>
+    <enName>engleski</enName>
+    <eoName>esperanto</eoName>
+    <esName>španjolski</esName>
+    <etName>estonski</etName>
+    <euName>baskijski</euName>
+    <faName>perzijski</faName>
+    <fiName>finski</fiName>
+    <fjName>fidžijski</fjName>
+    <foName>ferojski</foName>
+    <frName>francuski</frName>
+    <fyName>zapadnofrizijski</fyName>
+    <gaName>irski</gaName>
+    <gdName>škotski-galski</gdName>
+    <glName>galicijski</glName>
+    <gnName>guarani</gnName>
+    <guName>gudžaratski</guName>
+    <haName>hausa</haName>
+    <heName>hebrejski</heName>
+    <hiName>hindski</hiName>
+    <hrName>hrvatski</hrName>
+    <huName>mađarski</huName>
+    <hyName>armenski</hyName>
+    <iaName>interlingua</iaName>
+    <idName>indonezijski</idName>
+    <ieName>interligua</ieName>
+    <ikName>inupiaq</ikName>
+    <isName>islandski</isName>
+    <itName>talijanski</itName>
+    <iuName>inuktitut</iuName>
+    <jaName>japanski</jaName>
+    <jvName>javanski</jvName>
+    <kaName>gruzijski</kaName>
+    <kkName>kazaški</kkName>
+    <klName>kalaallisut</klName>
+    <kmName>kmerski</kmName>
+    <knName>kannadski</knName>
+    <koName>korejski</koName>
+    <ksName>kašmirski</ksName>
+    <kuName>kurdski</kuName>
+    <kyName>kirgiški</kyName>
+    <laName>latinski</laName>
+    <lbName>luksemburški</lbName>
+    <lnName>lingala</lnName>
+    <loName>laoski</loName>
+    <ltName>litavski</ltName>
+    <lvName>latvijski</lvName>
+    <mgName>malgaški</mgName>
+    <miName>maorski</miName>
+    <mkName>makedonski</mkName>
+    <mlName>malajalamski</mlName>
+    <mnName>mongolski</mnName>
+    <mrName>marathski</mrName>
+    <msName>malajski</msName>
+    <mtName>malteški</mtName>
+    <myName>burmanski</myName>
+    <naName>nauru</naName>
+    <neName>nepalski</neName>
+    <nlName>nizozemski</nlName>
+    <noName>norveški</noName>
+    <ocName>okcitanski</ocName>
+    <omName>oromski</omName>
+    <orName>orijski</orName>
+    <paName>pandžapski</paName>
+    <plName>poljski</plName>
+    <psName>paštu</psName>
+    <ptName>portugalski</ptName>
+    <quName>kečua</quName>
+    <rmName>romanš</rmName>
+    <rnName>rundi</rnName>
+    <roName>rumunjski</roName>
+    <ruName>ruski</ruName>
+    <rwName>kinyarwanda</rwName>
+    <saName>sanskrtski</saName>
+    <sdName>sindhi</sdName>
+    <sgName>sango</sgName>
+    <shName>srpsko-hrvatski</shName>
+    <siName>sinhaleški</siName>
+    <skName>slovački</skName>
+    <slName>slovenski</slName>
+    <smName>samoanski</smName>
+    <snName>shona</snName>
+    <soName>somalski</soName>
+    <sqName>albanski</sqName>
+    <srName>srpski</srName>
+    <ssName>svati</ssName>
+    <stName>sesotski</stName>
+    <suName>sundanski</suName>
+    <svName>švedski</svName>
+    <swName>svahili</swName>
+    <taName>tamilski</taName>
+    <teName>telugu</teName>
+    <tgName>tadžički</tgName>
+    <thName>tajlandski</thName>
+    <tiName>tigrinja</tiName>
+    <tkName>turkmenski</tkName>
+    <tlName>tagalog</tlName>
+    <tnName>cvana</tnName>
+    <toName>tonganski</toName>
+    <trName>turski</trName>
+    <tsName>tsonga</tsName>
+    <ttName>tatarski</ttName>
+    <twName>twi</twName>
+    <ugName>ujgurski</ugName>
+    <ukName>ukrajinski</ukName>
+    <urName>urdski</urName>
+    <uzName>uzbečki</uzName>
+    <viName>vijetnamski</viName>
+    <voName>volapük</voName>
+    <woName>wolof</woName>
+    <xhName>xhosa</xhName>
+    <yiName>jidiš</yiName>
+    <yoName>joruba</yoName>
+    <zaName>zhuang</zaName>
+    <zhName>kineski</zhName>
+    <zuName>zulu</zuName>
+  </LanguageNames>
   <Main>
     <Menu>
       <File>
@@ -1029,7 +1165,6 @@ Napomena: Provjeri slobodan prostor prostor na disku.</WaveFileMalformed>
     <BeforeVisualSync>Izvršeno vizualno usklađivanje</BeforeVisualSync>
     <VisualSyncPerformedOnSelectedLines>Izvršeno je vizualno usklađivanje na odabranim linijama</VisualSyncPerformedOnSelectedLines>
     <VisualSyncPerformed>Vizualno usklađivanje je izvršeno.</VisualSyncPerformed>
-    <ImportThisVobSubSubtitle>Uvezi ovaj Vobsub podnaslov?</ImportThisVobSubSubtitle>
     <FileXIsLargerThan10MB>Datoteka je veća od 10 MB: {0}</FileXIsLargerThan10MB>
     <ContinueAnyway>Ipak nastaviti?</ContinueAnyway>
     <BeforeLoadOf>Prije učitavanja {0}</BeforeLoadOf>
@@ -1064,8 +1199,8 @@ Datoteka samo za čitanje!</FileXIsReadOnly>
 Želiš li početi od vrha dokumenta i nastaviti pretraživanje i zamjenu?</ReplaceXContinue>
     <ReplaceContinueTitle>Nastavi 'Zamijeni'?</ReplaceContinueTitle>
     <SearchingForXFromLineY>Potraži za '{0}' s linije broj {1}...</SearchingForXFromLineY>
-    <XFoundAtLineNumberY>{0} su pronađene na liniji broj {1}.</XFoundAtLineNumberY>
-    <XNotFound>{0} nisu pronađene.</XNotFound>
+    <XFoundAtLineNumberY>{0} je pronađeno na liniji broj {1}.</XFoundAtLineNumberY>
+    <XNotFound>{0} nije pronađeno.</XNotFound>
     <BeforeReplace>Zamijenjeno sa: {0}</BeforeReplace>
     <MatchFoundX>Preklapanja: {0}</MatchFoundX>
     <NoMatchFoundX>Nema preklapanja: {0}</NoMatchFoundX>
@@ -1348,7 +1483,7 @@ koji bi trebao biti usklađen s video datotekom.
     <CaseSensitive>&amp;Podudaranje</CaseSensitive>
     <RegularExpression>&amp;Normalan izraz</RegularExpression>
     <LinesFoundX>Pronađeno linija: {0}</LinesFoundX>
-    <Delete>Obriši</Delete>
+    <Remove>Obriši</Remove>
     <Add>&amp;Dodaj</Add>
     <Update>&amp;Ažuriraj</Update>
     <Enabled>Omogućeno</Enabled>
@@ -1552,12 +1687,8 @@ određeni podnaslov s drugim ljudima.</Information>
     <VideoEngine>Dobavljač slike</VideoEngine>
     <DirectShow>DirectShow</DirectShow>
     <DirectShowDescription>quartz.dll u mapi „System32“</DirectShowDescription>
-    <ManagedDirectX>Managed DirectX</ManagedDirectX>
-    <ManagedDirectXDescription>Microsoft.DirectX.AudioVideoPlayback — .NET Managed code from DirectX</ManagedDirectXDescription>
     <MpcHc>MPC-HC</MpcHc>
     <MpcHcDescription>Media Player Classic - Home Cinema</MpcHcDescription>
-    <MPlayer>MPlayer</MPlayer>
-    <MPlayerDescription>MPlayer 2/MPlayer</MPlayerDescription>
     <VlcMediaPlayer>VLC media player</VlcMediaPlayer>
     <VlcMediaPlayerDescription>libvlc.dll iz VLC media player-a 1.1.0 ili novijeg izdanja</VlcMediaPlayerDescription>
     <VlcBrowseToLabel>VLC putanja (potrebno samo ako se koristi prijenosna verzija VLC)</VlcBrowseToLabel>
@@ -1593,7 +1724,6 @@ određeni podnaslov s drugim ljudima.</Information>
     <WaveformBrowseToFFmpeg>Potraži FFmpeg</WaveformBrowseToFFmpeg>
     <WaveformBrowseToVLC>Potraži prijenosni VLC</WaveformBrowseToVLC>
     <SubStationAlphaStyle>SSA stil</SubStationAlphaStyle>
-    <ChooseFont>Izaberi font…</ChooseFont>
     <ChooseColor>Izaberi boju…</ChooseColor>
     <SsaOutline>Obris</SsaOutline>
     <SsaShadow>Sjena</SsaShadow>
@@ -1641,7 +1771,6 @@ određeni podnaslov s drugim ljudima.</Information>
     <Key>Tipka:</Key>
     <TextBox>Polje za tekst</TextBox>
     <UpdateShortcut>Ažuriraj prečac</UpdateShortcut>
-    <ShortcutIsNotValid>Prečac nije ispravan: {0}</ShortcutIsNotValid>
     <ToggleDockUndockOfVideoControls>Zakači/otkači video kontrole</ToggleDockUndockOfVideoControls>
     <CreateSetEndAddNewAndGoToNew>Postavi kraj, dodaj novi i idi na novi</CreateSetEndAddNewAndGoToNew>
     <AdjustViaEndAutoStartAndGoToNext>Prilagodi preko završnog položaja i prijeđi na sljedeći</AdjustViaEndAutoStartAndGoToNext>

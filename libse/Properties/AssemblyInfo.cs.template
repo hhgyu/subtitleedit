@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("libse")]
@@ -6,9 +7,11 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Nikse")]
 [assembly: AssemblyProduct("libse")]
-[assembly: AssemblyCopyright("Copyright 2001-2015, Nikse")]
+[assembly: AssemblyCopyright("Copyright 2001-2017, Nikse")]
 [assembly: AssemblyTrademark("Licensed under the GPL v3")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
 [assembly: Guid("eab3b9db-0f82-4843-982b-05a4c51888a2")]
-[assembly: AssemblyVersion("3.4.10.[REVNO]")]
+[assembly: AssemblyVersion("3.5.2.[REVNO]")]
+
+[assembly: InternalsVisibleTo("Test")]

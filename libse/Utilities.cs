@@ -23,16 +23,13 @@ namespace Nikse.SubtitleEdit.Core
         /// <summary>
         /// Cached environment new line characters for faster lookup.
         /// </summary>
-        public static readonly char[] NewLineChars = Environment.NewLine.ToCharArray();
+        public static readonly char[] NewLineChars = { '\r', '\n' };
 
         public static VideoInfo TryReadVideoInfoViaMatroskaHeader(string fileName)
         {
             var info = new VideoInfo { Success = false };
-
-            MatroskaFile matroska = null;
-            try
+            using (var matroska = new MatroskaFile(fileName))
             {
-                matroska = new MatroskaFile(fileName);
                 if (matroska.IsValid)
                 {
                     double frameRate;
@@ -52,18 +49,6 @@ namespace Nikse.SubtitleEdit.Core
                     info.VideoCodec = videoCodec;
                 }
             }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                if (matroska != null)
-                {
-                    matroska.Dispose();
-                }
-            }
-
             return info;
         }
 
@@ -120,17 +105,16 @@ namespace Nikse.SubtitleEdit.Core
             return info;
         }
 
-        public static List<string> GetMovieFileExtensions()
-        {
-            return new List<string> { ".avi", ".mkv", ".wmv", ".mpg", ".mpeg", ".divx", ".mp4", ".asf", ".flv", ".mov", ".m4v", ".vob", ".ogv", ".webm", ".ts", ".m2ts", ".avs", ".mxf" };
-        }
+        // TODO: Change to IReadonlyList in .net >= 4.5
+        public static ICollection<string> VideoFileExtensions { get; } = new List<string>
+        { ".avi", ".mkv", ".wmv", ".mpg", ".mpeg", ".divx", ".mp4", ".asf", ".flv",".mov", ".m4v", ".vob", ".ogv", ".webm", ".ts", ".m2ts", ".avs", ".mxf" };
 
         public static string GetVideoFileFilter(bool includeAudioFiles)
         {
             var sb = new StringBuilder();
             sb.Append(Configuration.Settings.Language.General.VideoFiles + "|");
             int i = 0;
-            foreach (string extension in GetMovieFileExtensions())
+            foreach (string extension in VideoFileExtensions)
             {
                 if (i > 0)
                     sb.Append(';');
@@ -176,8 +160,6 @@ namespace Nikse.SubtitleEdit.Core
                 return string.Format("{0:0.0} mb", (float)fileSize / (1024 * 1024));
             return string.Format("{0:0.0} gb", (float)fileSize / (1024 * 1024 * 1024));
         }
-
-
 
         /// <summary>
         /// Downloads the requested resource as a <see cref="String"/> using the configured <see cref="WebProxy"/>.
@@ -248,7 +230,7 @@ namespace Nikse.SubtitleEdit.Core
 
         private static bool CanBreak(string s, int index, string language)
         {
-            char nextChar = ' ';
+            char nextChar;
             if (index >= 0 && index < s.Length)
                 nextChar = s[index];
             else
@@ -430,30 +412,14 @@ namespace Nikse.SubtitleEdit.Core
                 if (noTagLines.Length == 2)
                 {
                     var arr0 = noTagLines[0].Trim().TrimEnd('"', '\'').TrimEnd();
-                    if (arr0.StartsWith('-') && noTagLines[1].TrimStart().StartsWith('-') && arr0.Length > 1 && ".?!)]".Contains(arr0[arr0.Length - 1]) || arr0.EndsWith("--", StringComparison.Ordinal) || arr0.EndsWith('–'))
+                    if (arr0.StartsWith('-') && noTagLines[1].TrimStart().StartsWith('-') && arr0.Length > 1 && (".?!)]".Contains(arr0[arr0.Length - 1]) || arr0.EndsWith("--", StringComparison.Ordinal) || arr0.EndsWith('–')))
                         return text;
                 }
             }
 
             string s = RemoveLineBreaks(text);
-            string noTagText = HtmlUtil.RemoveHtmlTags(s, true);
-
-            if (noTagText.Length < mergeLinesShorterThan)
+            if (HtmlUtil.RemoveHtmlTags(s, true).Length < mergeLinesShorterThan)
             {
-                var noTagLines = noTagText.SplitToLines();
-                if (noTagLines.Length > 1)
-                {
-                    bool isDialog = true;
-                    foreach (string line in noTagLines)
-                    {
-                        var noTagLine = line.TrimStart();
-                        isDialog = isDialog && (noTagLine.StartsWith('-') || noTagLine.StartsWith('—'));
-                    }
-                    if (isDialog)
-                    {
-                        return text;
-                    }
-                }
                 return s;
             }
 
@@ -463,14 +429,20 @@ namespace Nikse.SubtitleEdit.Core
             while (six < s.Length)
             {
                 var letter = s[six];
-                var tagFound = letter == '<' && (s.Substring(six).StartsWith("<font", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("</font", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("<u", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("</u", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("<b", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("</b", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("<i", StringComparison.OrdinalIgnoreCase)
-                                                 || s.Substring(six).StartsWith("</i", StringComparison.OrdinalIgnoreCase));
+                bool tagFound = false;
+                if (letter == '<')
+                {
+                    string tagString = s.Substring(six);
+                    tagFound = tagString.StartsWith("<font", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("</font", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("<u", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("</u", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("<b", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("</b", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("<i", StringComparison.OrdinalIgnoreCase)
+                               || tagString.StartsWith("</i", StringComparison.OrdinalIgnoreCase);
+                }
+
                 int endIndex = -1;
                 if (tagFound)
                     endIndex = s.IndexOf('>', six + 1);
@@ -519,10 +491,19 @@ namespace Nikse.SubtitleEdit.Core
                             string rest = s.Substring(mid - j + 1).TrimStart();
                             if (rest.Length > 0 && char.IsUpper(rest[0]))
                             {
-                                if (mid - j > 5 && s[mid - j - 1] == ' ' && @"!?.".Contains(s[mid - j - 2]))
+                                if (mid - j > 5 && s[mid - j - 1] == ' ')
                                 {
-                                    splitPos = mid - j;
-                                    break;
+                                    if ("!?.".Contains(s[mid - j - 2]))
+                                    {
+                                        splitPos = mid - j;
+                                        break;
+                                    }
+                                    var first = s.Substring(0, mid - j - 1);
+                                    if (first.EndsWith(".\"", StringComparison.Ordinal) || first.EndsWith("!\"", StringComparison.Ordinal) || first.EndsWith("?\"", StringComparison.Ordinal))
+                                    {
+                                        splitPos = mid - j;
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -619,7 +600,7 @@ namespace Nikse.SubtitleEdit.Core
                 s = s.Substring(0, splitPos) + Environment.NewLine + s.Substring(splitPos);
 
             s = ReInsertHtmlTags(s, htmlTags);
-            var idx = s.IndexOf(Environment.NewLine + "</");
+            var idx = s.IndexOf(Environment.NewLine + "</", StringComparison.Ordinal);
             if (idx > 2)
             {
                 var endIdx = s.IndexOf('>', idx + 2);
@@ -687,10 +668,11 @@ namespace Nikse.SubtitleEdit.Core
 
         public static string UnbreakLine(string text)
         {
-            if (!text.Contains(Environment.NewLine))
+            var lines = text.SplitToLines();
+            if (lines.Length == 1)
                 return text;
 
-            var singleLine = text.Replace(Environment.NewLine, " ");
+            var singleLine = string.Join(" ", lines);
             while (singleLine.Contains("  "))
                 singleLine = singleLine.Replace("  ", " ");
 
@@ -713,19 +695,10 @@ namespace Nikse.SubtitleEdit.Core
             int k = s.IndexOf('{');
             while (k >= 0)
             {
-                int l = s.IndexOf('}', k);
-                if (l > k)
-                {
-                    s = s.Remove(k, l - k + 1);
-                    if (s.Length > 1 && s.Length > k)
-                        k = s.IndexOf('{', k);
-                    else
-                        break;
-                }
-                else
-                {
-                    break;
-                }
+                int l = s.IndexOf('}', k + 1);
+                if (l < k) break;
+                s = s.Remove(k, l - k + 1);
+                k = s.IndexOf('{', k);
             }
             return s;
         }
@@ -734,7 +707,7 @@ namespace Nikse.SubtitleEdit.Core
         {
             get
             {
-                return Configuration.DictionariesFolder;
+                return Configuration.DictionariesDirectory;
             }
         }
 
@@ -811,6 +784,8 @@ namespace Nikse.SubtitleEdit.Core
             const string zeroWidthNoBreakSpace = "\uFEFF";
 
             string s = HtmlUtil.RemoveHtmlTags(paragraph.Text, true).Replace(Environment.NewLine, string.Empty).Replace(zeroWidthSpace, string.Empty).Replace(zeroWidthNoBreakSpace, string.Empty);
+            if (Configuration.Settings.General.CharactersPerSecondsIgnoreWhiteSpace)
+                s = s.Replace(" ", string.Empty);
             return s.Length / paragraph.Duration.TotalSeconds;
         }
 
@@ -851,62 +826,6 @@ namespace Nikse.SubtitleEdit.Core
                 return null;
             }
         }
-
-        private static void AddExtension(StringBuilder sb, string extension)
-        {
-            if (!sb.ToString().Contains("*" + extension + ";", StringComparison.OrdinalIgnoreCase))
-            {
-                sb.Append('*');
-                sb.Append(extension.TrimStart('*'));
-                sb.Append(';');
-            }
-        }
-
-        public static string GetOpenDialogFilter()
-        {
-            var sb = new StringBuilder();
-            sb.Append(Configuration.Settings.Language.General.SubtitleFiles + "|");
-            foreach (SubtitleFormat s in SubtitleFormat.AllSubtitleFormats)
-            {
-                AddExtension(sb, s.Extension);
-                foreach (string ext in s.AlternateExtensions)
-                    AddExtension(sb, ext);
-            }
-            AddExtension(sb, new Pac().Extension);
-            AddExtension(sb, new Cavena890().Extension);
-            AddExtension(sb, new Spt().Extension);
-            AddExtension(sb, new Wsb().Extension);
-            AddExtension(sb, new CheetahCaption().Extension);
-            AddExtension(sb, ".chk");
-            AddExtension(sb, new CaptionsInc().Extension);
-            AddExtension(sb, new Ultech130().Extension);
-            AddExtension(sb, new ELRStudioClosedCaption().Extension);
-            AddExtension(sb, ".uld"); // Ultech drop frame
-            AddExtension(sb, new SonicScenaristBitmaps().Extension);
-            AddExtension(sb, ".mks");
-            AddExtension(sb, ".mxf");
-            AddExtension(sb, ".sup");
-            AddExtension(sb, ".dost");
-            AddExtension(sb, new Ayato().Extension);
-            AddExtension(sb, new PacUnicode().Extension);
-
-            if (!string.IsNullOrEmpty(Configuration.Settings.General.OpenSubtitleExtraExtensions))
-            {
-                var extraExtensions = Configuration.Settings.General.OpenSubtitleExtraExtensions.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string ext in extraExtensions)
-                {
-                    if (ext.StartsWith("*.", StringComparison.Ordinal) && !sb.ToString().Contains(ext, StringComparison.OrdinalIgnoreCase))
-                        AddExtension(sb, ext);
-                }
-            }
-            AddExtension(sb, ".son");
-
-            sb.Append('|');
-            sb.Append(Configuration.Settings.Language.General.AllFiles);
-            sb.Append("|*.*");
-            return sb.ToString();
-        }
-
 
         public static bool IsValidRegex(string testPattern)
         {
@@ -1046,27 +965,11 @@ namespace Nikse.SubtitleEdit.Core
             return userWordListXmlFileName;
         }
 
-        public static readonly string UppercaseLetters = GetLetters(true, false, false);
-        public static readonly string LowercaseLetters = GetLetters(false, true, false);
-        public static readonly string LowercaseLettersWithNumbers = GetLetters(false, true, true);
-        public static readonly string AllLetters = GetLetters(true, true, false);
-        public static readonly string AllLettersAndNumbers = GetLetters(true, true, true);
-
-        private static string GetLetters(bool uppercase, bool lowercase, bool numbers)
-        {
-            var sb = new StringBuilder();
-
-            if (uppercase)
-                sb.Append(Configuration.Settings.General.UppercaseLetters.ToUpper());
-
-            if (lowercase)
-                sb.Append(Configuration.Settings.General.UppercaseLetters.ToLower());
-
-            if (numbers)
-                sb.Append("0123456789");
-
-            return sb.ToString();
-        }
+        public static readonly string UppercaseLetters = Configuration.Settings.General.UppercaseLetters.ToUpper();
+        public static readonly string LowercaseLetters = Configuration.Settings.General.UppercaseLetters.ToLower();
+        public static readonly string LowercaseLettersWithNumbers = LowercaseLetters + "0123456789";
+        public static readonly string AllLetters = UppercaseLetters + LowercaseLetters;
+        public static readonly string AllLettersAndNumbers = UppercaseLetters + LowercaseLettersWithNumbers;
 
         public static Color GetColorFromUserName(string userName)
         {
@@ -1207,7 +1110,7 @@ namespace Nikse.SubtitleEdit.Core
 
             foreach (Paragraph p in originalParagraphs)
             {
-                if (p.StartTime.TotalMilliseconds == paragraph.StartTime.TotalMilliseconds)
+                if (Math.Abs(p.StartTime.TotalMilliseconds - paragraph.StartTime.TotalMilliseconds) < 0.01)
                     return p;
             }
 
@@ -1237,6 +1140,119 @@ namespace Nikse.SubtitleEdit.Core
             // plus literals are encoded as %2b normally so this should be safe
             text = text.Replace('+', ' ');
             return Uri.UnescapeDataString(text);
+        }
+
+        private static readonly Regex TwoOrMoreDigitsNumber = new Regex(@"\d\d+", RegexOptions.Compiled);
+
+        public static string ReverseStartAndEndingForRightToLeft(string s)
+        {
+            var newLines = new StringBuilder();
+            var pre = new StringBuilder();
+            var post = new StringBuilder();
+            bool startsWithAssTag = false;
+            string assTag = string.Empty;
+            if (s.StartsWith("{\\", StringComparison.Ordinal) && s.IndexOf('}') < 22)
+            {
+                startsWithAssTag = true;
+                int end = s.IndexOf('}') + 1;
+                assTag = s.Substring(0, end);
+                s = s.Remove(0, end);
+            }
+            var lines = s.SplitToLines();
+            foreach (var line in lines)
+            {
+                string s2 = line;
+
+                bool startsWithItalic = false;
+                if (s2.StartsWith("<i>", StringComparison.Ordinal))
+                {
+                    startsWithItalic = true;
+                    s2 = s2.Remove(0, 3);
+                }
+                bool endsWithItalic = false;
+                if (s2.EndsWith("</i>", StringComparison.Ordinal))
+                {
+                    endsWithItalic = true;
+                    s2 = s2.Remove(s2.Length - 4, 4);
+                }
+
+                pre.Clear();
+                post.Clear();
+                int i = 0;
+                while (i < s2.Length && !char.IsLetterOrDigit(s2[i]) && s2[i] != '{')
+                {
+                    pre.Append(s2[i]);
+                    i++;
+                }
+                int j = s2.Length - 1;
+                while (j > i && !char.IsLetterOrDigit(s2[j]) && s2[j] != '}')
+                {
+                    post.Append(s2[j]);
+                    j--;
+                }
+                if (startsWithAssTag)
+                    newLines.Append(assTag);
+                if (startsWithItalic)
+                    newLines.Append("<i>");
+                newLines.Append(ReverseParenthesis(post.ToString()));
+                newLines.Append(s2.Substring(pre.Length, s2.Length - (pre.Length + post.Length)));
+                newLines.Append(ReverseParenthesis(ReverseString(pre.ToString())));
+                if (endsWithItalic)
+                    newLines.Append("</i>");
+                newLines.AppendLine();
+            }
+            return newLines.ToString().Trim();
+        }
+
+        public static string ReverseNumbers(string s)
+        {
+            return TwoOrMoreDigitsNumber.Replace(s, m => ReverseString(m.Value));
+        }
+
+        private static string ReverseString(string s)
+        {
+            int len = s.Length;
+            if (len <= 1)
+            {
+                return s;
+            }
+            var chars = new char[len];
+            for (int i = 0; i < len; i++)
+            {
+                chars[i] = s[len - i - 1];
+            }
+            return new string(chars);
+        }
+
+        private static string ReverseParenthesis(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+            int len = s.Length;
+            var chars = new char[len];
+            for (int i = 0; i < len; i++)
+            {
+                char ch = s[i];
+                switch (ch)
+                {
+                    case '(':
+                        ch = ')';
+                        break;
+                    case ')':
+                        ch = '(';
+                        break;
+                    case '[':
+                        ch = ']';
+                        break;
+                    case ']':
+                        ch = '[';
+                        break;
+                }
+                chars[i] = ch;
+            }
+            return new string(chars);
         }
 
         public static string FixEnglishTextInRightToLeftLanguage(string text, string reverseChars)
@@ -1553,19 +1569,13 @@ namespace Nikse.SubtitleEdit.Core
                 int i = 0;
                 while (i < s.Length)
                 {
-                    if (ignoreLineBreaks && s.Substring(i).StartsWith(Environment.NewLine, StringComparison.Ordinal))
+                    if (s.Substring(i).StartsWith(Environment.NewLine, StringComparison.Ordinal))
                     {
                         if (word.Length > 0)
                             list.Add(word.ToString());
                         word.Clear();
-                        i += Environment.NewLine.Length;
-                    }
-                    else if (s.Substring(i).StartsWith(Environment.NewLine, StringComparison.Ordinal))
-                    {
-                        if (word.Length > 0)
-                            list.Add(word.ToString());
-                        word.Clear();
-                        list.Add(Environment.NewLine);
+                        if (!ignoreLineBreaks)
+                            list.Add(Environment.NewLine);
                         i += Environment.NewLine.Length;
                     }
                     else if (s[i] == ' ')
@@ -1614,7 +1624,8 @@ namespace Nikse.SubtitleEdit.Core
             int i2 = 0;
             int i = 0;
             int c = 0;
-            while (i < Math.Max(parts1.Length, parts2.Length) && i1 < parts1.Length && i2 < parts2.Length)
+            var max = Math.Max(parts1.Length, parts2.Length);
+            while (i < max && i1 < parts1.Length && i2 < parts2.Length)
             {
                 if (parts1[i1] == parts2[i2])
                 {
@@ -1700,19 +1711,37 @@ namespace Nikse.SubtitleEdit.Core
         /// <returns>text with unneeded spaces removed</returns>
         public static string RemoveUnneededSpaces(string text, string language)
         {
-            const string zeroWidthSpace = "\u200B";
-            const string zeroWidthNoBreakSpace = "\uFEFF";
-            const string noBreakSpace = "\u00A0";
-            const string operatingSystemCommand = "\u009D";
+            const char zeroWidthSpace = '\u200B';
+            const char zeroWidthNoBreakSpace = '\uFEFF';
+            const char noBreakSpace = '\u00A0';
+            const char operatingSystemCommand = '\u009D';
 
             text = text.Trim();
-
-            text = text.Replace(zeroWidthSpace, string.Empty);
-            text = text.Replace(zeroWidthNoBreakSpace, string.Empty);
-            text = text.Replace(noBreakSpace, " ");
-            text = text.Replace(operatingSystemCommand, string.Empty);
-            text = text.Replace('\t', ' ');
-
+            int len = text.Length;
+            int count = 0;
+            char[] textChars = new char[len];
+            for (int i = 0; i < len; i++)
+            {
+                char ch = text[i];
+                switch (ch)
+                {
+                    // Ignore: \u200B, \uFEFF and \u009D.
+                    case zeroWidthSpace:
+                    case zeroWidthNoBreakSpace:
+                    case operatingSystemCommand:
+                        break;
+                    // Replace: \t or \u00A0 with white-space.
+                    case '\t':
+                    case noBreakSpace:
+                        textChars[count++] = ' ';
+                        break;
+                    default:
+                        textChars[count++] = ch;
+                        break;
+                }
+            }
+            // Construct new string from textChars.
+            text = new string(textChars, 0, count);
             text = text.FixExtraSpaces();
 
             if (text.EndsWith(' '))
@@ -1838,17 +1867,15 @@ namespace Nikse.SubtitleEdit.Core
                     {
                         string before = string.Empty;
                         int k = idx - 1;
-                        while (k >= 0 && AllLettersAndNumbers.Contains(text[k]))
+                        while (k >= 0 && char.IsLetterOrDigit(text[k]))
                         {
-                            before = text[k] + before;
-                            k--;
+                            before = text[k--] + before;
                         }
                         string after = string.Empty;
                         k = idx + 2;
-                        while (k < text.Length && AllLetters.Contains(text[k]))
+                        while (k < text.Length && char.IsLetter(text[k]))
                         {
-                            after = after + text[k];
-                            k++;
+                            after = after + text[k++];
                         }
                         if (after.Length > 0 && after.Equals(before, StringComparison.OrdinalIgnoreCase))
                             text = text.Remove(idx + 1, 1);
@@ -1885,7 +1912,7 @@ namespace Nikse.SubtitleEdit.Core
                 int idxp = text.IndexOf('"');
 
                 //"Foo " bar.
-                if ((idxp >= 0 && idxp < idx) && AllLettersAndNumbers.Contains(text[idx - 1]) && !" \r\n".Contains(text[idxp + 1]))
+                if ((idxp >= 0 && idxp < idx) && char.IsLetterOrDigit(text[idx - 1]) && !" \r\n".Contains(text[idxp + 1]))
                 {
                     text = text.Remove(idx, 1);
                 }
@@ -1895,7 +1922,7 @@ namespace Nikse.SubtitleEdit.Core
                 idxp = text.IndexOf('"');
                 if (idxp >= 0 && idx > idxp)
                 {
-                    if (text[idxp + 1] == ' ' && AllLettersAndNumbers.Contains(text[idxp + 2]))
+                    if (text[idxp + 1] == ' ' && char.IsLetterOrDigit(text[idxp + 2]))
                     {
                         text = text.Remove(idxp + 1, 1);
                         idx--;
@@ -1996,7 +2023,7 @@ namespace Nikse.SubtitleEdit.Core
         public static SubtitleFormat LoadMatroskaTextSubtitle(MatroskaTrackInfo matroskaSubtitleInfo, MatroskaFile matroska, List<MatroskaSubtitle> sub, Subtitle subtitle)
         {
             if (subtitle == null)
-                throw new ArgumentNullException("subtitle");
+                throw new ArgumentNullException(nameof(subtitle));
             subtitle.Paragraphs.Clear();
 
             var isSsa = false;
@@ -2084,6 +2111,7 @@ namespace Nikse.SubtitleEdit.Core
             if (!string.IsNullOrEmpty(matroskaSubtitleInfo.CodecPrivate))
             {
                 bool footerOn = false;
+                char[] splitChars = { ':', '.' };
                 foreach (string line in lines)
                 {
                     if (footerOn)
@@ -2105,7 +2133,7 @@ namespace Nikse.SubtitleEdit.Core
                         var arr = line.Split(',');
                         if (arr.Length > 3)
                         {
-                            arr = arr[1].Split(new[] { ':', '.' });
+                            arr = arr[1].Split(splitChars);
                             if (arr.Length == 4)
                             {
                                 int hour;
@@ -2115,7 +2143,7 @@ namespace Nikse.SubtitleEdit.Core
                                 if (int.TryParse(arr[0], out hour) && int.TryParse(arr[1], out min) &&
                                     int.TryParse(arr[2], out sec) && int.TryParse(arr[3], out ms))
                                 {
-                                    comments.Paragraphs.Add(new Paragraph(new TimeCode(hour, min, sec, ms * 10), new TimeCode(0, 0, 0, 0), line));
+                                    comments.Paragraphs.Add(new Paragraph(new TimeCode(hour, min, sec, ms * 10), new TimeCode(), line));
                                 }
                             }
                         }

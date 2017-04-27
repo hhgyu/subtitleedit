@@ -34,7 +34,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             string xmlStructure =
                 "<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + Environment.NewLine +
                 "<tmx version=\"1.4\">" + Environment.NewLine +
-                "  <header creationtool=\"Subtitle Edit\" creationtoolversion=\"3.3\" datatype=\"html\" segtype=\"sentence\" adminlang=\"en-us\" srclang=\"EN\" o-encoding=\"utf-8\">" + Environment.NewLine +
+                "  <header creationtool=\"Subtitle Edit\" creationtoolversion=\"3.4\" datatype=\"html\" segtype=\"sentence\" adminlang=\"en-us\" srclang=\"EN\" o-encoding=\"utf-8\">" + Environment.NewLine +
                 "    <note>This is a subtitle</note>" + Environment.NewLine +
                 "  </header>" + Environment.NewLine +
                 "  <body />" + Environment.NewLine +
@@ -73,8 +73,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 string innerXml = paragraphInnerXml;
                 innerXml = innerXml.Replace("[START]", p.StartTime.ToString());
                 innerXml = innerXml.Replace("[END]", p.EndTime.ToString());
-                innerXml = innerXml.Replace("[TEXT]", p.Text.Replace(Environment.NewLine, "<br />"));
                 paragraph.InnerXml = innerXml;
+
+                XmlNode textNode = paragraph.SelectSingleNode("tuv/seg");
+                textNode.InnerText = HtmlUtil.RemoveHtmlTags(p.Text, true);
+                textNode.InnerXml = textNode.InnerXml.Replace(Environment.NewLine, "<br />");
 
                 body.AppendChild(paragraph);
                 count++;
@@ -137,7 +140,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static TimeCode DecodeTimeCode(XmlNode node)
         {
-            var tc = new TimeCode(0, 0, 0, 0);
+            var tc = new TimeCode();
             if (node != null)
             {
                 string[] arr = node.InnerText.Split(new[] { ':', '.', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);

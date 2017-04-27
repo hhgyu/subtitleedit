@@ -1,9 +1,9 @@
 ﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
 using System;
 using System.IO;
 using System.Text;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -40,13 +40,6 @@ namespace Nikse.SubtitleEdit.Forms
                 file.Position = 0;
                 _fileBuffer = new byte[length];
                 file.Read(_fileBuffer, 0, length);
-
-                for (int i = 0; i < length; i++)
-                {
-                    if (_fileBuffer[i] == 0)
-                        _fileBuffer[i] = 32;
-                }
-
                 file.Close();
             }
             catch
@@ -54,12 +47,12 @@ namespace Nikse.SubtitleEdit.Forms
                 _fileBuffer = new byte[0];
             }
 
-            Encoding encoding = LanguageAutoDetect.DetectAnsiEncoding(_fileBuffer);
-            foreach (EncodingInfo ei in Encoding.GetEncodings())
+            var encoding = LanguageAutoDetect.DetectAnsiEncoding(_fileBuffer);
+            foreach (var enc in Configuration.AvailableEncodings)
             {
-                var item = new ListViewItem(new[] { ei.CodePage.ToString(), ei.Name, ei.DisplayName });
+                var item = new ListViewItem(new[] { enc.CodePage.ToString(), enc.WebName, enc.EncodingName });
                 listView1.Items.Add(item);
-                if (ei.CodePage == encoding.CodePage)
+                if (enc.CodePage == encoding.CodePage)
                     item.Selected = true;
             }
 
@@ -93,7 +86,7 @@ namespace Nikse.SubtitleEdit.Forms
             if (listView1.SelectedItems.Count > 0)
             {
                 Encoding encoding = Encoding.GetEncoding(int.Parse(listView1.SelectedItems[0].Text));
-                textBoxPreview.Text = encoding.GetString(_fileBuffer);
+                textBoxPreview.Text = encoding.GetString(_fileBuffer).Replace("\0", " ");
                 LabelPreview.Text = Configuration.Settings.Language.General.Preview + " - " + encoding.EncodingName;
             }
         }

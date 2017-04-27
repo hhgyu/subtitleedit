@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace UpdateAssemblyInfo
 {
     internal class Program
     {
         private static readonly Regex LongGitTagRegex; // e.g.: 3.4.8-226-g7037fef
+        private static readonly Regex ShortGitTagRegex; // e.g.: 3.4.8-226-g7037fef
         private static readonly Regex LongVersionRegex; // e.g.: 3.4.8.226
         private static readonly Regex ShortVersionRegex; // e.g.: 3.4.8 (w/o build number)
         private static readonly Regex TemplateFileVersionRegex; // e.g.: [assembly: AssemblyVersion("3.4.8.[REVNO]")]
@@ -18,6 +21,7 @@ namespace UpdateAssemblyInfo
         {
             var options = RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.CultureInvariant;
             LongGitTagRegex = new Regex(@"\A(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<maintenance>[0-9]+)-(?<build>[0-9]+)-g[0-9a-z]+\z", options);
+            ShortGitTagRegex = new Regex(@"\A(?<major>[0-9]+)\.(?<minor>[0-9]+)-(?<build>[0-9]+)-g[0-9a-z]+\z", options);
             LongVersionRegex = new Regex(@"\A(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<maintenance>[0-9]+)\.(?<build>[0-9]+)\z", options);
             ShortVersionRegex = new Regex(@"\A(?<major>[0-9]+)\.(?<minor>[0-9]+)\.(?<maintenance>[0-9]+)\z", options);
             options |= RegexOptions.Multiline;
@@ -62,6 +66,8 @@ namespace UpdateAssemblyInfo
                 var match = LongGitTagRegex.Match(version);
                 if (!match.Success)
                     match = LongVersionRegex.Match(version);
+                if (!match.Success)
+                    match = ShortGitTagRegex.Match(version);
                 if (!match.Success || string.IsNullOrWhiteSpace(guid))
                 {
                     Build = UnknownBuild;
@@ -78,13 +84,13 @@ namespace UpdateAssemblyInfo
                     throw new ArgumentException("Invalid version identifier: '" + version + "'");
                 Major = int.Parse(match.Groups["major"].Value, NumberStyles.None, CultureInfo.InvariantCulture);
                 Minor = int.Parse(match.Groups["minor"].Value, NumberStyles.None, CultureInfo.InvariantCulture);
-                Maintenance = int.Parse(match.Groups["maintenance"].Value, NumberStyles.None, CultureInfo.InvariantCulture);
+                Maintenance = string.IsNullOrEmpty(match.Groups["maintenance"].Value) ? 0 : int.Parse(match.Groups["maintenance"].Value, NumberStyles.None, CultureInfo.InvariantCulture);
             }
 
             public int CompareTo(VersionInfo vi)
             {
                 int cmp = 1;
-                if (!object.ReferenceEquals(vi, null))
+                if (!ReferenceEquals(vi, null))
                 {
                     cmp = Major.CompareTo(vi.Major);
                     if (cmp == 0)
@@ -97,7 +103,7 @@ namespace UpdateAssemblyInfo
 
             public bool Equals(VersionInfo vi)
             {
-                return object.ReferenceEquals(vi, null) ? false : Major.Equals(vi.Major) && Minor.Equals(vi.Minor) && Maintenance.Equals(vi.Maintenance) && Build.Equals(vi.Build) && RevisionGuid.Equals(vi.RevisionGuid, StringComparison.Ordinal);
+                return !ReferenceEquals(vi, null) && Major.Equals(vi.Major) && Minor.Equals(vi.Minor) && Maintenance.Equals(vi.Maintenance) && Build.Equals(vi.Build) && RevisionGuid.Equals(vi.RevisionGuid, StringComparison.Ordinal);
             }
 
             public override bool Equals(object obj)
@@ -110,24 +116,44 @@ namespace UpdateAssemblyInfo
                 return FullVersion.GetHashCode();
             }
 
-            public static bool operator == (VersionInfo vi1, VersionInfo vi2)
+            public static bool operator ==(VersionInfo vi1, VersionInfo vi2)
             {
-                return object.ReferenceEquals(vi2, null) ? object.ReferenceEquals(vi1, null) : vi2.Equals(vi1);
+                return ReferenceEquals(vi2, null) ? ReferenceEquals(vi1, null) : vi2.Equals(vi1);
             }
 
-            public static bool operator != (VersionInfo vi1, VersionInfo vi2)
+            public static bool operator !=(VersionInfo vi1, VersionInfo vi2)
             {
-                return object.ReferenceEquals(vi2, null) ? !object.ReferenceEquals(vi1, null) : !vi2.Equals(vi1);
+                return ReferenceEquals(vi2, null) ? !ReferenceEquals(vi1, null) : !vi2.Equals(vi1);
             }
 
-            public static bool operator > (VersionInfo vi1, VersionInfo vi2)
+            public static bool operator >(VersionInfo vi1, VersionInfo vi2)
             {
-                return object.ReferenceEquals(vi1, null) ? false : vi1.CompareTo(vi2) > 0;
+                return !ReferenceEquals(vi1, null) && vi1.CompareTo(vi2) > 0;
             }
 
-            public static bool operator < (VersionInfo vi1, VersionInfo vi2)
+            public static bool operator <(VersionInfo vi1, VersionInfo vi2)
             {
-                return object.ReferenceEquals(vi2, null) ? false : vi2.CompareTo(vi1) > 0;
+                return !ReferenceEquals(vi2, null) && vi2.CompareTo(vi1) > 0;
+            }
+        }
+
+        private static void UpdateTranslations(string languagesFolderName, VersionInfo newVersion, VersionInfo oldVersion)
+        {
+            // Valid translation file name formats:
+            //   <language-id> "-" <script-id> "-" <region-id> ".xml"  (e.g., sr-Cyrl-RS.xml)
+            //   <language-id> "-" <script-id> ".xml"  (e.g., zh-Hans.xml)
+            //   <language-id> "-" <region-id> ".xml"  (e.g., nb-NO.xml)
+            var fileNamePattern = string.Format(@"[\{0}\{1}][a-z]{{2,3}}-[A-Z][A-Za-z-]+\.xml\z", Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            var fileNameRegex = new Regex(fileNamePattern, RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+            var translation = new XmlDocument { XmlResolver = null };
+
+            foreach (var fileName in Directory.EnumerateFiles(languagesFolderName).Where(fn => fileNameRegex.IsMatch(fn)))
+            {
+                translation.Load(fileName);
+                var node = translation.DocumentElement.SelectSingleNode("General/Version") as XmlElement;
+                if (node != null && node.InnerText.Trim() == oldVersion.ShortVersion)
+                    node.InnerText = newVersion.ShortVersion;
+                translation.Save(fileName);
             }
         }
 
@@ -160,7 +186,7 @@ namespace UpdateAssemblyInfo
             var gitPath = GetGitPath();
             if (clrHash.RunCommandAndGetOutput(gitPath, "rev-parse --verify HEAD", workingDirectory) && clrTags.RunCommandAndGetOutput(gitPath, "describe --long --tags", workingDirectory))
             {
-                if (!LongGitTagRegex.IsMatch(clrTags.Result))
+                if (!LongGitTagRegex.IsMatch(clrTags.Result) && !ShortGitTagRegex.IsMatch(clrTags.Result))
                 {
                     throw new Exception("Invalid Git version tag: '" + clrTags.Result + "' (major.minor.maintenance-build expected)");
                 }
@@ -172,7 +198,7 @@ namespace UpdateAssemblyInfo
             }
             if (clrHash.RunCommandAndGetOutput(gitPath, "rev-parse --verify refs/heads/master", workingDirectory) && clrTags.RunCommandAndGetOutput(gitPath, "describe --long --tags refs/heads/master", workingDirectory))
             {
-                if (!LongGitTagRegex.IsMatch(clrTags.Result))
+                if (!LongGitTagRegex.IsMatch(clrTags.Result) && !ShortGitTagRegex.IsMatch(clrTags.Result))
                 {
                     throw new Exception("Invalid Git version tag: '" + clrTags.Result + "' (major.minor.maintenance-build expected)");
                 }
@@ -241,11 +267,10 @@ namespace UpdateAssemblyInfo
                 var libSeTemplateFileName = Environment.GetCommandLineArgs()[2];
                 VersionInfo currentRepositoryVersion;
                 VersionInfo latestRepositoryVersion;
-                VersionInfo currentVersion;
                 VersionInfo newVersion;
 
                 GetRepositoryVersions(out currentRepositoryVersion, out latestRepositoryVersion);
-                currentVersion = GetCurrentVersion(seTemplateFileName);
+                var currentVersion = GetCurrentVersion(seTemplateFileName);
                 var updateTemplateFile = false;
                 if (latestRepositoryVersion.RevisionGuid.Length > 0 && currentVersion > latestRepositoryVersion && latestRepositoryVersion == currentRepositoryVersion)
                 {
@@ -257,7 +282,7 @@ namespace UpdateAssemblyInfo
                 }
                 else if (currentRepositoryVersion.RevisionGuid.Length == 0)
                 {
-                     // last resort when building from source tarball - unknown build number and revision guid
+                    // last resort when building from source tarball - unknown build number and revision guid
                     newVersion = GetTemplateVersion(seTemplateFileName);
                 }
                 else
@@ -268,6 +293,12 @@ namespace UpdateAssemblyInfo
                 if (newVersion != currentVersion)
                 {
                     Console.WriteLine(" updating version number to " + newVersion.FullVersion);
+                    if (updateTemplateFile)
+                    {
+                        var oldVersion = GetTemplateVersion(seTemplateFileName);
+                        var languagesFolderName = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(seTemplateFileName)), "Languages");
+                        UpdateTranslations(languagesFolderName, newVersion, oldVersion);
+                    }
                     UpdateAssemblyInfo(libSeTemplateFileName, newVersion, updateTemplateFile);
                     UpdateAssemblyInfo(seTemplateFileName, newVersion, updateTemplateFile);
                 }

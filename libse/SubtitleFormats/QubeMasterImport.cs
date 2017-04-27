@@ -83,14 +83,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         {
                             if (expectStartTime)
                             {
-                                p.StartTime = DecodeTimeCode(parts);
+                                p.StartTime = DecodeTimeCodeFramesFourParts(parts);
                                 expectStartTime = false;
                             }
                             else
                             {
                                 if (p.EndTime.TotalMilliseconds < 0.01)
                                     _errorCount++;
-                                p.EndTime = DecodeTimeCode(parts);
+                                p.EndTime = DecodeTimeCodeFramesFourParts(parts);
                             }
                         }
                         catch (Exception exception)
@@ -102,7 +102,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (p.StartTime.TotalMilliseconds == 0 && p.EndTime.TotalMilliseconds == 0)
+                    if (Math.Abs(p.StartTime.TotalMilliseconds) < 0.001 && Math.Abs(p.EndTime.TotalMilliseconds) < 0.001)
                         _errorCount++;
                     else
                         subtitle.Paragraphs.Add(p);
@@ -125,7 +125,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             bool allNullEndTime = true;
             for (int i = 0; i < subtitle.Paragraphs.Count; i++)
             {
-                if (subtitle.Paragraphs[i].EndTime.TotalMilliseconds != 0)
+                if (Math.Abs(subtitle.Paragraphs[i].EndTime.TotalMilliseconds) > 0.001)
                     allNullEndTime = false;
             }
             if (allNullEndTime)
@@ -133,17 +133,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-
-            return new TimeCode(hour, minutes, seconds, FramesToMillisecondsMax999(frames));
         }
 
     }

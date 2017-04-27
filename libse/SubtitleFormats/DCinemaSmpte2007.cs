@@ -77,22 +77,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     return false;
                 }
             }
-            else
-            {
-                return false;
-            }
-        }
-
-        private static string RemoveSubStationAlphaFormatting(string s)
-        {
-            int indexOfBegin = s.IndexOf('{');
-            while (indexOfBegin >= 0 && s.IndexOf('}') > indexOfBegin)
-            {
-                int indexOfEnd = s.IndexOf('}');
-                s = s.Remove(indexOfBegin, (indexOfEnd - indexOfBegin) + 1);
-                indexOfBegin = s.IndexOf('{');
-            }
-            return s;
+            return false;
         }
 
         public override string ToText(Subtitle subtitle, string title)
@@ -205,20 +190,19 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     end.InnerText = ConvertToTimeString(p.EndTime);
                     subNode.Attributes.Append(end);
 
-                    bool alignLeft = p.Text.StartsWith("{\\a1}") || p.Text.StartsWith("{\\a5}") || p.Text.StartsWith("{\\a9}") || // sub station alpha
-                                    p.Text.StartsWith("{\\an1}") || p.Text.StartsWith("{\\an4}") || p.Text.StartsWith("{\\an7}"); // advanced sub station alpha
+                    bool alignLeft = p.Text.StartsWith("{\\a1}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a5}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a9}", StringComparison.Ordinal) || // sub station alpha
+                                     p.Text.StartsWith("{\\an1}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an4}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an7}", StringComparison.Ordinal); // advanced sub station alpha
 
-                    bool alignRight = p.Text.StartsWith("{\\a3}") || p.Text.StartsWith("{\\a7}") || p.Text.StartsWith("{\\a11}") || // sub station alpha
-                                      p.Text.StartsWith("{\\an3}") || p.Text.StartsWith("{\\an6}") || p.Text.StartsWith("{\\an9}"); // advanced sub station alpha
+                    bool alignRight = p.Text.StartsWith("{\\a3}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a7}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a11}", StringComparison.Ordinal) || // sub station alpha
+                                      p.Text.StartsWith("{\\an3}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an6}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an9}", StringComparison.Ordinal); // advanced sub station alpha
 
-                    bool alignVTop = p.Text.StartsWith("{\\a5}") || p.Text.StartsWith("{\\a6}") || p.Text.StartsWith("{\\a7}") || // sub station alpha
-                                    p.Text.StartsWith("{\\an7}") || p.Text.StartsWith("{\\an8}") || p.Text.StartsWith("{\\an9}"); // advanced sub station alpha
+                    bool alignVTop = p.Text.StartsWith("{\\a5}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a6}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a7}", StringComparison.Ordinal) || // sub station alpha
+                                     p.Text.StartsWith("{\\an7}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an8}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an9}", StringComparison.Ordinal); // advanced sub station alpha
 
-                    bool alignVCenter = p.Text.StartsWith("{\\a9}") || p.Text.StartsWith("{\\a10}") || p.Text.StartsWith("{\\a11}") || // sub station alpha
-                                      p.Text.StartsWith("{\\an4}") || p.Text.StartsWith("{\\an5}") || p.Text.StartsWith("{\\an6}"); // advanced sub station alpha
+                    bool alignVCenter = p.Text.StartsWith("{\\a9}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a10}", StringComparison.Ordinal) || p.Text.StartsWith("{\\a11}", StringComparison.Ordinal) || // sub station alpha
+                                       p.Text.StartsWith("{\\an4}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an5}", StringComparison.Ordinal) || p.Text.StartsWith("{\\an6}", StringComparison.Ordinal); // advanced sub station alpha
 
-                    // remove styles for display text (except italic)
-                    string text = RemoveSubStationAlphaFormatting(p.Text);
+                    string text = Utilities.RemoveSsaTags(p.Text);
 
                     var lines = text.SplitToLines();
                     int vPos = 1 + lines.Length * 7;
@@ -281,7 +265,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 {
                                     nodeTemp.InnerText = txt.ToString();
                                     html.Append(nodeTemp.InnerXml);
-                                    txt = new StringBuilder();
+                                    txt.Clear();
                                 }
                                 isItalic = true;
                                 i += 2;
@@ -307,7 +291,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                                     fontNode.InnerText = HtmlUtil.RemoveHtmlTags(txt.ToString());
                                     html.Append(fontNode.OuterXml);
-                                    txt = new StringBuilder();
+                                    txt.Clear();
                                 }
                                 isItalic = false;
                                 i += 3;
@@ -319,7 +303,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 {
                                     nodeTemp.InnerText = txt.ToString();
                                     html.Append(nodeTemp.InnerXml);
-                                    txt = new StringBuilder();
+                                    txt.Clear();
                                 }
                                 string c = line.Substring(i + 12, endOfFont - (i + 12));
                                 c = c.Trim('"').Trim('\'').Trim();
@@ -350,7 +334,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                                     fontNode.InnerText = HtmlUtil.RemoveHtmlTags(txt.ToString());
                                     html.Append(fontNode.OuterXml);
-                                    txt = new StringBuilder();
+                                    txt.Clear();
                                 }
                                 fontNo--;
                                 i += 6;
@@ -399,7 +383,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 fontColor.InnerText = fontColors.Peek();
                                 fontNode.Attributes.Append(fontColor);
 
-                                html = new StringBuilder();
+                                html.Clear();
                                 html.Append(fontNode.OuterXml);
                             }
                         }
@@ -475,7 +459,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     Errors = "Error validating xml via SMPTE - 428 - 7 - 2007 - DCST.xsd: " + exception.Message;
                 }
             }
-            return result;
+            return DCinemaSmpte2010.FixDcsTextSameLine(result);
         }
 
         private void ValidationCallBack(object sender, ValidationEventArgs e)
@@ -516,6 +500,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         Configuration.Settings.General.CurrentFrameRate = 24;
                     else if (ss.CurrentDCinemaEditRate == "25")
                         Configuration.Settings.General.CurrentFrameRate = 24;
+
+                    if (BatchSourceFrameRate.HasValue)
+                    {
+                        Configuration.Settings.General.CurrentFrameRate = BatchSourceFrameRate.Value;
+                    }
                 }
 
                 node = xml.DocumentElement.SelectSingleNode("StartTime");
@@ -562,7 +551,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 try
                 {
-                    StringBuilder pText = new StringBuilder();
+                    var pText = new StringBuilder();
                     string lastVPosition = string.Empty;
                     foreach (XmlNode innerNode in node.ChildNodes)
                     {
@@ -630,7 +619,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                                 pre = "{\\an3}";
                                         }
                                         string temp = pre + pText;
-                                        pText = new StringBuilder();
+                                        pText.Clear();
                                         pText.Append(temp);
                                     }
                                 }
@@ -699,35 +688,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             subtitle.Renumber();
         }
 
-        private static string GetColorStringForDCinema(string p)
-        {
-            string s = p.ToUpper().Trim();
-            if (s.Replace("#", string.Empty).
-                Replace("0", string.Empty).
-                Replace("1", string.Empty).
-                Replace("2", string.Empty).
-                Replace("3", string.Empty).
-                Replace("4", string.Empty).
-                Replace("5", string.Empty).
-                Replace("6", string.Empty).
-                Replace("7", string.Empty).
-                Replace("8", string.Empty).
-                Replace("9", string.Empty).
-                Replace("A", string.Empty).
-                Replace("B", string.Empty).
-                Replace("C", string.Empty).
-                Replace("D", string.Empty).
-                Replace("E", string.Empty).
-                Replace("F", string.Empty).Length == 0)
-            {
-                return s.TrimStart('#');
-            }
-            else
-            {
-                return p;
-            }
-        }
-
         private static string GetColorStringFromDCinema(string p)
         {
             string s = p.ToLower().Trim();
@@ -751,18 +711,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 if (s.StartsWith('#'))
                     return s;
-                else
-                    return "#" + s;
+                return "#" + s;
             }
-            else
-            {
-                return p;
-            }
+            return p;
         }
 
         private TimeCode GetTimeCode(string s)
         {
-            string[] parts = s.Split(new char[] { ':', '.', ',' });
+            var parts = s.Split(new[] { ':', '.', ',' });
 
             int milliseconds = (int)Math.Round(int.Parse(parts[3]) * (TimeCode.BaseUnit / _frameRate));
             if (milliseconds > 999)

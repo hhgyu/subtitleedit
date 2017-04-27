@@ -36,7 +36,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (!sb.ToString().Contains("$FORMAT"))
                 return false;
 
+            var oldFrameRate = Configuration.Settings.General.CurrentFrameRate;
             LoadSubtitle(subtitle, lines, fileName);
+            Configuration.Settings.General.CurrentFrameRate = oldFrameRate;
             return subtitle.Paragraphs.Count > _errorCount;
         }
 
@@ -64,7 +66,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         string text = temp[5];
                         try
                         {
-                            p = new Paragraph(DecodeTimeCode(start.Split(':')), DecodeTimeCode(end.Split(':')), text);
+                            p = new Paragraph(DecodeTimeCodeFramesFourParts(start.Split(':')), DecodeTimeCodeFramesFourParts(end.Split(':')), text);
                             subtitle.Paragraphs.Add(p);
                         }
                         catch (Exception exception)
@@ -83,6 +85,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         double f = frameRate / TimeCode.BaseUnit;
                         if (f > 10 && f < 500)
                             Configuration.Settings.General.CurrentFrameRate = f;
+
+                        if (BatchSourceFrameRate.HasValue)
+                        {
+                            Configuration.Settings.General.CurrentFrameRate = BatchSourceFrameRate.Value;
+                        }
                     }
                 }
                 else if (string.IsNullOrWhiteSpace(line) || line.StartsWith('$'))
@@ -96,18 +103,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
 
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            TimeCode tc = new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
-            return tc;
         }
 
     }

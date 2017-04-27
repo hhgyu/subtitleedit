@@ -25,9 +25,9 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 FindWhat = findWhat;
                 ReplaceWith = replaceWith;
-                if (string.CompareOrdinal(searchType, Configuration.Settings.Language.MultipleReplace.RegularExpression) == 0)
+                if (string.CompareOrdinal(searchType, SearchTypeRegularExpression) == 0)
                     SearchType = SearchRegEx;
-                else if (string.CompareOrdinal(searchType, Configuration.Settings.Language.MultipleReplace.CaseSensitive) == 0)
+                else if (string.CompareOrdinal(searchType, SearchTypeCaseSensitive) == 0)
                     SearchType = SearchCaseSensitive;
             }
         }
@@ -41,12 +41,14 @@ namespace Nikse.SubtitleEdit.Forms
         public const string SearchTypeNormal = "Normal";
         public const string SearchTypeCaseSensitive = "CaseSensitive";
         public const string SearchTypeRegularExpression = "RegularExpression";
-        private readonly List<MultipleSearchAndReplaceSetting> _oldMultipleSearchAndReplaceList = new List<MultipleSearchAndReplaceSetting>();
+        private readonly List<MultipleSearchAndReplaceGroup> _oldMultipleSearchAndReplaceGroups = new List<MultipleSearchAndReplaceGroup>();
         private readonly Dictionary<string, Regex> _compiledRegExList = new Dictionary<string, Regex>();
         private Subtitle _subtitle;
         public List<int> DeleteIndices { get; private set; }
         public Subtitle FixedSubtitle { get; private set; }
         public int FixCount { get; private set; }
+        private bool _loading = true;
+        private MultipleSearchAndReplaceGroup _currentGroup;
 
         public MultipleReplace()
         {
@@ -66,19 +68,21 @@ namespace Nikse.SubtitleEdit.Forms
             radioButtonCaseSensitive.Text = Configuration.Settings.Language.MultipleReplace.CaseSensitive;
             buttonAdd.Text = Configuration.Settings.Language.MultipleReplace.Add;
             buttonUpdate.Text = Configuration.Settings.Language.MultipleReplace.Update;
-            listViewReplaceList.Columns[0].Text = Configuration.Settings.Language.MultipleReplace.Enabled;
-            listViewReplaceList.Columns[1].Text = Configuration.Settings.Language.MultipleReplace.FindWhat;
-            listViewReplaceList.Columns[2].Text = Configuration.Settings.Language.MultipleReplace.ReplaceWith;
-            listViewReplaceList.Columns[3].Text = Configuration.Settings.Language.MultipleReplace.SearchType;
+            listViewRules.Columns[0].Text = Configuration.Settings.Language.MultipleReplace.Enabled;
+            listViewRules.Columns[1].Text = Configuration.Settings.Language.MultipleReplace.FindWhat;
+            listViewRules.Columns[2].Text = Configuration.Settings.Language.MultipleReplace.ReplaceWith;
+            listViewRules.Columns[3].Text = Configuration.Settings.Language.MultipleReplace.SearchType;
+            groupBoxGroups.Text = Configuration.Settings.Language.MultipleReplace.Groups;
             groupBoxLinesFound.Text = string.Empty;
             listViewFixes.Columns[0].Text = Configuration.Settings.Language.General.Apply;
             listViewFixes.Columns[1].Text = Configuration.Settings.Language.General.LineNumber;
             listViewFixes.Columns[2].Text = Configuration.Settings.Language.General.Before;
             listViewFixes.Columns[3].Text = Configuration.Settings.Language.General.After;
-            deleteToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.Delete;
-            buttonRemoveAll.Text = Configuration.Settings.Language.MultipleReplace.RemoveAll;
-            buttonImport.Text = Configuration.Settings.Language.MultipleReplace.Import;
-            buttonExport.Text = Configuration.Settings.Language.MultipleReplace.Export;
+            deleteToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.Remove;
+            toolStripMenuItemRemoveAll.Text = Configuration.Settings.Language.MultipleReplace.RemoveAll;
+            toolStripMenuItemImport.Text = Configuration.Settings.Language.MultipleReplace.Import;
+            toolStripMenuItemExport.Text = Configuration.Settings.Language.MultipleReplace.Export;
+            buttonNewGroup.Text = Configuration.Settings.Language.MultipleReplace.NewGroup;
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
             buttonReplacesSelectAll.Text = Configuration.Settings.Language.FixCommonErrors.SelectAll;
@@ -91,6 +95,15 @@ namespace Nikse.SubtitleEdit.Forms
             moveDownToolStripMenuItem.Text = Configuration.Settings.Language.DvdSubRip.MoveDown;
             moveTopToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.MoveToTop;
             moveBottomToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.MoveToBottom;
+            newToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.NewGroup;
+
+            toolStripMenuItemMoveRulesToGroup.Text = Configuration.Settings.Language.MultipleReplace.MoveSelectedRulesToGroup;
+            moveUpToolStripMenuItem1.Text = Configuration.Settings.Language.DvdSubRip.MoveUp;
+            moveDownToolStripMenuItem1.Text = Configuration.Settings.Language.DvdSubRip.MoveDown;
+            moveToTopToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.MoveToTop;
+            moveToBottomToolStripMenuItem.Text = Configuration.Settings.Language.MultipleReplace.MoveToBottom;
+            toolStripMenuItemRename.Text = Configuration.Settings.Language.MultipleReplace.RenameGroup;
+            deleteToolStripMenuItem1.Text = Configuration.Settings.Language.MultipleReplace.Remove;
 
             radioButtonCaseSensitive.Left = radioButtonNormal.Left + radioButtonNormal.Width + 40;
             radioButtonRegEx.Left = radioButtonCaseSensitive.Left + radioButtonCaseSensitive.Width + 40;
@@ -102,21 +115,63 @@ namespace Nikse.SubtitleEdit.Forms
                 throw new ArgumentNullException("subtitle");
 
             _subtitle = subtitle;
-            foreach (var item in Configuration.Settings.MultipleSearchAndReplaceList)
+            _oldMultipleSearchAndReplaceGroups.Clear();
+
+            if (Configuration.Settings.MultipleSearchAndReplaceGroups.Count == 0)
             {
-                AddToReplaceListView(item.Enabled, item.FindWhat, item.ReplaceWith, EnglishSearchTypeToLocal(item.SearchType));
-                _oldMultipleSearchAndReplaceList.Add(item);
+                Configuration.Settings.MultipleSearchAndReplaceGroups.Add(new MultipleSearchAndReplaceGroup { Enabled = true, Name = "Default", Rules = new List<MultipleSearchAndReplaceSetting>() });
+            }
+
+            foreach (var group in Configuration.Settings.MultipleSearchAndReplaceGroups)
+            {
+                var oldGroup = new MultipleSearchAndReplaceGroup { Name = group.Name, Enabled = group.Enabled, Rules = new List<MultipleSearchAndReplaceSetting>() };
+                foreach (var rule in group.Rules)
+                {
+                    oldGroup.Rules.Add(rule);
+                }
+                _oldMultipleSearchAndReplaceGroups.Add(oldGroup);
             }
 
             if (subtitle.Paragraphs == null || subtitle.Paragraphs.Count == 0)
                 groupBoxLinesFound.Enabled = false;
+
+            UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, Configuration.Settings.MultipleSearchAndReplaceGroups.Count > 0 ? Configuration.Settings.MultipleSearchAndReplaceGroups[0] : null);
+        }
+
+        internal void RunFromBatch(Subtitle subtitle)
+        {
+            Initialize(subtitle);
+            _loading = false;
+            GeneratePreview();
+        }
+
+        internal void RunFromBatch(Subtitle subtitle, IEnumerable<string> importFileNames)
+        {
+            _loading = false;
+            var savedList = Configuration.Settings.MultipleSearchAndReplaceGroups;
+            try
+            {
+                Configuration.Settings.MultipleSearchAndReplaceGroups = new List<MultipleSearchAndReplaceGroup>();
+                foreach (var fileName in importFileNames)
+                {
+                    if (fileName.Equals("."))
+                        Configuration.Settings.MultipleSearchAndReplaceGroups.AddRange(savedList);
+                    else
+                        ImportRulesFile(fileName);
+                }
+                RunFromBatch(subtitle);
+            }
+            finally
+            {
+                Configuration.Settings.MultipleSearchAndReplaceGroups = savedList;
+            }
         }
 
         private void MultipleReplace_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
                 buttonCancel_Click(null, null);
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
                 Utilities.ShowHelp("#multiple_replace");
         }
 
@@ -130,6 +185,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void ButtonAddClick(object sender, EventArgs e)
         {
+            if (_currentGroup == null)
+                return;
+
             string findText = textBoxFind.Text.RemoveControlCharacters();
             if (findText.Length > 0)
             {
@@ -147,23 +205,21 @@ namespace Nikse.SubtitleEdit.Forms
                     }
                 }
 
-                AddToReplaceListView(true, findText, textBoxReplace.Text.RemoveControlCharacters(), EnglishSearchTypeToLocal(searchType));
+                var rule = new MultipleSearchAndReplaceSetting() { Enabled = true, FindWhat = findText, ReplaceWith = textBoxReplace.Text, SearchType = searchType };
+                _currentGroup.Rules.Add(rule);
+                AddToRulesListView(rule);
                 textBoxFind.Text = string.Empty;
                 textBoxReplace.Text = string.Empty;
                 GeneratePreview();
                 textBoxFind.Select();
-                SaveReplaceList(false);
             }
-        }
-
-        internal void RunFromBatch(Subtitle subtitle)
-        {
-            Initialize(subtitle);
-            GeneratePreview();
         }
 
         private void GeneratePreview()
         {
+            if (_loading)
+                return;
+
             Cursor = Cursors.WaitCursor;
             FixedSubtitle = new Subtitle(_subtitle);
             DeleteIndices = new List<int>();
@@ -171,20 +227,26 @@ namespace Nikse.SubtitleEdit.Forms
             listViewFixes.BeginUpdate();
             listViewFixes.Items.Clear();
             var replaceExpressions = new HashSet<ReplaceExpression>();
-            foreach (ListViewItem item in listViewReplaceList.Items)
+            foreach (var group in Configuration.Settings.MultipleSearchAndReplaceGroups)
             {
-                if (item.Checked)
+                if (group.Enabled)
                 {
-                    string findWhat = item.SubItems[1].Text;
-                    if (!string.IsNullOrEmpty(findWhat)) // allow space or spaces
+                    foreach (var rule in group.Rules)
                     {
-                        string replaceWith = item.SubItems[2].Text.Replace(@"\n", Environment.NewLine);
-                        string searchType = item.SubItems[3].Text;
-                        var mpi = new ReplaceExpression(findWhat, replaceWith, searchType);
-                        replaceExpressions.Add(mpi);
-                        if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                        if (rule.Enabled)
                         {
-                            _compiledRegExList.Add(findWhat, new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                            string findWhat = rule.FindWhat;
+                            if (!string.IsNullOrEmpty(findWhat)) // allow space or spaces
+                            {
+                                string replaceWith = rule.ReplaceWith.Replace(@"\n", Environment.NewLine);
+                                string searchType = rule.SearchType;
+                                var mpi = new ReplaceExpression(findWhat, replaceWith, searchType);
+                                replaceExpressions.Add(mpi);
+                                if (mpi.SearchType == ReplaceExpression.SearchRegEx && !_compiledRegExList.ContainsKey(findWhat))
+                                {
+                                    _compiledRegExList.Add(findWhat, new Regex(findWhat, RegexOptions.Compiled | RegexOptions.Multiline));
+                                }
+                            }
                         }
                     }
                 }
@@ -246,13 +308,13 @@ namespace Nikse.SubtitleEdit.Forms
             DeleteIndices.Reverse();
         }
 
-        private void AddToReplaceListView(bool enabled, string findWhat, string replaceWith, string searchType)
+        private void AddToRulesListView(MultipleSearchAndReplaceSetting rule)
         {
-            var item = new ListViewItem(string.Empty) { Checked = enabled };
-            item.SubItems.Add(findWhat);
-            item.SubItems.Add(replaceWith);
-            item.SubItems.Add(searchType);
-            listViewReplaceList.Items.Add(item);
+            var item = new ListViewItem(string.Empty) { Checked = rule.Enabled, Tag = rule };
+            item.SubItems.Add(rule.FindWhat);
+            item.SubItems.Add(rule.ReplaceWith);
+            item.SubItems.Add(EnglishSearchTypeToLocal(rule.SearchType));
+            listViewRules.Items.Add(item);
         }
 
         private void AddToPreviewListView(Paragraph p, string newText)
@@ -291,17 +353,6 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void SaveReplaceList(bool saveToDisk)
         {
-            Configuration.Settings.MultipleSearchAndReplaceList = new List<MultipleSearchAndReplaceSetting>();
-            foreach (ListViewItem item in listViewReplaceList.Items)
-            {
-                Configuration.Settings.MultipleSearchAndReplaceList.Add(new MultipleSearchAndReplaceSetting
-                {
-                    Enabled = item.Checked,
-                    FindWhat = item.SubItems[1].Text,
-                    ReplaceWith = item.SubItems[2].Text,
-                    SearchType = LocalSearchTypeToEnglish(item.SubItems[3].Text)
-                });
-            }
             if (saveToDisk)
                 Configuration.Settings.Save();
         }
@@ -318,31 +369,28 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        private void ListViewReplaceListItemChecked(object sender, ItemCheckedEventArgs e)
-        {
-            GeneratePreview();
-            SaveReplaceList(false);
-        }
-
         private void DeleteToolStripMenuItemClick(object sender, EventArgs e)
         {
-            if (listViewReplaceList.Items.Count < 1 || listViewReplaceList.SelectedItems.Count < 1)
+            if (listViewRules.Items.Count < 1 || listViewRules.SelectedItems.Count < 1 || _currentGroup == null)
                 return;
-            for (int i = listViewReplaceList.Items.Count - 1; i >= 0; i--)
+
+            for (int i = listViewRules.Items.Count - 1; i >= 0; i--)
             {
-                ListViewItem item = listViewReplaceList.Items[i];
+                ListViewItem item = listViewRules.Items[i];
                 if (item.Selected)
+                {
                     item.Remove();
+                    _currentGroup.Rules.Remove(item.Tag as MultipleSearchAndReplaceSetting);
+                }
             }
             GeneratePreview();
-            SaveReplaceList(false);
         }
 
         private void ListViewReplaceListKeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
                 DeleteToolStripMenuItemClick(null, null);
-            if (listViewReplaceList.SelectedItems.Count == 1)
+            if (listViewRules.SelectedItems.Count == 1)
             {
                 if (e.KeyCode == Keys.Up && e.Control && !e.Alt && !e.Shift)
                     moveUpToolStripMenuItem_Click(sender, e);
@@ -358,7 +406,7 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void ButtonUpdateClick(object sender, EventArgs e)
         {
-            if (listViewReplaceList.SelectedItems.Count != 1)
+            if (listViewRules.SelectedItems.Count != 1 || _currentGroup == null)
                 return;
 
             string findText = textBoxFind.Text.RemoveControlCharacters();
@@ -385,25 +433,28 @@ namespace Nikse.SubtitleEdit.Forms
                     }
                 }
 
-                var item = listViewReplaceList.SelectedItems[0];
+                var item = listViewRules.SelectedItems[0];
                 item.SubItems[1].Text = findText;
                 item.SubItems[2].Text = replaceText;
                 item.SubItems[3].Text = EnglishSearchTypeToLocal(searchType);
 
+                _currentGroup.Rules[item.Index].FindWhat = findText;
+                _currentGroup.Rules[item.Index].ReplaceWith = replaceText;
+                _currentGroup.Rules[item.Index].SearchType = searchType;
+
                 GeneratePreview();
                 textBoxFind.Select();
-                SaveReplaceList(false);
             }
         }
 
         private void ListViewReplaceListSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (listViewReplaceList.SelectedItems.Count == 1)
+            if (listViewRules.SelectedItems.Count == 1)
             {
                 buttonUpdate.Enabled = true;
-                textBoxFind.Text = listViewReplaceList.SelectedItems[0].SubItems[1].Text;
-                textBoxReplace.Text = listViewReplaceList.SelectedItems[0].SubItems[2].Text;
-                string searchType = LocalSearchTypeToEnglish(listViewReplaceList.SelectedItems[0].SubItems[3].Text);
+                textBoxFind.Text = listViewRules.SelectedItems[0].SubItems[1].Text;
+                textBoxReplace.Text = listViewRules.SelectedItems[0].SubItems[2].Text;
+                string searchType = LocalSearchTypeToEnglish(listViewRules.SelectedItems[0].SubItems[3].Text);
                 if (searchType == SearchTypeRegularExpression)
                     radioButtonRegEx.Checked = true;
                 else if (searchType == SearchTypeCaseSensitive)
@@ -437,99 +488,300 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            bool isVisible = listViewReplaceList.Items.Count > 1 && listViewReplaceList.SelectedItems.Count == 1;
+            bool moreThanOneGroup = Configuration.Settings.MultipleSearchAndReplaceGroups.Count > 1;
+            bool isVisible = listViewRules.Items.Count > 1 && listViewRules.SelectedItems.Count == 1;
+            toolStripSeparator3.Visible = isVisible;
             moveUpToolStripMenuItem.Visible = isVisible;
             moveDownToolStripMenuItem.Visible = isVisible;
             moveTopToolStripMenuItem.Visible = isVisible;
             moveBottomToolStripMenuItem.Visible = isVisible;
+
+            toolStripMenuItemExport.Visible = listViewRules.Items.Count > 0;
+            toolStripMenuItemRemoveAll.Visible = listViewRules.Items.Count > 0;
+            toolStripSeparator2.Visible = listViewRules.Items.Count > 0;
+
+            deleteToolStripMenuItem.Visible = listViewRules.SelectedItems.Count >= 1;
+
+            if (moreThanOneGroup && listViewRules.SelectedItems.Count >= 1)
+            {
+                toolStripMenuItemMoveRulesToGroup.Visible = true;
+                toolStripSeparator4.Visible = true;
+                toolStripMenuItemMoveRulesToGroup.DropDownItems.Clear();
+                foreach (var g in Configuration.Settings.MultipleSearchAndReplaceGroups)
+                {
+                    if (g != _currentGroup)
+                    {
+                        var menuItem = new ToolStripMenuItem(g.Name) { Tag = g };
+                        menuItem.Click += (o, args) => { MoveRulesToGroup(g); };
+                        toolStripMenuItemMoveRulesToGroup.DropDownItems.Add(menuItem);
+                    }
+                }
+            }
+            else
+            {
+                toolStripMenuItemMoveRulesToGroup.Visible = false;
+                toolStripSeparator4.Visible = false;
+            }
+        }
+
+        private void MoveRulesToGroup(MultipleSearchAndReplaceGroup newGroup)
+        {
+            foreach (ListViewItem item in listViewRules.SelectedItems)
+            {
+                var rule = (MultipleSearchAndReplaceSetting)item.Tag;
+                _currentGroup.Rules.Remove(rule);
+                newGroup.Rules.Add(rule);
+            }
+            UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, _currentGroup);
+            GeneratePreview();
         }
 
         private void moveUpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int index = listViewReplaceList.SelectedIndices[0];
+            int index = listViewRules.SelectedIndices[0];
             if (index == 0)
                 return;
 
-            SwapReplaceList(index, index - 1);
+            SwapRules(index, index - 1);
         }
 
-        private void SwapReplaceList(int index, int index2)
+        private void SwapRules(int index, int index2)
         {
-            listViewReplaceList.ItemChecked -= ListViewReplaceListItemChecked;
-            bool enabled = listViewReplaceList.Items[index].Checked;
-            string findWhat = listViewReplaceList.Items[index].SubItems[1].Text;
-            string replaceWith = listViewReplaceList.Items[index].SubItems[2].Text;
-            string searchType = listViewReplaceList.Items[index].SubItems[3].Text;
+            if (_currentGroup == null)
+                return;
 
-            listViewReplaceList.Items[index].Checked = listViewReplaceList.Items[index2].Checked;
-            listViewReplaceList.Items[index].SubItems[1].Text = listViewReplaceList.Items[index2].SubItems[1].Text;
-            listViewReplaceList.Items[index].SubItems[2].Text = listViewReplaceList.Items[index2].SubItems[2].Text;
-            listViewReplaceList.Items[index].SubItems[3].Text = listViewReplaceList.Items[index2].SubItems[3].Text;
+            listViewRules.ItemChecked -= ListViewRulesItemChecked;
 
-            listViewReplaceList.Items[index2].Checked = enabled;
-            listViewReplaceList.Items[index2].SubItems[1].Text = findWhat;
-            listViewReplaceList.Items[index2].SubItems[2].Text = replaceWith;
-            listViewReplaceList.Items[index2].SubItems[3].Text = searchType;
+            var temp = _currentGroup.Rules[index];
+            _currentGroup.Rules[index] = _currentGroup.Rules[index2];
+            _currentGroup.Rules[index2] = temp;
 
-            listViewReplaceList.Items[index].Selected = false;
-            listViewReplaceList.Items[index2].Selected = true;
-            SaveReplaceList(false);
+            bool enabled = listViewRules.Items[index].Checked;
+            string findWhat = listViewRules.Items[index].SubItems[1].Text;
+            string replaceWith = listViewRules.Items[index].SubItems[2].Text;
+            string searchType = listViewRules.Items[index].SubItems[3].Text;
+
+            listViewRules.Items[index].Checked = listViewRules.Items[index2].Checked;
+            listViewRules.Items[index].SubItems[1].Text = listViewRules.Items[index2].SubItems[1].Text;
+            listViewRules.Items[index].SubItems[2].Text = listViewRules.Items[index2].SubItems[2].Text;
+            listViewRules.Items[index].SubItems[3].Text = listViewRules.Items[index2].SubItems[3].Text;
+            listViewRules.Items[index].Tag = _currentGroup.Rules[index];
+
+            listViewRules.Items[index2].Checked = enabled;
+            listViewRules.Items[index2].SubItems[1].Text = findWhat;
+            listViewRules.Items[index2].SubItems[2].Text = replaceWith;
+            listViewRules.Items[index2].SubItems[3].Text = searchType;
+            listViewRules.Items[index2].Tag = _currentGroup.Rules[index2];
+
+            listViewRules.Items[index].Selected = false;
+            listViewRules.Items[index2].Selected = true;
             GeneratePreview();
-            listViewReplaceList.ItemChecked += ListViewReplaceListItemChecked;
+            listViewRules.ItemChecked += ListViewRulesItemChecked;
         }
 
         private void moveDownToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int index = listViewReplaceList.SelectedIndices[0];
-            if (index == listViewReplaceList.Items.Count - 1)
+            int index = listViewRules.SelectedIndices[0];
+            if (index == listViewRules.Items.Count - 1)
                 return;
 
-            SwapReplaceList(index, index + 1);
+            SwapRules(index, index + 1);
         }
 
         private void moveTopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int index = listViewReplaceList.SelectedIndices[0];
+            int index = listViewRules.SelectedIndices[0];
             if (index == 0)
                 return;
 
-            var item = listViewReplaceList.Items[index];
-            listViewReplaceList.Items.RemoveAt(index);
-            listViewReplaceList.Items.Insert(0, item);
+            if (_currentGroup == null)
+                return;
+            
+            var temp = _currentGroup.Rules[index];
+            _currentGroup.Rules.Remove(temp);
+            _currentGroup.Rules.Insert(0, temp);
+            listViewGroups_SelectedIndexChanged(null, null);
             GeneratePreview();
-            SaveReplaceList(false);
         }
 
         private void moveBottomToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            int index = listViewReplaceList.SelectedIndices[0];
-            int bottomIndex = listViewReplaceList.Items.Count - 1;
+            int index = listViewRules.SelectedIndices[0];
+            int bottomIndex = listViewRules.Items.Count - 1;
             if (index == bottomIndex)
                 return;
 
-            var item = listViewReplaceList.Items[index];
-            listViewReplaceList.Items.RemoveAt(index);
-            listViewReplaceList.Items.Add(item);
+            var temp = _currentGroup.Rules[index];
+            _currentGroup.Rules.Remove(temp);
+            _currentGroup.Rules.Add(temp);
+            listViewGroups_SelectedIndexChanged(null, null);
+            listViewRules.Items[0].Selected = false;
+            listViewRules.Items[bottomIndex].Selected = true;
+            listViewRules.Items[bottomIndex].Focused = true;
             GeneratePreview();
-            SaveReplaceList(false);
         }
 
-        private void ExportClick(object sender, EventArgs e)
+        private void ImportRulesFile(string fileName)
         {
-            if (listViewReplaceList.Items.Count == 0)
+            if (_currentGroup == null)
+                return;
+
+            var doc = new XmlDocument { XmlResolver = null };
+            doc.Load(fileName);
+
+            foreach (XmlNode listNode in doc.DocumentElement.SelectNodes("MultipleSearchAndReplaceList/MultipleSearchAndReplaceItem"))
+            {
+                var item = new MultipleSearchAndReplaceSetting();
+                var subNode = listNode.SelectSingleNode(RuleEnabled);
+                if (subNode != null)
+                    item.Enabled = Convert.ToBoolean(subNode.InnerText);
+                subNode = listNode.SelectSingleNode(FindWhat);
+                if (subNode != null)
+                    item.FindWhat = subNode.InnerText;
+                subNode = listNode.SelectSingleNode(ReplaceWith);
+                if (subNode != null)
+                    item.ReplaceWith = subNode.InnerText;
+                subNode = listNode.SelectSingleNode(SearchType);
+                if (subNode != null)
+                    item.SearchType = subNode.InnerText;
+
+                AddToRulesListView(item);
+                _currentGroup.Rules.Add(item);
+            }
+        }
+
+        private void MultipleReplace_Shown(object sender, EventArgs e)
+        {
+            _loading = false;
+            GeneratePreview();
+            listViewRules.ItemChecked += ListViewRulesItemChecked;
+            listViewGroups.ItemChecked += listViewGroups_ItemChecked;
+            MultipleReplace_ResizeEnd(sender, null);
+        }
+
+        private void buttonCancel_Click(object sender, EventArgs e)
+        {
+            Configuration.Settings.MultipleSearchAndReplaceGroups = _oldMultipleSearchAndReplaceGroups;
+            DialogResult = DialogResult.Cancel;
+        }
+
+        private void buttonNewGroup_Click(object sender, EventArgs e)
+        {
+            newToolStripMenuItem_Click(sender, null);
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var form = new MultipleReplaceNewGroup(string.Empty))
+            {
+                if (form.ShowDialog(this) == DialogResult.OK && form.GroupName.Length > 0)
+                {
+                    var newGroup = new MultipleSearchAndReplaceGroup { Enabled = true, Name = form.GroupName, Rules = new List<MultipleSearchAndReplaceSetting>() };
+                    Configuration.Settings.MultipleSearchAndReplaceGroups.Add(newGroup);
+                    UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, newGroup);
+                }
+            }
+        }
+
+        private void UpdateViewFromModel(List<MultipleSearchAndReplaceGroup> groups, MultipleSearchAndReplaceGroup focusGroup)
+        {
+            _loading = true;
+            listViewGroups.BeginUpdate();
+            listViewGroups.Items.Clear();
+            for (int index = 0; index < groups.Count; index++)
+            {
+                var group = groups[index];
+                var lvi = new ListViewItem(group.Name) { Checked = group.Enabled, Tag = group };
+                listViewGroups.Items.Add(lvi);
+                if (group == focusGroup)
+                {
+                    listViewGroups.Items[index].Selected = true;
+                }
+            }
+            listViewGroups.EndUpdate();
+            _loading = false;
+        }
+
+        private void listViewGroups_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listViewGroups.SelectedItems.Count < 1)
+                return;
+
+            _currentGroup = listViewGroups.SelectedItems[0].Tag as MultipleSearchAndReplaceGroup;
+            if (_currentGroup == null)
+                return;
+
+            groupBoxReplaces.Text = string.Format(Configuration.Settings.Language.MultipleReplace.RulesForGroupX, _currentGroup.Name);
+            _loading = true;
+            listViewRules.BeginUpdate();
+            listViewRules.Items.Clear();
+            foreach (var rule in _currentGroup.Rules)
+            {
+                AddToRulesListView(rule);
+            }
+            if (_currentGroup.Rules.Count > 0)
+            {
+                listViewRules.Items[0].Selected = true;
+            }
+            else
+            {
+                textBoxFind.Text = string.Empty;
+                textBoxReplace.Text = string.Empty;
+            }
+            listViewRules.EndUpdate();
+            _loading = false;
+        }
+
+        private void listViewGroups_ItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if (_loading)
+                return;
+
+            var group = e.Item.Tag as MultipleSearchAndReplaceGroup;
+            if (group == null)
+                return;
+
+            group.Enabled = e.Item.Checked;
+            GeneratePreview();
+        }
+
+        private void ListViewRulesItemChecked(object sender, ItemCheckedEventArgs e)
+        {
+            if (_loading)
+                return;
+
+            var rule = e.Item.Tag as MultipleSearchAndReplaceSetting;
+            if (rule == null)
+                return;
+
+            rule.Enabled = e.Item.Checked;
+            GeneratePreview();
+        }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            if (_currentGroup == null)
+                return;
+
+            _currentGroup.Rules.Clear();
+            listViewRules.Items.Clear();
+            GeneratePreview();
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e)
+        {
+            if (_currentGroup == null || _currentGroup.Rules.Count == 0)
                 return;
 
             saveFileDialog1.Title = Configuration.Settings.Language.MultipleReplace.ExportRulesTitle;
             saveFileDialog1.Filter = Configuration.Settings.Language.MultipleReplace.Rules + "|*.template";
             if (saveFileDialog1.ShowDialog(this) == DialogResult.OK)
             {
-                SaveReplaceList(false);
-
                 var textWriter = new XmlTextWriter(saveFileDialog1.FileName, null) { Formatting = Formatting.Indented };
                 textWriter.WriteStartDocument();
                 textWriter.WriteStartElement("Settings", string.Empty);
                 textWriter.WriteStartElement("MultipleSearchAndReplaceList", string.Empty);
-                foreach (var item in Configuration.Settings.MultipleSearchAndReplaceList)
+                foreach (var item in _currentGroup.Rules)
                 {
                     textWriter.WriteStartElement(MultipleSearchAndReplaceItem, string.Empty);
                     textWriter.WriteElementString(RuleEnabled, item.Enabled.ToString());
@@ -545,73 +797,162 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        private void buttonImport_Click(object sender, EventArgs e)
+        private void toolStripMenuItem3_Click(object sender, EventArgs e)
         {
+            if (_currentGroup == null)
+                return;
+
             openFileDialog1.Title = Configuration.Settings.Language.MultipleReplace.ImportRulesTitle;
             openFileDialog1.Filter = Configuration.Settings.Language.MultipleReplace.Rules + "|*.template";
             if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
             {
-                var doc = new XmlDocument();
                 try
                 {
-                    doc.Load(openFileDialog1.FileName);
+                    ImportRulesFile(openFileDialog1.FileName);
                 }
                 catch (Exception exception)
                 {
                     MessageBox.Show(exception.Message);
                     return;
                 }
-
-                foreach (XmlNode listNode in doc.DocumentElement.SelectNodes("MultipleSearchAndReplaceList/MultipleSearchAndReplaceItem"))
-                {
-                    var item = new MultipleSearchAndReplaceSetting();
-                    var subNode = listNode.SelectSingleNode(RuleEnabled);
-                    if (subNode != null)
-                        item.Enabled = Convert.ToBoolean(subNode.InnerText);
-                    subNode = listNode.SelectSingleNode(FindWhat);
-                    if (subNode != null)
-                        item.FindWhat = subNode.InnerText;
-                    subNode = listNode.SelectSingleNode(ReplaceWith);
-                    if (subNode != null)
-                        item.ReplaceWith = subNode.InnerText;
-                    subNode = listNode.SelectSingleNode(SearchType);
-                    if (subNode != null)
-                        item.SearchType = subNode.InnerText;
-                    Configuration.Settings.MultipleSearchAndReplaceList.Add(item);
-                }
-
-                listViewReplaceList.ItemChecked -= ListViewReplaceListItemChecked;
-                listViewReplaceList.BeginUpdate();
-                listViewReplaceList.Items.Clear();
-                foreach (var item in Configuration.Settings.MultipleSearchAndReplaceList)
-                    AddToReplaceListView(item.Enabled, item.FindWhat, item.ReplaceWith, EnglishSearchTypeToLocal(item.SearchType));
                 GeneratePreview();
-                listViewReplaceList.ItemChecked += ListViewReplaceListItemChecked;
-                listViewReplaceList.EndUpdate();
             }
         }
 
-        private void buttonRemoveAll_Click(object sender, EventArgs e)
+        private void ToolStripMenuItemRenameClick(object sender, EventArgs e)
         {
-            listViewReplaceList.Items.Clear();
-            Configuration.Settings.MultipleSearchAndReplaceList.Clear();
-            GeneratePreview();
-        }
+            if (_currentGroup == null)
+                return;
 
-        private void MultipleReplace_Shown(object sender, EventArgs e)
-        {
-            listViewReplaceList.ItemChecked += ListViewReplaceListItemChecked;
-            GeneratePreview();
-        }
-
-        private void buttonCancel_Click(object sender, EventArgs e)
-        {
-            Configuration.Settings.MultipleSearchAndReplaceList.Clear();
-            foreach (var item in _oldMultipleSearchAndReplaceList)
+            using (var form = new MultipleReplaceNewGroup(_currentGroup.Name))
             {
-                Configuration.Settings.MultipleSearchAndReplaceList.Add(item);
+                if (form.ShowDialog(this) == DialogResult.OK && form.GroupName.Length > 0)
+                {
+                    _currentGroup.Name = form.GroupName;
+                    UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, _currentGroup);
+                }
             }
-            DialogResult = DialogResult.Cancel;
+        }
+
+        private void deleteToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (_currentGroup == null)
+                return;
+
+            var idx = Configuration.Settings.MultipleSearchAndReplaceGroups.IndexOf(_currentGroup);
+            Configuration.Settings.MultipleSearchAndReplaceGroups.RemoveAt(idx);
+            if (Configuration.Settings.MultipleSearchAndReplaceGroups.Count > 0)
+            {
+                if (idx >= Configuration.Settings.MultipleSearchAndReplaceGroups.Count)
+                    idx--;
+                _currentGroup = Configuration.Settings.MultipleSearchAndReplaceGroups[idx];
+            }
+            else
+            {
+                _currentGroup = null;
+            }
+            UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, _currentGroup);
+        }
+
+        private void listViewGroups_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete)
+            {
+                deleteToolStripMenuItem1_Click(sender, null);
+                e.Handled = true;
+            }
+            else if (e.KeyData == (Keys.Control | Keys.Up))
+            {
+                moveUpToolStripMenuItem1_Click(sender, null);
+                e.Handled = true;
+            }
+            else if (e.KeyData == (Keys.Control | Keys.Down))
+            {
+                moveDownToolStripMenuItem1_Click(sender, null);
+                e.Handled = true;
+            }
+        }
+
+        private void SwapGroups(int index, int index2)
+        {
+            var temp = Configuration.Settings.MultipleSearchAndReplaceGroups[index];
+            Configuration.Settings.MultipleSearchAndReplaceGroups[index] = Configuration.Settings.MultipleSearchAndReplaceGroups[index2];
+            Configuration.Settings.MultipleSearchAndReplaceGroups[index2] = temp;
+
+            UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, _currentGroup);
+            GeneratePreview();
+        }
+
+        private void moveUpToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (listViewGroups.Items.Count < 2 || listViewGroups.SelectedItems.Count == 0)
+                return;
+
+            int index = listViewGroups.SelectedIndices[0];
+            if (index == 0)
+                return;
+
+            SwapGroups(index, index - 1);
+        }
+
+        private void moveDownToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            if (listViewGroups.Items.Count < 2 || listViewGroups.SelectedItems.Count == 0)
+                return;
+
+            int index = listViewGroups.SelectedIndices[0];
+            if (index == listViewGroups.Items.Count - 1)
+                return;
+
+            SwapGroups(index, index + 1);
+        }
+
+        private void MultipleReplace_ResizeEnd(object sender, EventArgs e)
+        {
+            columnHeader6.Width = -2;
+        }
+
+        private void moveToTopToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewGroups.Items.Count < 2 || listViewGroups.SelectedItems.Count == 0)
+                return;
+
+            int index = listViewGroups.SelectedIndices[0];
+            if (index == 0)
+                return;
+
+            var temp = Configuration.Settings.MultipleSearchAndReplaceGroups[index];
+            Configuration.Settings.MultipleSearchAndReplaceGroups.Remove(temp);
+            Configuration.Settings.MultipleSearchAndReplaceGroups.Insert(0, temp);
+            UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, _currentGroup);
+            GeneratePreview();
+        }
+
+        private void moveToBottomToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (listViewGroups.Items.Count < 2 || listViewGroups.SelectedItems.Count == 0)
+                return;
+
+            int index = listViewGroups.SelectedIndices[0];
+            int bottomIndex = listViewGroups.Items.Count - 1;
+            if (index == bottomIndex)
+                return;
+
+            var temp = Configuration.Settings.MultipleSearchAndReplaceGroups[index];
+            Configuration.Settings.MultipleSearchAndReplaceGroups.Remove(temp);
+            Configuration.Settings.MultipleSearchAndReplaceGroups.Insert(bottomIndex, temp);
+            UpdateViewFromModel(Configuration.Settings.MultipleSearchAndReplaceGroups, temp);
+            GeneratePreview();
+        }
+
+        private void contextMenuStripGroups_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            bool doShow = listViewGroups.SelectedItems.Count > 0;
+            foreach (ToolStripItem item in contextMenuStripGroups.Items)
+            {
+                if (item != newToolStripMenuItem)
+                    item.Visible = doShow;
+            }
         }
 
     }

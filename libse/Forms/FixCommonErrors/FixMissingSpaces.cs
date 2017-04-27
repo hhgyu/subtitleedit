@@ -11,9 +11,8 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
         private static readonly Regex FixMissingSpacesReQuestionMark = new Regex(@"[^\s\d]\?[a-zA-Z]", RegexOptions.Compiled);
         private static readonly Regex FixMissingSpacesReExclamation = new Regex(@"[^\s\d]\![a-zA-Z]", RegexOptions.Compiled);
         private static readonly Regex FixMissingSpacesReColon = new Regex(@"[^\s\d]\:[a-zA-Z]", RegexOptions.Compiled);
-        private static readonly Regex UrlCom = new Regex(@"\w\.com\b", RegexOptions.Compiled);
-        private static readonly Regex UrlNet = new Regex(@"\w\.net\b", RegexOptions.Compiled);
-        private static readonly Regex UrlOrg = new Regex(@"\w\.org\b", RegexOptions.Compiled);
+        private static readonly Regex FixMissingSpacesReColonWithAfter = new Regex(@"[^\s\d]\:[a-zA-Z]+", RegexOptions.Compiled);
+        private static readonly Regex Url = new Regex(@"\w\.(?:com|net|org)\b", RegexOptions.Compiled);
 
         public void Fix(Subtitle subtitle, IFixCallbacks callbacks)
         {
@@ -91,10 +90,19 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                     }
                     else if (allowFix && !@"""<".Contains(p.Text[match.Index + 2]))
                     {
-                        missingSpaces++;
-                        string oldText = p.Text;
-                        p.Text = p.Text.Replace(match.Value, match.Value[0] + ": " + match.Value[match.Value.Length - 1]);
-                        callbacks.AddFixToListView(p, fixAction, oldText, p.Text);
+                        bool skipSwedishOrFinish = false;
+                        if (languageCode == "sv" || languageCode == "fi")
+                        {
+                            var m = FixMissingSpacesReColonWithAfter.Match(p.Text, match.Index);
+                            skipSwedishOrFinish = IsSwedishSkipValue(languageCode, m) || IsFinnishSkipValue(languageCode, m);                            
+                        }
+                        if (!skipSwedishOrFinish)
+                        {
+                            missingSpaces++;
+                            string oldText = p.Text;
+                            p.Text = p.Text.Replace(match.Value, match.Value[0] + ": " + match.Value[match.Value.Length - 1]);
+                            callbacks.AddFixToListView(p, fixAction, oldText, p.Text);
+                        }
                     }
                     match = FixMissingSpacesReColon.Match(p.Text, match.Index + 1);
                 }
@@ -105,9 +113,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                 {
                     if (!p.Text.Contains("www.", StringComparison.OrdinalIgnoreCase) &&
                         !p.Text.Contains("http://", StringComparison.OrdinalIgnoreCase) &&
-                        !UrlCom.IsMatch(p.Text) &&
-                        !UrlNet.IsMatch(p.Text) &&
-                        !UrlOrg.IsMatch(p.Text)) // urls are skipped
+                        !Url.IsMatch(p.Text)) // Skip urls.
                     {
                         bool isMatchAbbreviation = false;
 
@@ -219,7 +225,7 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                     string newText = p.Text;
                     while (index != -1)
                     {
-                        if (newText.Length > index + 4 && index > 1)
+                        if (newText.Length > index + 4 && index >= 1)
                         {
                             if (Utilities.AllLettersAndNumbers.Contains(newText[index + 3]) &&
                                 Utilities.AllLettersAndNumbers.Contains(newText[index - 1]))
@@ -290,13 +296,9 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                     int j = 1;
                     while (j < newText.Length)
                     {
-                        if (@"!?:;".Contains(newText[j]))
+                        if (@"!?:;".Contains(newText[j]) && char.IsLetter(newText[j - 1]))
                         {
-                            if (Utilities.AllLetters.Contains(newText[j - 1]))
-                            {
-                                newText = newText.Insert(j, " ");
-                                j++;
-                            }
+                            newText = newText.Insert(j++, " ");
                         }
                         j++;
                     }
@@ -310,6 +312,49 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                 }
             }
             callbacks.UpdateFixStatus(missingSpaces, language.FixMissingSpaces, string.Format(language.XMissingSpacesAdded, missingSpaces));
+        }
+
+        private static bool IsSwedishSkipValue(string languageCode, Match match)
+        {
+            return languageCode == "sv" && (match.Value.EndsWith(":e") ||
+                                            match.Value.EndsWith(":a") ||
+                                            match.Value.EndsWith(":et") ||
+                                            match.Value.EndsWith(":en") ||
+                                            match.Value.EndsWith(":n") ||
+                                            match.Value.EndsWith(":s"));
+        }
+        private static bool IsFinnishSkipValue(string languageCode, Match match)
+        {
+            return languageCode == "fi" && (match.Value.EndsWith(":aa") ||
+                                            match.Value.EndsWith(":aan") ||
+                                            match.Value.EndsWith(":een") ||
+                                            match.Value.EndsWith(":ia") ||
+                                            match.Value.EndsWith(":ien") ||
+                                            match.Value.EndsWith(":iksi") ||
+                                            match.Value.EndsWith(":ille") ||
+                                            match.Value.EndsWith(":een") ||
+                                            match.Value.EndsWith(":in") ||
+                                            match.Value.EndsWith(":ina") ||
+                                            match.Value.EndsWith(":inä") ||
+                                            match.Value.EndsWith(":itta") ||
+                                            match.Value.EndsWith(":ittä") ||
+                                            match.Value.EndsWith(":iä") ||
+                                            match.Value.EndsWith(":ksi") ||
+                                            match.Value.EndsWith(":lta") ||
+                                            match.Value.EndsWith(":ltä") ||
+                                            match.Value.EndsWith(":n") ||
+                                            match.Value.EndsWith(":nä") ||
+                                            match.Value.EndsWith(":ssa") ||
+                                            match.Value.EndsWith(":ssä") ||
+                                            match.Value.EndsWith(":sta") ||
+                                            match.Value.EndsWith(":stä") ||
+                                            match.Value.EndsWith(":t") ||
+                                            match.Value.EndsWith(":ta") ||
+                                            match.Value.EndsWith(":tta") ||
+                                            match.Value.EndsWith(":ttä") ||
+                                            match.Value.EndsWith(":tä") ||
+                                            match.Value.EndsWith(":ää") ||
+                                            match.Value.EndsWith(":ään"));
         }
 
         private static string GetWordFromIndex(string text, int index)

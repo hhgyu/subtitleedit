@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -6,8 +7,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle41 : SubtitleFormat
     {
-        private static readonly Regex RegexTimeCodes1 = new Regex(@"^\d+.\d$", RegexOptions.Compiled);
-        private static readonly Regex RegexTimeCodes2 = new Regex(@"^\d+.\d\d$", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^\d+\.\d\d?$", RegexOptions.Compiled);
 
         public override string Extension
         {
@@ -27,17 +27,20 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override bool IsMine(List<string> lines, string fileName)
         {
             Subtitle subtitle = new Subtitle();
+            var oldFrameRate = Configuration.Settings.General.CurrentFrameRate;
             LoadSubtitle(subtitle, lines, fileName);
+            Configuration.Settings.General.CurrentFrameRate = oldFrameRate;
             return subtitle.Paragraphs.Count > _errorCount;
         }
 
         public override string ToText(Subtitle subtitle, string title)
         {
-            const string paragraphWriteFormat = "{0}\r\n{1}\r\n{2}\r\n";
+            Configuration.Settings.General.CurrentFrameRate = 24.0;
+            const string paragraphWriteFormat = "{0}{3}{1}{3}{2}/{3}";
             var sb = new StringBuilder();
             foreach (Paragraph p in subtitle.Paragraphs)
             {
-                sb.AppendLine(string.Format(paragraphWriteFormat, EncodeTimeCode(p.StartTime), p.Text, EncodeTimeCode(p.EndTime)));
+                sb.AppendLine(string.Format(paragraphWriteFormat, EncodeTimeCode(p.StartTime), p.Text, EncodeTimeCode(p.EndTime), Environment.NewLine));
             }
             return sb.ToString().Trim();
         }
@@ -52,6 +55,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             //Comment elle s’appelait ?
             //924.6/
 
+            Configuration.Settings.General.CurrentFrameRate = 24.0;
             _errorCount = 0;
             Paragraph p = null;
             bool textOn = false;
@@ -62,7 +66,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 {
                     if (textOn)
                     {
-                        if (RegexTimeCodes1.Match(line.TrimEnd('/')).Success || RegexTimeCodes2.Match(line).Success)
+                        if (line.Length > 1 && line.Length < 11 && RegexTimeCodes.Match(line.TrimEnd('/')).Success)
                         {
                             p.EndTime = DecodeTimeCode(line.TrimEnd('/').Split('.'));
                             if (sb.Length > 0)
@@ -84,7 +88,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
                     else
                     {
-                        if (RegexTimeCodes1.Match(line).Success || RegexTimeCodes2.Match(line).Success)
+                        if (line.Length > 1 && line.Length < 11 && RegexTimeCodes.Match(line).Success)
                         {
                             p = new Paragraph();
                             sb.Clear();
@@ -109,16 +113,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string EncodeTimeCode(TimeCode time)
         {
-            Configuration.Settings.General.CurrentFrameRate = 24.0;
             int frames = MillisecondsToFrames(time.TotalMilliseconds);
             int footage = frames / 16;
-            int rest = (int)((frames % 16) / 16.0 * Configuration.Settings.General.CurrentFrameRate);
+            int rest = (int)Math.Round(frames % 16.0 / 16.0 * Configuration.Settings.General.CurrentFrameRate);
             return string.Format("{0}.{1:0}", footage, rest);
         }
 
         private static TimeCode DecodeTimeCode(string[] parts)
         {
-            Configuration.Settings.General.CurrentFrameRate = 24.0;
             var frames16 = int.Parse(parts[0]);
             var frames = int.Parse(parts[1]);
             return new TimeCode(0, 0, 0, FramesToMilliseconds(16 * frames16 + frames));

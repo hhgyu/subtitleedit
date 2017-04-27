@@ -31,6 +31,8 @@ namespace Nikse.SubtitleEdit.Forms
             buttonTranslate.Text = Configuration.Settings.Language.GoogleOrMicrosoftTranslate.Translate;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
             UiUtil.FixLargeFonts(this, buttonCancel);
+            buttonGoogle.Text = string.Empty;
+            buttonMicrosoft.Text = string.Empty;
         }
 
         private static void RemovedLanguagesNotInMicrosoftTranslate(ComboBox comboBox)
@@ -50,7 +52,7 @@ namespace Nikse.SubtitleEdit.Forms
 
             int i = 0;
             comboBoxFrom.SelectedIndex = 0;
-            foreach (Nikse.SubtitleEdit.Forms.GoogleTranslate.ComboBoxItem item in comboBoxFrom.Items)
+            foreach (GoogleTranslate.ComboBoxItem item in comboBoxFrom.Items)
             {
                 if (item.Value == defaultFromLanguage)
                 {
@@ -62,7 +64,7 @@ namespace Nikse.SubtitleEdit.Forms
 
             i = 0;
             comboBoxTo.SelectedIndex = 0;
-            foreach (Nikse.SubtitleEdit.Forms.GoogleTranslate.ComboBoxItem item in comboBoxTo.Items)
+            foreach (GoogleTranslate.ComboBoxItem item in comboBoxTo.Items)
             {
                 if (item.Value == defaultToLanguage)
                 {

@@ -2,10 +2,10 @@
 <Language Name="dansk">
   <General>
     <Title>Subtitle Edit</Title>
-    <Version>3.4.10</Version>
+    <Version>3.5.2</Version>
     <TranslatedBy>Oversat til dansk af Nikse (mailto:nikse.dk@gmail.com)</TranslatedBy>
     <CultureName>da-DK</CultureName>
-    <HelpFile />
+    <HelpFile></HelpFile>
     <Ok>&amp;OK</Ok>
     <Cancel>&amp;Fortryd</Cancel>
     <Apply>Anvend</Apply>
@@ -21,10 +21,12 @@
     <OpenVideoFileTitle>Åbn video fil...</OpenVideoFileTitle>
     <NoVideoLoaded>Ingen video indlæst</NoVideoLoaded>
     <VideoInformation>Video info</VideoInformation>
-    <PositionX>Position: {0}</PositionX>
     <StartTime>Starttid</StartTime>
     <EndTime>Sluttid</EndTime>
     <Duration>Varighed</Duration>
+    <CharsPerSec>Tegn/sek</CharsPerSec>
+    <WordsPerMin>Ord/min</WordsPerMin>
+    <Actor>Taler</Actor>
     <NumberSymbol>#</NumberSymbol>
     <Number>Antal</Number>
     <Text>Tekst</Text>
@@ -170,7 +172,6 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <PleaseChooseOutputFolder>Vælg output mappe</PleaseChooseOutputFolder>
     <NotConverted>Fejl</NotConverted>
     <Converted>Konverteret</Converted>
-    <ConvertedX>Konverteret ({0})</ConvertedX>
     <Settings>Indstillinger</Settings>
     <SplitLongLines>Split lange linjer</SplitLongLines>
     <AutoBalance>Auto-balancer linjer</AutoBalance>
@@ -349,6 +350,7 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <CodePageNumber>Code page number</CodePageNumber>
     <DiskFormatCode>Disk format code</DiskFormatCode>
     <DisplayStandardCode>Display standard code</DisplayStandardCode>
+    <ColorRequiresTeletext>Farver kræver teletext!</ColorRequiresTeletext>
     <CharacterCodeTable>Character table</CharacterCodeTable>
     <LanguageCode>Language code</LanguageCode>
     <OriginalProgramTitle>Original program title</OriginalProgramTitle>
@@ -368,6 +370,10 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <Import>Import...</Import>
     <TextAndTimingInformation>Text and timing information</TextAndTimingInformation>
     <JustificationCode>Justification code</JustificationCode>
+    <VerticalPosition>Lodret position</VerticalPosition>
+    <MarginTop>Margin top (for top justeret undertekster)</MarginTop>
+    <MarginBottom>Margin bund (til bund justeret undertekster)</MarginBottom>
+    <NewLineRows>Antal rækker tilføjet af en ny linje</NewLineRows>
     <Teletext>Teletext</Teletext>
     <UseBox>Brug boks omkring tekst</UseBox>
     <DoubleHeight>Brug dobbelt højde til tekst</DoubleHeight>
@@ -632,8 +638,6 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <DescriptionLine1>Subtitle Edit's stavekontrol er baseret på NHunspell, der</DescriptionLine1>
     <DescriptionLine2>bruger ordbøger fra Open Office.</DescriptionLine2>
     <GetDictionariesHere>Hent ordbøger her:</GetDictionariesHere>
-    <OpenOpenOfficeWiki>Open Office Wiki Ordbog liste</OpenOpenOfficeWiki>
-    <GetAllDictionaries>Hent alle ordbøger</GetAllDictionaries>
     <ChooseLanguageAndClickDownload>Vælg sprog og klik på download</ChooseLanguageAndClickDownload>
     <OpenDictionariesFolder>Åbn 'Dictionaries' mappen</OpenDictionariesFolder>
     <Download>Download</Download>
@@ -688,6 +692,7 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <Frames>Rammer</Frames>
     <Seconds>Sekunder</Seconds>
     <Milliseconds>Millisekunder</Milliseconds>
+    <GetSceneChangesWithFfmpeg>Generer sceneskift med FFmpeg</GetSceneChangesWithFfmpeg>
   </ImportSceneChanges>
   <ImportText>
     <Title>Importer tekst</Title>
@@ -726,6 +731,150 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <TotalNumberOfLinesX>Total antal linjer: {0:#,###,###}</TotalNumberOfLinesX>
     <Note>Bemærk: Filer skal allerede have korrekte tidskoder</Note>
   </JoinSubtitles>
+  <LanguageNames>
+    <NotSpecified>Ikke angivet</NotSpecified>
+    <UnknownCodeX>Ukendt ({0})</UnknownCodeX>
+    <aaName>afar</aaName>
+    <abName>abkhasisk</abName>
+    <afName>afrikaans</afName>
+    <amName>amharisk</amName>
+    <arName>arabisk</arName>
+    <asName>assamesisk</asName>
+    <ayName>aymara</ayName>
+    <azName>aserbajdsjansk</azName>
+    <baName>bashkir</baName>
+    <beName>hviderussisk</beName>
+    <bgName>bulgarsk</bgName>
+    <bhName>bihari</bhName>
+    <biName>bislama</biName>
+    <bnName>bengali</bnName>
+    <boName>tibetansk</boName>
+    <brName>bretonsk</brName>
+    <caName>catalansk</caName>
+    <coName>korsikansk</coName>
+    <csName>tjekkisk</csName>
+    <cyName>walisisk</cyName>
+    <daName>dansk</daName>
+    <deName>tysk</deName>
+    <dzName>dzongkha</dzName>
+    <elName>græsk</elName>
+    <enName>engelsk</enName>
+    <eoName>esperanto</eoName>
+    <esName>spansk</esName>
+    <etName>estisk</etName>
+    <euName>baskisk</euName>
+    <faName>persisk</faName>
+    <fiName>finsk</fiName>
+    <fjName>fijiansk</fjName>
+    <foName>færøsk</foName>
+    <frName>fransk</frName>
+    <fyName>frisisk</fyName>
+    <gaName>irsk</gaName>
+    <gdName>skotsk gælisk</gdName>
+    <glName>galicisk</glName>
+    <gnName>guarani</gnName>
+    <guName>gujarati</guName>
+    <haName>hausa</haName>
+    <heName>hebraisk</heName>
+    <hiName>hindi</hiName>
+    <hrName>kroatisk</hrName>
+    <huName>ungarsk</huName>
+    <hyName>armensk</hyName>
+    <iaName>interlingua</iaName>
+    <idName>indonesisk</idName>
+    <ieName>interlingue</ieName>
+    <ikName>inupiaq</ikName>
+    <isName>islandsk</isName>
+    <itName>italiensk</itName>
+    <iuName>inuktitut</iuName>
+    <jaName>japansk</jaName>
+    <jvName>javanesisk</jvName>
+    <kaName>georgisk</kaName>
+    <kkName>kasakhisk</kkName>
+    <klName>grønlandsk</klName>
+    <kmName>khmer</kmName>
+    <knName>kannada</knName>
+    <koName>koreansk</koName>
+    <ksName>kashmiri</ksName>
+    <kuName>kurdisk</kuName>
+    <kyName>kirgisisk</kyName>
+    <laName>latin</laName>
+    <lbName>luxembourgsk</lbName>
+    <lnName>lingala</lnName>
+    <loName>lao</loName>
+    <ltName>litauisk</ltName>
+    <lvName>lettisk</lvName>
+    <mgName>malagassisk</mgName>
+    <miName>maori</miName>
+    <mkName>makedonsk</mkName>
+    <mlName>malayalam</mlName>
+    <mnName>mongolsk</mnName>
+    <moName>moldovisk</moName>
+    <mrName>marathisk</mrName>
+    <msName>malajisk</msName>
+    <mtName>maltesisk</mtName>
+    <myName>burmesisk</myName>
+    <naName>nauru</naName>
+    <neName>nepalesisk</neName>
+    <nlName>hollandsk</nlName>
+    <noName>norsk</noName>
+    <ocName>occitansk</ocName>
+    <omName>oromo</omName>
+    <orName>oriya</orName>
+    <paName>punjabi</paName>
+    <plName>polsk</plName>
+    <psName>pashto</psName>
+    <ptName>portugisisk</ptName>
+    <quName>quechua</quName>
+    <rmName>rætoromansk</rmName>
+    <rnName>rundi</rnName>
+    <roName>rumænsk</roName>
+    <ruName>russisk</ruName>
+    <rwName>kinyarwanda</rwName>
+    <saName>sanskrit</saName>
+    <sdName>sindhi</sdName>
+    <sgName>sango</sgName>
+    <shName>serbokroatisk</shName>
+    <siName>singalesisk</siName>
+    <skName>slovakisk</skName>
+    <slName>slovensk</slName>
+    <smName>samoansk</smName>
+    <snName>shona</snName>
+    <soName>somalisk</soName>
+    <sqName>albansk</sqName>
+    <srName>serbisk</srName>
+    <ssName>swati</ssName>
+    <stName>sydsotho</stName>
+    <suName>sundanesisk</suName>
+    <svName>svensk</svName>
+    <swName>swahili</swName>
+    <taName>tamilsk</taName>
+    <teName>telugu</teName>
+    <tgName>tajik</tgName>
+    <thName>thai</thName>
+    <tiName>tigrinya</tiName>
+    <tkName>turkmensk</tkName>
+    <tlName>tagalog</tlName>
+    <tnName>tswana</tnName>
+    <toName>tongansk</toName>
+    <trName>tyrkisk</trName>
+    <tsName>tsonga</tsName>
+    <ttName>tatarisk</ttName>
+    <twName>twi</twName>
+    <ugName>uygurisk</ugName>
+    <ukName>ukrainsk</ukName>
+    <urName>urdu</urName>
+    <uzName>usbekisk</uzName>
+    <viName>vietnamesisk</viName>
+    <voName>volapyk</voName>
+    <woName>wolof</woName>
+    <xhName>xhosa</xhName>
+    <yiName>jiddisch</yiName>
+    <yoName>yoruba</yoName>
+    <zaName>zhuang</zaName>
+    <zhName>kinesisk</zhName>
+    <zuName>zulu</zuName>
+  </LanguageNames>
   <Main>
     <Menu>
       <File>
@@ -845,6 +994,7 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
         <OpenDvd>Åbn DVD...</OpenDvd>
         <ChooseAudioTrack>Vælg lydspor</ChooseAudioTrack>
         <CloseVideo>Luk videofil</CloseVideo>
+        <SetVideoOffset>Indstil video offset...</SetVideoOffset>
         <ImportSceneChanges>Importer sceneskift...</ImportSceneChanges>
         <RemoveSceneChanges>Fjern sceneskift</RemoveSceneChanges>
         <WaveformBatchGenerate>Batch generer bølgeformer...</WaveformBatchGenerate>
@@ -903,16 +1053,20 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
         <Find>Find</Find>
         <Replace>Erstat</Replace>
         <FixCommonErrors>Fix almindelige fejl</FixCommonErrors>
+        <RemoveTextForHi>Fjern tekst for hørehæmmede</RemoveTextForHi>
         <VisualSync>Visuel synkroniser</VisualSync>
         <SpellCheck>Stavekontrol</SpellCheck>
+        <NetflixQualityCheck>Netflix kvalitetstjek</NetflixQualityCheck>
         <Settings>Indstillinger</Settings>
         <Help>Hjælp</Help>
         <ShowHideWaveform>Vis/skjul kurveform</ShowHideWaveform>
         <ShowHideVideo>Vis/skjul video</ShowHideVideo>
       </ToolBar>
       <ContextMenu>
+        <SizeAllColumnsToFit>Auto-tilpas kolonner</SizeAllColumnsToFit>
         <AdvancedSubStationAlphaSetStyle>Advanced Sub Station Alpha - vælg stilart</AdvancedSubStationAlphaSetStyle>
         <SubStationAlphaSetStyle>(Advanced) Sub Station Alpha - vælg stilart</SubStationAlphaSetStyle>
+        <SetActor>Vælg taler</SetActor>
         <SubStationAlphaStyles>Sub Station Alpha stilarter...</SubStationAlphaStyles>
         <AdvancedSubStationAlphaStyles>Advanced Sub Station Alpha stilarter...</AdvancedSubStationAlphaStyles>
         <TimedTextSetStyle>Timed Text - sæt style</TimedTextSetStyle>
@@ -964,6 +1118,8 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
         <SaveSelectedLines>Gem valgte linjer som...</SaveSelectedLines>
         <WebVTTSetNewVoice>Angiv ny stemme...</WebVTTSetNewVoice>
         <WebVTTRemoveVoices>Fjern stemmer</WebVTTRemoveVoices>
+        <NewActor>Ny taler</NewActor>
+        <RemoveActors>Fjern talere</RemoveActors>
       </ContextMenu>
     </Menu>
     <Controls>
@@ -1039,7 +1195,6 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
     <BeforeVisualSync>Før visuel synkroniser</BeforeVisualSync>
     <VisualSyncPerformedOnSelectedLines>Visual synkronisering udføres på udvalgte linjer</VisualSyncPerformedOnSelectedLines>
     <VisualSyncPerformed>Visuel synkronisering udført</VisualSyncPerformed>
-    <ImportThisVobSubSubtitle>Importer denne VobSub undertekst?</ImportThisVobSubSubtitle>
     <FileXIsLargerThan10MB>Filen er større end 10 MB: {0}</FileXIsLargerThan10MB>
     <ContinueAnyway>Fortsæt alligevel?</ContinueAnyway>
     <BeforeLoadOf>Før indlæsning af {0}</BeforeLoadOf>
@@ -1298,6 +1453,7 @@ Hvis du har redigeret denne fil med Subtitle Edit du måske finde en backup via 
   </Main>
   <MatroskaSubtitleChooser>
     <Title>Vælg undertekst fra Matroska fil</Title>
+    <TitleMp4>Vælg undertekster fra MP4-fil</TitleMp4>
     <PleaseChoose>Mere end en undertekst fundet - så vælg</PleaseChoose>
     <TrackXLanguageYTypeZ>Spor {0} - sprog: {1} - type: {2}</TrackXLanguageYTypeZ>
   </MatroskaSubtitleChooser>
@@ -1363,7 +1519,7 @@ Hvis du har redigeret denne fil med Subtitle Edit du måske finde en backup via 
     <CaseSensitive>Versal følsom</CaseSensitive>
     <RegularExpression>Regulært udtryk</RegularExpression>
     <LinesFoundX>Linjer fundet: {0}</LinesFoundX>
-    <Delete>Slet</Delete>
+    <Remove>Fjern</Remove>
     <Add>Tilføj</Add>
     <Update>Opdater</Update>
     <Enabled>Aktiv</Enabled>
@@ -1376,6 +1532,12 @@ Hvis du har redigeret denne fil med Subtitle Edit du måske finde en backup via 
     <Rules>Eksport regler</Rules>
     <MoveToTop>Flyt til top</MoveToTop>
     <MoveToBottom>Flyt til bund</MoveToBottom>
+    <MoveSelectedRulesToGroup>Flyt valgte regler gruppe</MoveSelectedRulesToGroup>
+    <Groups>Grupper</Groups>
+    <RulesForGroupX>Regler for gruppen "{0}"</RulesForGroupX>
+    <GroupName>Gruppenavn</GroupName>
+    <RenameGroup>Omdøb gruppe...</RenameGroup>
+    <NewGroup>Ny gruppe...</NewGroup>
   </MultipleReplace>
   <NetworkChat>
     <Title>Chat</Title>
@@ -1522,6 +1684,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <Replace>Erstat</Replace>
     <VisualSync>Visuel synk</VisualSync>
     <SpellCheck>Stavekontrol</SpellCheck>
+    <NetflixQualityCheck>Netflix kvalitetstjek</NetflixQualityCheck>
     <SettingsName>Indstillinger</SettingsName>
     <Help>Hjælp</Help>
     <ShowFrameRate>Vis frame rate i værktøjslinjen</ShowFrameRate>
@@ -1530,13 +1693,16 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <AutoDetectAnsiEncoding>Auto opdag ANSI-kodning</AutoDetectAnsiEncoding>
     <SubtitleLineMaximumLength>Linje max. længde</SubtitleLineMaximumLength>
     <MaximumCharactersPerSecond>Maks tegn/sek</MaximumCharactersPerSecond>
+    <MaximumWordssPerMinute>Maks ord/min</MaximumWordssPerMinute>
     <AutoWrapWhileTyping>Auto-ombryd tekst mens du skriver</AutoWrapWhileTyping>
     <DurationMinimumMilliseconds>Min. varighed, millisekunder</DurationMinimumMilliseconds>
     <DurationMaximumMilliseconds>Max. varighed, millisekunder</DurationMaximumMilliseconds>
     <MinimumGapMilliseconds>Min. mellemrum mellem undertekster i ms</MinimumGapMilliseconds>
+    <MaximumLines>Max. antal linjer</MaximumLines>
     <SubtitleFont>undertekst skrifttype</SubtitleFont>
     <SubtitleFontSize>undertekst skriftstørrelse</SubtitleFontSize>
     <SubtitleBold>Fed</SubtitleBold>
+    <VideoAutoOpen>Auto-åbn videofil ved åbning af undertekst</VideoAutoOpen>
     <SubtitleCenter>Centrer</SubtitleCenter>
     <SubtitleFontColor>Undertekst skriftfarve</SubtitleFontColor>
     <SubtitleBackgroundColor>Undertekst baggrundsfarve</SubtitleBackgroundColor>
@@ -1549,6 +1715,8 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <RemoveBlankLinesWhenOpening>Fjern tomme linjer, når undertekst åbnes</RemoveBlankLinesWhenOpening>
     <ShowLineBreaksAs>Vis linjeskift i listevisning som</ShowLineBreaksAs>
     <MainListViewDoubleClickAction>Dobbeltklik på linje i hovedvinduet listevisning starter</MainListViewDoubleClickAction>
+    <MainListViewColumns>Listevisning kolonner</MainListViewColumns>
+    <MainListViewColumnsInfo>Vælg synlige listevisning kolonner</MainListViewColumnsInfo>
     <MainListViewNothing>Ingenting</MainListViewNothing>
     <MainListViewVideoGoToPositionAndPause>Gå til video pos og pause</MainListViewVideoGoToPositionAndPause>
     <MainListViewVideoGoToPositionAndPlay>Gå til video pos og afspi</MainListViewVideoGoToPositionAndPlay>
@@ -1561,6 +1729,10 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <AutoBackupEveryMinute>Hvert minut</AutoBackupEveryMinute>
     <AutoBackupEveryFiveMinutes>Hver 5. minut</AutoBackupEveryFiveMinutes>
     <AutoBackupEveryFifteenMinutes>Hver 15. minut</AutoBackupEveryFifteenMinutes>
+    <AutoBackupDeleteAfter>Slet efter</AutoBackupDeleteAfter>
+    <AutoBackupDeleteAfterOneMonth>En måned</AutoBackupDeleteAfterOneMonth>
+    <AutoBackupDeleteAfterThreeMonths>3 måneder</AutoBackupDeleteAfterThreeMonths>
+    <AutoBackupDeleteAfterSixMonths>6 måneder</AutoBackupDeleteAfterSixMonths>
     <CheckForUpdates>Tjek for opdateringer</CheckForUpdates>
     <AllowEditOfOriginalSubtitle>Tillad redigering af originale undertekst</AllowEditOfOriginalSubtitle>
     <PromptDeleteLines>Spørg om slet af linjer</PromptDeleteLines>
@@ -1570,12 +1742,11 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <VideoEngine>Video afspiller</VideoEngine>
     <DirectShow>DirectShow</DirectShow>
     <DirectShowDescription>Quartz.dll i system32 mappen</DirectShowDescription>
-    <ManagedDirectX>Managed DirectX</ManagedDirectX>
-    <ManagedDirectXDescription>Microsoft.DirectX.AudioVideoPlayback - .NET Managed kode fra DirectX</ManagedDirectXDescription>
     <MpcHc>MPC-HC</MpcHc>
     <MpcHcDescription>Media Player Classic - Home Cinema</MpcHcDescription>
-    <MPlayer>MPlayer</MPlayer>
-    <MPlayerDescription>MPlayer2/Mplayer</MPlayerDescription>
+    <MpvPlayer>mpv</MpvPlayer>
+    <MpvPlayerDescription>https://mpv.io/ - gratis, open source og cross-platform medie afspiller</MpvPlayerDescription>
+    <MpvHandlesPreviewText>MPV håndterer tekstvisning</MpvHandlesPreviewText>
     <VlcMediaPlayer>VLC media player</VlcMediaPlayer>
     <VlcMediaPlayerDescription>libvlc.dll fra VLC media player 1.1.0 eller nyere</VlcMediaPlayerDescription>
     <VlcBrowseToLabel>VLC sti (kun nødvendig, hvis du bruger den portable version af VLC)</VlcBrowseToLabel>
@@ -1588,8 +1759,11 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <WaveformAppearance>Lyd kurve udseende</WaveformAppearance>
     <WaveformGridColor>Gitter farve</WaveformGridColor>
     <WaveformShowGridLines>Vis gitterlinjer</WaveformShowGridLines>
+    <WaveformShowCps>Vis tegn/sek</WaveformShowCps>
+    <WaveformShowWpm>Vis ord/min</WaveformShowWpm>
     <ReverseMouseWheelScrollDirection>Skift musehjul rulle retning</ReverseMouseWheelScrollDirection>
     <WaveformAllowOverlap>Tillad overlapning (når du flytter/resizing)</WaveformAllowOverlap>
+    <WaveformSetVideoPosMoveStartEnd>Sæt video position, når du flytter start/slut</WaveformSetVideoPosMoveStartEnd>
     <WaveformFocusMouseEnter>Sæt fokus ved mus over</WaveformFocusMouseEnter>
     <WaveformListViewFocusMouseEnter>Set focus i listevisning ved mus over listevisning</WaveformListViewFocusMouseEnter>
     <WaveformBorderHitMs1>Grænse-markør ved flyt er aktiv inden for</WaveformBorderHitMs1>
@@ -1611,7 +1785,6 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <WaveformBrowseToFFmpeg>Vælg sti stil FFmpeg</WaveformBrowseToFFmpeg>
     <WaveformBrowseToVLC>Gå til VLC portable</WaveformBrowseToVLC>
     <SubStationAlphaStyle>Sub Station Alpha Style</SubStationAlphaStyle>
-    <ChooseFont>Vælg skrifttype</ChooseFont>
     <ChooseColor>Vælg farve</ChooseColor>
     <SsaOutline>Orids</SsaOutline>
     <SsaShadow>Skygge</SsaShadow>
@@ -1646,6 +1819,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <FirstPlusX>Første + {0}</FirstPlusX>
     <LastMinusX>Sidste - {0}</LastMinusX>
     <FixCommonerrors>Ret almindelige fejl</FixCommonerrors>
+    <RemoveTextForHi>Fjern tekst for svagthørende</RemoveTextForHi>
     <MergeLinesShorterThan>Flet linjer kortere end</MergeLinesShorterThan>
     <MusicSymbol>Musik symbol</MusicSymbol>
     <MusicSymbolsToReplace>Musik symboler der skal erstattes (adskilt af mellemrum)</MusicSymbolsToReplace>
@@ -1660,7 +1834,6 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <Key>Key</Key>
     <TextBox>Tekstboks</TextBox>
     <UpdateShortcut>Opdater</UpdateShortcut>
-    <ShortcutIsNotValid>Genvej er ikke gyldig: {0}</ShortcutIsNotValid>
     <ToggleDockUndockOfVideoControls>Skift dok/frigør af video kontrol</ToggleDockUndockOfVideoControls>
     <CreateSetEndAddNewAndGoToNew>Sæt slut, tilføj ny og gå til ny</CreateSetEndAddNewAndGoToNew>
     <AdjustViaEndAutoStartAndGoToNext>Juster via slutposition og gå til næste</AdjustViaEndAutoStartAndGoToNext>
@@ -1673,12 +1846,16 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <AdjustSetStartTimeKeepDuration>Sæt starttid, behold varighed</AdjustSetStartTimeKeepDuration>
     <AdjustSetEndAndOffsetTheRest>Set sluttid, juster resten</AdjustSetEndAndOffsetTheRest>
     <AdjustSetEndAndOffsetTheRestAndGoToNext>Set sluttid, juster resten og gå til næste</AdjustSetEndAndOffsetTheRestAndGoToNext>
+    <AdjustExtendCurrentSubtitle>Forlæng aktuelle linje til næste undertekster eller max varighed</AdjustExtendCurrentSubtitle>
+    <RecalculateDurationOfCurrentSubtitle>Genberegn varighed valgte undertekst</RecalculateDurationOfCurrentSubtitle>
     <MainCreateStartDownEndUp>Opret ny på tast-ned, sæt sluttid ved tast-op</MainCreateStartDownEndUp>
     <MergeDialog>Flet dialog (indsæt tankestreger)</MergeDialog>
     <GoToNext>Gå til næste linje</GoToNext>
     <GoToPrevious>Gå til forrige line</GoToPrevious>
     <GoToCurrentSubtitleStart>Gå til nuværende linje start</GoToCurrentSubtitleStart>
     <GoToCurrentSubtitleEnd>Gå til nuværende linje slut</GoToCurrentSubtitleEnd>
+    <GoToPreviousSubtitleAndFocusVideo>Gå til foregående linje og indstil video position</GoToPreviousSubtitleAndFocusVideo>
+    <GoToNextSubtitleAndFocusVideo>Gå til næste linje og sæt video position</GoToNextSubtitleAndFocusVideo>
     <ToggleFocus>Skift fokus imellem liste visning og undertekst tekstboks</ToggleFocus>
     <ToggleDialogDashes>Toggle dialog tankestreger</ToggleDialogDashes>
     <Alignment>Justering (valgte linier)</Alignment>
@@ -1696,6 +1873,8 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <WaveformPlayNewSelectionEnd>Afspil slutningen af markering</WaveformPlayNewSelectionEnd>
     <WaveformPlayFirstSelectedSubtitle>Spil første valgte undertekst</WaveformPlayFirstSelectedSubtitle>
     <WaveformFocusListView>Fokuser listevisning</WaveformFocusListView>
+    <WaveformGoToNextSceneChange>Gå til næste sceneskift</WaveformGoToNextSceneChange>
+    <WaveformToggleSceneChange>Toggle sceneskift</WaveformToggleSceneChange>
     <GoBack1Frame>En frame tilbage</GoBack1Frame>
     <GoForward1Frame>En frame frem</GoForward1Frame>
     <GoBack100Milliseconds>100 ms tilbage</GoBack100Milliseconds>
@@ -1704,6 +1883,8 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <GoForward500Milliseconds>500 ms frem</GoForward500Milliseconds>
     <GoBack1Second>Et sekund tilbage</GoBack1Second>
     <GoForward1Second>Et sekund fremad</GoForward1Second>
+    <GoBack5Seconds>Fem sekunder tilbage</GoBack5Seconds>
+    <GoForward5Seconds>Fem sekunder frem</GoForward5Seconds>
     <TogglePlayPause>Skift mellem afspil og pause</TogglePlayPause>
     <Pause>Pause</Pause>
     <Fullscreen>Fuldskærm</Fullscreen>
@@ -1718,7 +1899,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <SyntaxColorDurationIfTooSmall>Farve - varighed, hvis for kort</SyntaxColorDurationIfTooSmall>
     <SyntaxColorDurationIfTooLarge>Farve - varighed, hvis for længe</SyntaxColorDurationIfTooLarge>
     <SyntaxColorTextIfTooLong>Farve - tekst, hvis for lang</SyntaxColorTextIfTooLong>
-    <SyntaxColorTextMoreThanXLines>Farve - tekst, hvis mere end linjer:</SyntaxColorTextMoreThanXLines>
+    <SyntaxColorTextMoreThanMaxLines>Farve - tekst, hvis mere end {0} linjer</SyntaxColorTextMoreThanMaxLines>
     <SyntaxColorOverlap>Farve - tidskode overlapper</SyntaxColorOverlap>
     <SyntaxErrorColor>Fejl farve</SyntaxErrorColor>
     <GoToFirstSelectedLine>Gå til første valgte linje</GoToFirstSelectedLine>
@@ -1728,6 +1909,8 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <ToggleTranslationMode>Toggle oversættelses-tilstand</ToggleTranslationMode>
     <SwitchOriginalAndTranslation>Byt original og oversættelse</SwitchOriginalAndTranslation>
     <MergeOriginalAndTranslation>Flet original og oversættelse</MergeOriginalAndTranslation>
+    <MergeWithNext>Flet med næste</MergeWithNext>
+    <MergeWithPrevious>Flet med forrige</MergeWithPrevious>
     <ShortcutIsAlreadyDefinedX>Genvej allerede defineret:
 {0}</ShortcutIsAlreadyDefinedX>
     <ToggleTranslationAndOriginalInPreviews>Skift mellem oversættelse og original i video/audio preview</ToggleTranslationAndOriginalInPreviews>
@@ -1746,12 +1929,25 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <MainTextBoxUnbreak>Fjern linjeskift</MainTextBoxUnbreak>
     <MainFileSaveAll>Gem alle</MainFileSaveAll>
     <Miscellaneous>Diverse</Miscellaneous>
+    <CpsIncludesSpace>Tegn/sek (CPS) inkluderer mellemrum</CpsIncludesSpace>
     <UseDoNotBreakAfterList>Benyt skift-ikke-efter-liste (for auto-ombrydning)</UseDoNotBreakAfterList>
+    <MicrosoftBingTranslator>Microsoft Bing Translator</MicrosoftBingTranslator>
+    <HowToSignUp>Sådan tilmelder du dig</HowToSignUp>
+    <ClientId>Client ID</ClientId>
+    <ClientSecret>Client secret</ClientSecret>
   </Settings>
+  <SettingsMpv>
+    <Title>Indstillinger for MPV</Title>
+    <DownloadMpv>Hent MPV lib</DownloadMpv>
+    <DownloadMpvFailed>Kan ikke downloade MPV - prøv igen senere!</DownloadMpvFailed>
+    <DownloadMpvOk>MPV lib blev hentet og er klar til brug.</DownloadMpvOk>
+  </SettingsMpv>
   <SetVideoOffset>
     <Title>Indstil video offset</Title>
     <Description>Indstil video offset (undertekster bør ikke følge real video tid, men fx +10 timer)</Description>
     <RelativeToCurrentVideoPosition>I forhold til aktuelle video position</RelativeToCurrentVideoPosition>
+    <KeepTimeCodes>Behold eksisterende tidskoder (tilføj ikke video offset)</KeepTimeCodes>
+    <Reset>Reset</Reset>
   </SetVideoOffset>
   <ShowEarlierLater>
     <Title>Vis valgte linjer tidligere/senere</Title>
@@ -1800,6 +1996,13 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <SpellCheckAborted>Stavekontrol afbrudt</SpellCheckAborted>
     <UndoX>Fortryd: {0}</UndoX>
   </SpellCheck>
+  <NetflixQualityCheck>
+    <GlyphCheckReport>Ugyldigt tegn {0} findes i kolonne {1}</GlyphCheckReport>
+    <WhiteSpaceCheckReport>Ugyldigt mellemrum fundet ved kolonne {0}.</WhiteSpaceCheckReport>
+    <ReportPrompt>Se hele rapporten her: {0}.</ReportPrompt>
+    <FoundXIssues>Netflix kvalitetstjek fundet {0} problemstillinger.</FoundXIssues>
+    <CheckOk>Netflix kvalitetstjek OK :)</CheckOk>
+  </NetflixQualityCheck>
   <Split>
     <Title>Split</Title>
     <SplitOptions>Split - indstillinger</SplitOptions>
@@ -1857,6 +2060,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <LengthInFormatXinCharactersY>Antal tegn som {0}: {1: ####, ##0}</LengthInFormatXinCharactersY>
     <NumberOfCharactersInTextOnly>Antal tegn (kun in tekst): {0:#,###,##0}</NumberOfCharactersInTextOnly>
     <TotalCharsPerSecond>Total antal karakterer per sekund: {0:0.0} sekunder</TotalCharsPerSecond>
+    <TotalWords>Total antal ord: {0}</TotalWords>
     <NumberOfItalicTags>Antal kursiv tags: {0}</NumberOfItalicTags>
     <NumberOfBoldTags>Antal fed tags: {0}</NumberOfBoldTags>
     <NumberOfUnderlineTags>Antal understreg tags: {0}</NumberOfUnderlineTags>
@@ -2081,6 +2285,17 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <Title>Juster de-kursiv faktor</Title>
     <Description>Juster værdi indtil tekst stil er normalt og ikke kursiv. Bemærk, at det oprindelige billede skal være kursiv.</Description>
   </VobSubOcrSetItalicFactor>
+  <Watermark>
+    <Title>Vandmærke</Title>
+    <WatermarkX>Vandmærke: {0}</WatermarkX>
+    <GenerateWatermarkTitle>Generer vandmærke</GenerateWatermarkTitle>
+    <SpreadOverEntireSubtitle>Spredt over hele underteksten</SpreadOverEntireSubtitle>
+    <CurrentLineOnlyX>Kun på den aktuelle linje: {0}</CurrentLineOnlyX>
+    <Generate>Generer</Generate>
+    <Remove>Fjern</Remove>
+    <BeforeWatermark>Før "Vandmærke"</BeforeWatermark>
+    <ErrorUnicodeEncodingOnly>"Vandmærke" virker kun med unicode fil kodning.</ErrorUnicodeEncodingOnly>
+  </Watermark>
   <Waveform>
     <ClickToAddWaveform>Klik for at tilføje audio kurve</ClickToAddWaveform>
     <ClickToAddWaveformAndSpectrogram>Klik for at tilføje bølgeform/spektrogram</ClickToAddWaveformAndSpectrogram>
@@ -2099,8 +2314,12 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <ShowWaveformAndSpectrogram>Vis bølgeform og spektrogram</ShowWaveformAndSpectrogram>
     <ShowWaveformOnly>Vis kun bølgeform</ShowWaveformOnly>
     <ShowSpectrogramOnly>Vis kun spektrogram</ShowSpectrogramOnly>
+    <AddSceneChange>Tilføj sceneskift</AddSceneChange>
+    <RemoveSceneChange>Fjern sceneskift</RemoveSceneChange>
     <GuessTimeCodes>Gæt tidskoder...</GuessTimeCodes>
     <SeekSilence>Søg tavshed...</SeekSilence>
+    <CharsSecX>Tegn/sec: {0:0.00}</CharsSecX>
+    <WordsMinX>Ord/min: {0:0.00}</WordsMinX>
   </Waveform>
   <WaveformGenerateTimeCodes>
     <Title>Gæt tidskoder</Title>

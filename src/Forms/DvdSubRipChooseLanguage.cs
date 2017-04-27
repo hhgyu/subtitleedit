@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using Nikse.SubtitleEdit.Forms.Ocr;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -69,8 +70,11 @@ namespace Nikse.SubtitleEdit.Forms
                 }
             }
 
-            foreach (var existingLanguageId in uniqueLanguageStreamIds)
-                comboBoxLanguages.Items.Add(string.Format(Configuration.Settings.Language.DvdSubRipChooseLanguage.UnknownLanguage + " (0x{0:x})", existingLanguageId)); // subtitle track not supplied from IFO
+            foreach (var existingLanguageId in uniqueLanguageStreamIds) // subtitle tracks not supplied from IFO
+            {
+                // Use U+200E (LEFT-TO-RIGHT MARK) to support right-to-left scripts
+                comboBoxLanguages.Items.Add(string.Format("{0} \x200E(0x{1:x})", Configuration.Settings.Language.DvdSubRipChooseLanguage.UnknownLanguage, existingLanguageId));
+            }
 
             if (comboBoxLanguages.Items.Count > 0 && comboBoxLanguages.SelectedIndex < 0)
                 comboBoxLanguages.SelectedIndex = 0;

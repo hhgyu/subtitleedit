@@ -236,8 +236,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     XmlNode t = node.SelectSingleNode("w:tc/w:p/w:r/w:t", nsmgr);
                     if (t != null)
                     {
-                        p.StartTime = GetTimeCode(t.InnerText);
-                        sb = new StringBuilder();
+                        p.StartTime = DecodeTimeCodeFrames(t.InnerText.Trim(), SplitCharColon);
+                        sb.Clear();
                         foreach (XmlNode wrNode in node.SelectNodes("w:tc/w:p/w:r", nsmgr))
                         {
                             foreach (XmlNode child in wrNode.ChildNodes)
@@ -276,12 +276,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     subtitle.Paragraphs[i].EndTime.TotalMilliseconds = subtitle.Paragraphs[i + 1].StartTime.TotalMilliseconds - 1;
             }
             subtitle.Renumber();
-        }
-
-        private static TimeCode GetTimeCode(string s)
-        {
-            var parts = s.Trim().Split(':');
-            return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), FramesToMillisecondsMax999(int.Parse(parts[3])));
         }
 
     }

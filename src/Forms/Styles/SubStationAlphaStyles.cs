@@ -29,6 +29,14 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             _header = subtitle.Header;
             _format = format;
             _isSubStationAlpha = _format.Name == SubStationAlpha.NameOfFormat;
+
+            if (_header != null && _header.Contains("http://www.w3.org/ns/ttml"))
+            {
+                var s = new Subtitle { Header = _header };
+                AdvancedSubStationAlpha.LoadStylesFromTimedText10(s, string.Empty, _header, AdvancedSubStationAlpha.HeaderNoStyles, new StringBuilder());
+                _header = s.Header;
+            }
+
             if (_header == null || !_header.Contains("style:", StringComparison.OrdinalIgnoreCase))
                 ResetHeader();
 
@@ -302,8 +310,9 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             lv.Items.Add(item);
         }
 
-        private void SetSsaStyle(string styleName, string propertyName, string propertyValue)
+        private bool SetSsaStyle(string styleName, string propertyName, string propertyValue, bool trimStyles = true)
         {
+            bool found = false;
             int propertyIndex = -1;
             int nameIndex = -1;
             var sb = new StringBuilder();
@@ -331,10 +340,12 @@ namespace Nikse.SubtitleEdit.Forms.Styles
                     if (line.Length > 10)
                     {
                         bool correctLine = false;
-                        var format = line.Substring(6).Split(',');
+                        var format = line.Substring(6).Trim().Split(',');
                         for (int i = 0; i < format.Length; i++)
                         {
-                            string f = format[i].Trim();
+                            string f = format[i];
+                            if (trimStyles)
+                                f = f.Trim();
                             if (i == nameIndex)
                                 correctLine = f.Equals(styleName, StringComparison.OrdinalIgnoreCase);
                         }
@@ -346,9 +357,14 @@ namespace Nikse.SubtitleEdit.Forms.Styles
                             {
                                 string f = format[i].Trim();
                                 if (i == propertyIndex)
+                                {
                                     sb.Append(propertyValue);
+                                    found = true;
+                                }
                                 else
+                                {
                                     sb.Append(f);
+                                }
                                 if (i < format.Length - 1)
                                     sb.Append(',');
                             }
@@ -370,6 +386,7 @@ namespace Nikse.SubtitleEdit.Forms.Styles
                 }
             }
             _header = sb.ToString().Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
+            return found;
         }
 
         private SsaStyle GetSsaStyle(string styleName)
@@ -781,7 +798,10 @@ namespace Nikse.SubtitleEdit.Forms.Styles
                     {
                         textBoxStyleName.BackColor = listViewStyles.BackColor;
                         listViewStyles.SelectedItems[0].Text = textBoxStyleName.Text;
-                        SetSsaStyle(_oldSsaName, "name", textBoxStyleName.Text);
+                        bool found = SetSsaStyle(_oldSsaName, "name", textBoxStyleName.Text);
+                        if (!found)
+                            SetSsaStyle(_oldSsaName, "name", textBoxStyleName.Text, false);
+
                         _oldSsaName = textBoxStyleName.Text;
                     }
                     else
@@ -821,8 +841,8 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             if (_isSubStationAlpha)
             {
                 var ssa = new SubStationAlpha();
-                string text = ssa.ToText(sub, string.Empty);
-                string[] lineArray = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                var text = ssa.ToText(sub, string.Empty);
+                var lineArray = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                 var lines = new List<string>();
                 foreach (string line in lineArray)
                     lines.Add(line);
@@ -832,8 +852,8 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             else
             {
                 var ass = new AdvancedSubStationAlpha();
-                string text = ass.ToText(sub, string.Empty);
-                string[] lineArray = text.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                var text = ass.ToText(sub, string.Empty);
+                var lineArray = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
                 var lines = new List<string>();
                 foreach (string line in lineArray)
                     lines.Add(line);
@@ -883,7 +903,7 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             {
                 string name = listViewStyles.SelectedItems[0].Text;
                 if (checkBoxFontBold.Checked)
-                    SetSsaStyle(name, "bold", "1");
+                    SetSsaStyle(name, "bold", "-1");
                 else
                     SetSsaStyle(name, "bold", "0");
                 GeneratePreview();
@@ -896,7 +916,7 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             {
                 string name = listViewStyles.SelectedItems[0].Text;
                 if (checkBoxFontItalic.Checked)
-                    SetSsaStyle(name, "italic", "1");
+                    SetSsaStyle(name, "italic", "-1");
                 else
                     SetSsaStyle(name, "italic", "0");
                 GeneratePreview();
@@ -909,7 +929,7 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             {
                 string name = listViewStyles.SelectedItems[0].Text;
                 if (checkBoxFontUnderline.Checked)
-                    SetSsaStyle(name, "underline", "1");
+                    SetSsaStyle(name, "underline", "-1");
                 else
                     SetSsaStyle(name, "underline", "0");
                 GeneratePreview();

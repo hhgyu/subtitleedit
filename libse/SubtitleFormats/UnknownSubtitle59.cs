@@ -7,11 +7,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle59 : SubtitleFormat
     {
-
         public static readonly Regex RegexTimeCodes = new Regex(@"^\d\d\:\d\d\:\d\d\t.+\t\d\d\:\d\d\:\d\d$", RegexOptions.Compiled);
         public static readonly Regex RegexTimeCodes2 = new Regex(@"^\d\d\:\d\d\:\d\d.+\d\d\:\d\d\:\d\d$", RegexOptions.Compiled);
         private static readonly Regex RegexStartOnly = new Regex(@"^\d\d\:\d\d\:\d\d\t.+$", RegexOptions.Compiled);
         private static readonly Regex RegexEndOnly = new Regex(@"\d\d\:\d\d\:\d\d$", RegexOptions.Compiled);
+
         public override string Extension
         {
             get { return ".txt"; }
@@ -58,7 +58,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string EncodeTimeCode(TimeCode timeCode)
         {
-            int seconds = (int)(timeCode.Seconds + timeCode.Milliseconds / 1000 + 0.5);
+            int seconds = (int)Math.Round(timeCode.Seconds + timeCode.Milliseconds / 1000.0);
             return string.Format("{0:00}:{1:00}:{2:00}", timeCode.Hours, timeCode.Minutes, seconds);
         }
 

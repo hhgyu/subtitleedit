@@ -7,7 +7,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     public class UnknownSubtitle53 : SubtitleFormat
     {
 
-        private static readonly Regex RegexTimeCodes = new Regex(@"^\d\d\:\d\d\:\d\d\:\d\d [^ ]+", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^\d\d\:\d\d\:\d\d\:\d\d .+", RegexOptions.Compiled);
+
         public override string Extension
         {
             get { return ".txt"; }
@@ -70,12 +71,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         string[] arr = s.Substring(0, 11).Split(':');
                         if (arr.Length == 4)
                         {
-                            int hours = int.Parse(arr[0]);
-                            int minutes = int.Parse(arr[1]);
-                            int seconds = int.Parse(arr[2]);
-                            int frames = int.Parse(arr[3]);
-                            p.StartTime = new TimeCode(hours, minutes, seconds, FramesToMillisecondsMax999(frames));
-                            string text = s.Remove(0, 11).Trim();
+                            p.StartTime = DecodeTimeCodeFramesFourParts(arr);
+                            string text = s.Substring(11).Trim();
                             p.Text = text;
                             if (text.Length > 1 && Utilities.IsInteger(text.Substring(0, 2)))
                                 _errorCount++;
@@ -111,6 +108,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 index++;
             }
             subtitle.RemoveEmptyLines();
+            subtitle.Renumber();
         }
 
     }

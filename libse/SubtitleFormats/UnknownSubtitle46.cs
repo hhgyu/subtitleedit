@@ -8,8 +8,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     public class UnknownSubtitle46 : SubtitleFormat
     {
         //7:00:01:27AM
-        private static readonly Regex regexTimeCodesAM = new Regex(@"^\d\:\d\d\:\d\d\:\d\dAM", RegexOptions.Compiled);
-        private static readonly Regex regexTimeCodesPM = new Regex(@"^\d\:\d\d\:\d\d\:\d\dPM", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodesAm = new Regex(@"^\d\:\d\d\:\d\d\:\d\dAM", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodesPm = new Regex(@"^\d\:\d\d\:\d\d\:\d\dPM", RegexOptions.Compiled);
+
         public override string Extension
         {
             get { return ".pst"; }
@@ -59,19 +60,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 string s = line.Trim();
                 string[] arr = line.Split();
                 var timeCode = arr[arr.Length - 1];
-                if (regexTimeCodesAM.Match(timeCode).Success || regexTimeCodesPM.Match(timeCode).Success)
+                if (RegexTimeCodesAm.Match(timeCode).Success || RegexTimeCodesPm.Match(timeCode).Success)
                 {
                     try
                     {
                         arr = timeCode.Substring(0, 10).Split(':');
                         if (arr.Length == 4)
                         {
-                            int hours = int.Parse(arr[0]);
-                            int minutes = int.Parse(arr[1]);
-                            int seconds = int.Parse(arr[2]);
-                            int frames = int.Parse(arr[3]);
                             p = new Paragraph();
-                            p.StartTime = new TimeCode(hours, minutes, seconds, FramesToMillisecondsMax999(frames));
+                            p.StartTime = DecodeTimeCodeFramesFourParts(arr);
                             p.Text = s.Substring(0, s.IndexOf(timeCode, StringComparison.Ordinal)).Trim();
                             subtitle.Paragraphs.Add(p);
                         }

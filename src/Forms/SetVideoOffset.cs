@@ -5,11 +5,14 @@ using System.Windows.Forms;
 
 namespace Nikse.SubtitleEdit.Forms
 {
-    public partial class SetVideoOffset : PositionAndSizeForm
+    public sealed partial class SetVideoOffset : PositionAndSizeForm
     {
         public bool FromCurrentVideoPosition { get; set; }
+        public bool DoNotaddVideoOffsetToTimeCodes { get; set; }
+        public bool Reset { get; set; }
 
-        private TimeCode _videoOffset = new TimeCode(0);
+        private readonly TimeCode _videoOffset;
+
         public TimeCode VideoOffset
         {
             get
@@ -26,10 +29,13 @@ namespace Nikse.SubtitleEdit.Forms
         public SetVideoOffset()
         {
             InitializeComponent();
-
+            _videoOffset = new TimeCode();
+            checkBoxKeepTimeCodes.Checked = Configuration.Settings.Tools.VideoOffsetKeepTimeCodes;
             Text = Configuration.Settings.Language.SetVideoOffset.Title;
             labelDescription.Text = Configuration.Settings.Language.SetVideoOffset.Description;
             checkBoxFromCurrentPosition.Text = Configuration.Settings.Language.SetVideoOffset.RelativeToCurrentVideoPosition;
+            checkBoxKeepTimeCodes.Text = Configuration.Settings.Language.SetVideoOffset.KeepTimeCodes;
+            buttonReset.Text = Configuration.Settings.Language.SetVideoOffset.Reset;
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
             UiUtil.FixLargeFonts(this, buttonOK);
@@ -39,6 +45,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             VideoOffset = timeUpDownVideoPosition.TimeCode;
             FromCurrentVideoPosition = checkBoxFromCurrentPosition.Checked;
+            DoNotaddVideoOffsetToTimeCodes = checkBoxKeepTimeCodes.Checked;
             DialogResult = DialogResult.OK;
         }
 
@@ -47,5 +54,17 @@ namespace Nikse.SubtitleEdit.Forms
             DialogResult = DialogResult.Cancel;
         }
 
+        private void buttonReset_Click(object sender, EventArgs e)
+        {
+            VideoOffset = new TimeCode();
+            DoNotaddVideoOffsetToTimeCodes = checkBoxKeepTimeCodes.Checked;
+            Reset = true;
+            DialogResult = DialogResult.OK;
+        }
+
+        private void SetVideoOffset_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Configuration.Settings.Tools.VideoOffsetKeepTimeCodes = checkBoxKeepTimeCodes.Checked;
+        }
     }
 }

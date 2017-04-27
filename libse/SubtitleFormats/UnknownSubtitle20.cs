@@ -42,9 +42,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 string line1 = string.Empty;
                 string line2 = string.Empty;
-                string[] lines = p.Text.Replace(Environment.NewLine, "\r").Split('\r');
+                string[] lines = p.Text.SplitToLines();
                 if (lines.Length > 2)
-                    lines = Utilities.AutoBreakLine(p.Text).Replace(Environment.NewLine, "\r").Split('\r');
+                    lines = Utilities.AutoBreakLine(p.Text).SplitToLines();
                 if (lines.Length == 1)
                 {
                     line2 = lines[0];
@@ -80,12 +80,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return sb.ToString();
         }
 
-        private static TimeCode DecodeTimeCode(string timeCode)
-        {
-            string[] arr = timeCode.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-            return new TimeCode(int.Parse(arr[0]), int.Parse(arr[1]), int.Parse(arr[2]), FramesToMillisecondsMax999(int.Parse(arr[3])));
-        }
-
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
         {
             _errorCount = 0;
@@ -99,7 +93,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         if (p != null)
                             subtitle.Paragraphs.Add(p);
-                        p = new Paragraph(DecodeTimeCode(s.Substring(5, 11)), new TimeCode(0, 0, 0, 0), s.Remove(0, 37).Trim());
+                        p = new Paragraph(DecodeTimeCodeFrames(s.Substring(5, 11), SplitCharColon), new TimeCode(), s.Remove(0, 37).Trim());
                     }
                     catch
                     {
@@ -113,7 +107,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         if (p != null)
                             subtitle.Paragraphs.Add(p);
-                        p = new Paragraph(DecodeTimeCode(s.Substring(5, 11)), new TimeCode(0, 0, 0, 0), string.Empty);
+                        p = new Paragraph(DecodeTimeCodeFrames(s.Substring(5, 11), SplitCharColon), new TimeCode(), string.Empty);
                     }
                     catch
                     {
@@ -127,7 +121,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         if (p != null)
                         {
-                            p.EndTime = DecodeTimeCode(s.Substring(5, 11));
+                            p.EndTime = DecodeTimeCodeFrames(s.Substring(5, 11), SplitCharColon);
                             if (string.IsNullOrWhiteSpace(p.Text))
                                 p.Text = s.Remove(0, 37).Trim();
                             else

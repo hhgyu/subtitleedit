@@ -80,7 +80,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         {
                             if (expectStartTime)
                             {
-                                p.StartTime = DecodeTimeCode(parts);
+                                p.StartTime = DecodeTimeCodeFramesFourParts(parts);
                                 expectStartTime = false;
                             }
                             else
@@ -90,7 +90,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 if (!string.IsNullOrEmpty(p.Text))
                                     _errorCount++;
 
-                                p.EndTime = DecodeTimeCode(parts);
+                                p.EndTime = DecodeTimeCodeFramesFourParts(parts);
                             }
                         }
                         catch (Exception exception)
@@ -102,7 +102,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (p.StartTime.TotalMilliseconds == 0 && p.EndTime.TotalMilliseconds == 0)
+                    if (Math.Abs(p.StartTime.TotalMilliseconds) < 0.001 && Math.Abs(p.EndTime.TotalMilliseconds) < 0.001)
                         _errorCount++;
                     else
                         subtitle.Paragraphs.Add(p);
@@ -125,7 +125,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             bool allNullEndTime = true;
             for (int i = 0; i < subtitle.Paragraphs.Count; i++)
             {
-                if (subtitle.Paragraphs[i].EndTime.TotalMilliseconds != 0)
+                if (Math.Abs(subtitle.Paragraphs[i].EndTime.TotalMilliseconds) > 0.001)
                     allNullEndTime = false;
             }
             if (allNullEndTime)
@@ -133,17 +133,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

@@ -1,15 +1,17 @@
 ﻿using Nikse.SubtitleEdit.Core;
 using Nikse.SubtitleEdit.Logic;
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace Nikse.SubtitleEdit.Forms
 {
-    public partial class RestoreAutoBackup : PositionAndSizeForm
+    public sealed partial class RestoreAutoBackup : PositionAndSizeForm
     {
-
+        //2011-12-13_20-19-18_title
+        private static readonly Regex RegexFileNamePattern = new Regex(@"^\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d", RegexOptions.Compiled);
         private string[] _files;
         public string AutoBackupFileName { get; set; }
 
@@ -41,15 +43,14 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void RestoreAutoBackup_Shown(object sender, EventArgs e)
         {
-            //2011-12-13_20-19-18_title
-            var fileNamePattern = new Regex(@"^\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d", RegexOptions.Compiled);
             listViewBackups.Columns[2].Width = -2;
-            if (Directory.Exists(Configuration.AutoBackupFolder))
+            if (Directory.Exists(Configuration.AutoBackupDirectory))
             {
-                _files = Directory.GetFiles(Configuration.AutoBackupFolder, "*.*");
+                _files = Directory.GetFiles(Configuration.AutoBackupDirectory, "*.*");
                 foreach (string fileName in _files)
                 {
-                    if (fileNamePattern.IsMatch(Path.GetFileName(fileName)))
+                    var path = Path.GetFileName(fileName);
+                    if (path != null && RegexFileNamePattern.IsMatch(path))
                         AddBackupToListView(fileName);
                 }
                 listViewBackups.Sorting = SortOrder.Descending;
@@ -64,33 +65,31 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void AddBackupToListView(string fileName)
         {
-            string displayDate = Path.GetFileName(fileName).Substring(0, 19).Replace('_', ' ');
+            var path = Path.GetFileName(fileName);
+            if (path == null)
+                return;
+
+            string displayDate = path.Substring(0, 19).Replace('_', ' ');
             displayDate = displayDate.Remove(13, 1).Insert(13, ":");
             displayDate = displayDate.Remove(16, 1).Insert(16, ":");
 
-            string displayName = Path.GetFileName(fileName).Remove(0, 20);
-
+            string displayName = path.Remove(0, 20);
             if (displayName == "srt")
                 displayName = "Untitled.srt";
 
             var item = new ListViewItem(displayDate);
             item.UseItemStyleForSubItems = false;
             item.Tag = fileName;
-
-            var subItem = new ListViewItem.ListViewSubItem(item, Path.GetFileNameWithoutExtension(displayName));
-            item.SubItems.Add(subItem);
-
-            subItem = new ListViewItem.ListViewSubItem(item, Path.GetExtension(fileName));
-            item.SubItems.Add(subItem);
+            item.SubItems.Add(Path.GetFileNameWithoutExtension(displayName));
+            item.SubItems.Add(Path.GetExtension(fileName));
 
             try
             {
-                FileInfo fi = new FileInfo(fileName);
-                subItem = new ListViewItem.ListViewSubItem(item, fi.Length + " bytes");
-                item.SubItems.Add(subItem);
+                item.SubItems.Add(new FileInfo(fileName).Length + " bytes");
             }
             catch
             {
+                // ignored
             }
 
             listViewBackups.Items.Add(item);
@@ -129,7 +128,7 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void linkLabelOpenContainingFolder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string folderName = Configuration.AutoBackupFolder;
+            string folderName = Configuration.AutoBackupDirectory;
             if (Utilities.IsRunningOnMono())
             {
                 System.Diagnostics.Process.Start(folderName);
@@ -144,6 +143,35 @@ namespace Nikse.SubtitleEdit.Forms
                 else
                 {
                     System.Diagnostics.Process.Start(folderName);
+                }
+            }
+        }
+
+        public static void CleanAutoBackupFolder(string autoBackupFolder, int autoBackupDeleteAfterMonths)
+        {
+            const int maxCount = 100; // to avoid locking computer
+            if (Directory.Exists(autoBackupFolder))
+            {
+                var targetDate = DateTime.Now.AddMonths(-autoBackupDeleteAfterMonths);
+                var files = Directory.GetFiles(autoBackupFolder, "*.*");
+                int filesDeleted = 0;
+                foreach (string fileName in files)
+                {
+                    try
+                    {
+                        var name = Path.GetFileName(fileName);
+                        if (name != null && RegexFileNamePattern.IsMatch(name) && Convert.ToDateTime(name.Substring(0, 10), CultureInfo.InvariantCulture) < targetDate)
+                        {
+                            File.Delete(fileName);
+                            filesDeleted++;
+                            if (filesDeleted > maxCount)
+                                return;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
                 }
             }
         }

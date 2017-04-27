@@ -9,7 +9,7 @@ namespace Nikse.SubtitleEdit.Logic
     {
 
         private Ebu.EbuGeneralSubtitleInformation _header;
-        private byte _justificationCode;
+        private byte _justificationCode = 2;
         private string _fileName;
         private Subtitle _subtitle;
 
@@ -26,7 +26,12 @@ namespace Nikse.SubtitleEdit.Logic
             using (var saveOptions = new EbuSaveOptions())
             {
                 saveOptions.Initialize(_header, _justificationCode, _fileName, _subtitle);
-                return saveOptions.ShowDialog() == DialogResult.OK;
+                if (saveOptions.ShowDialog() == DialogResult.OK)
+                {
+                    _justificationCode = saveOptions.JustificationCode;
+                    return true;
+                }
+                return false;
             }
         }
 

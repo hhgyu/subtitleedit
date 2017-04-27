@@ -36,7 +36,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             //10 01 37 23   10 01 42 01 Makkhi  (newline is TAB)
             const string paragraphWriteFormat = "{0}\t{1}\t{2}";
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 sb.AppendLine(string.Format(paragraphWriteFormat, EncodeTimeCode(p.StartTime), EncodeTimeCode(p.EndTime), p.Text.Replace(Environment.NewLine, "\t")));
@@ -59,9 +59,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         try
                         {
-                            var start = DecodeTimeCode(parts);
+                            var start = DecodeTimeCodeFramesFourParts(parts);
                             parts = line.Substring(12, 11).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                            var end = DecodeTimeCode(parts);
+                            var end = DecodeTimeCodeFramesFourParts(parts);
                             paragraph = new Paragraph();
                             paragraph.StartTime = start;
                             paragraph.EndTime = end;
@@ -82,16 +82,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static string EncodeTimeCode(TimeCode time)
         {
             return string.Format("{0:00} {1:00} {2:00} {3:00}", time.Hours, time.Minutes, time.Seconds, MillisecondsToFramesMaxFrameRate(time.Milliseconds));
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

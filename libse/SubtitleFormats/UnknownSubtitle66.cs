@@ -8,7 +8,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle66 : SubtitleFormat
     {
-
         //   24       10:08:57:17   10:08:59:15       01:23
         //The question is,
         //
@@ -94,8 +93,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 subtitle.Paragraphs.Add(p);
                                 p = new Paragraph();
                             }
-                            p.StartTime = DecodeTimeCode(parts[1]);
-                            p.EndTime = DecodeTimeCode(parts[2]);
+                            p.StartTime = DecodeTimeCodeFrames(parts[1], SplitCharColon);
+                            p.EndTime = DecodeTimeCodeFrames(parts[2], SplitCharColon);
                             expectStartTime = false;
                         }
                         catch (Exception exception)
@@ -107,7 +106,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (p.StartTime.TotalMilliseconds == 0 && p.EndTime.TotalMilliseconds == 0)
+                    if (Math.Abs(p.StartTime.TotalMilliseconds) < 0.001 && Math.Abs(p.EndTime.TotalMilliseconds) < 0.001)
                         _errorCount++;
                     else
                         subtitle.Paragraphs.Add(p);
@@ -130,18 +129,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string part)
-        {
-            string[] parts = part.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Forms;
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Forms;
 
 namespace Nikse.SubtitleEdit
 {
@@ -14,6 +14,7 @@ namespace Nikse.SubtitleEdit
         [STAThread]
         private static void Main()
         {
+#if !DEBUG
             // Add the event handler for handling UI thread exceptions to the event.
             Application.ThreadException += Application_ThreadException;
 
@@ -22,6 +23,7 @@ namespace Nikse.SubtitleEdit
 
             // Add the event handler for handling non-UI thread exceptions to the event.
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+#endif
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -39,7 +41,7 @@ namespace Nikse.SubtitleEdit
                 try
                 {
                     var cap = "Windows Forms Thread Exception";
-                    var msg = "An application error occurred in Subtitle Edit." +
+                    var msg = "An application error occurred in Subtitle Edit " + GetVersion() + ". " +
                               "\nPlease report at https://github.com/SubtitleEdit/subtitleedit/issues with the following information:" +
                               "\n\nError Message:\n" + exc.Message +
                               "\n\nStack Trace:\n" + exc.StackTrace;
@@ -55,6 +57,18 @@ namespace Nikse.SubtitleEdit
             }
         }
 
+        private static string GetVersion()
+        {
+            try
+            {
+                return System.Reflection.Assembly.GetEntryAssembly().GetName().Version.ToString();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
         // Handle the non-UI exceptions by logging the event to the ThreadException event log before
         // the system default handler reports the exception to the user and terminates the application.
         // NOTE: This exception handler cannot prevent the termination of the application.
@@ -63,7 +77,7 @@ namespace Nikse.SubtitleEdit
             try
             {
                 var exc = e.ExceptionObject as Exception;
-                var msg = "A fatal non-UI error occurred in Subtitle Edit." +
+                var msg = "A fatal non-UI error occurred in Subtitle Edit " + GetVersion() + "." +
                           "\nPlease report at https://github.com/SubtitleEdit/subtitleedit/issues with the following information:" +
                           "\n\nError Message:\n" + exc.Message +
                           "\n\nStack Trace:\n" + exc.StackTrace;
@@ -85,7 +99,7 @@ namespace Nikse.SubtitleEdit
                 try
                 {
                     var cap = "Non-UI Thread Exception";
-                    var msg = "A fatal non-UI error occurred in Subtitle Edit." +
+                    var msg = "A fatal non-UI error occurred in Subtitle Edit " + GetVersion() + "." +
                               "\nCould not write the error to the event log." +
                               "\nReason: " + ex.Message;
                     MessageBox.Show(msg, cap, MessageBoxButtons.OK, MessageBoxIcon.Stop);

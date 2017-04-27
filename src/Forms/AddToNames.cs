@@ -59,7 +59,7 @@ namespace Nikse.SubtitleEdit.Forms
 
             if (!string.IsNullOrEmpty(text))
             {
-                textBoxAddName.Text = text.Trim().TrimEnd('.','!', '?');
+                textBoxAddName.Text = text.Trim().TrimEnd('.', '!', '?');
                 if (textBoxAddName.Text.Length > 1)
                     textBoxAddName.Text = char.ToUpper(textBoxAddName.Text[0]) + textBoxAddName.Text.Substring(1);
             }
@@ -127,7 +127,7 @@ namespace Nikse.SubtitleEdit.Forms
             if (string.IsNullOrEmpty(languageName))
                 languageName = "en_US";
 
-            var namesList = new NamesList(Configuration.DictionariesFolder, languageName, Configuration.Settings.WordLists.UseOnlineNamesEtc, Configuration.Settings.WordLists.NamesEtcUrl);
+            var namesList = new NamesList(Configuration.DictionariesDirectory, languageName, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
             if (namesList.Add(textBoxAddName.Text))
                 DialogResult = DialogResult.OK;
             else

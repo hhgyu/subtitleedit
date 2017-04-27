@@ -1,9 +1,7 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Nikse.SubtitleEdit.Core.Forms;
-using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
-using Nikse.SubtitleEdit.Logic;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
+using System;
 
 namespace Test.Logic
 {
@@ -29,7 +27,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLine3()
         {
             string s1 = "- We're gonna lose him." + Environment.NewLine + "- He's left him four signals in the last week.";
@@ -38,7 +35,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLine4()
         {
             Configuration.Settings.General.SubtitleLineMaximumLength = 43;
@@ -49,18 +45,16 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLine5()
         {
             Configuration.Settings.General.SubtitleLineMaximumLength = 43;
             const string s1 = "<i>30 years ago I'd found</i> The Book of the Dead.";
             var s2 = Utilities.AutoBreakLine(s1);
-            var Expected = "<i>30 years ago I'd found</i>" + Environment.NewLine + "The Book of the Dead.";
-            Assert.AreEqual(Expected, s2);
+            var expected = "<i>30 years ago I'd found</i>" + Environment.NewLine + "The Book of the Dead.";
+            Assert.AreEqual(expected, s2);
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLine5DoNoBreakAtPeriod()
         {
             Configuration.Settings.General.SubtitleLineMaximumLength = 43;
@@ -71,7 +65,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLineDoNotBreakAfterDashDash()
         {
             Configuration.Settings.General.SubtitleLineMaximumLength = 43;
@@ -81,7 +74,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLineDialog1()
         {
             const string s1 = "- Qu'est ce qui se passe ? - Je veux voir ce qu'ils veulent être.";
@@ -90,7 +82,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void AutoBreakLineDialog2()
         {
             const string s1 = "- Je veux voir ce qu'ils veulent être. - Qu'est ce qui se passe ?";
@@ -99,7 +90,34 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
+        public void UnBreakLine1()
+        {
+            string s = Utilities.UnbreakLine("Hallo!" + Environment.NewLine + "Hallo!");
+            Assert.AreEqual("Hallo! Hallo!", s);
+        }
+
+        [TestMethod]
+        public void UnBreakLine2()
+        {
+            string s = Utilities.UnbreakLine("Hallo!\nHallo!");
+            Assert.AreEqual("Hallo! Hallo!", s);
+        }
+
+        [TestMethod]
+        public void UnBreakLine3()
+        {
+            string s = Utilities.UnbreakLine("Hallo!\r\nHallo!");
+            Assert.AreEqual("Hallo! Hallo!", s);
+        }
+
+        [TestMethod]
+        public void UnBreakLine4()
+        {
+            string s = Utilities.UnbreakLine("Hallo! \nHallo!");
+            Assert.AreEqual("Hallo! Hallo!", s);
+        }
+
+        [TestMethod]
         public void FixInvalidItalicTags2()
         {
             const string s1 = "Gledaj prema kameri i rici <i>zdravo!";
@@ -108,7 +126,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags3()
         {
             string s1 = "<i>Line 1.</i>" + Environment.NewLine + "<i>Line 2.";
@@ -117,7 +134,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags4()
         {
             string s1 = "It <i>is</i> a telegram," + Environment.NewLine + "it <i>is</i> ordering an advance,";
@@ -126,7 +142,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags5()
         {
             string s1 = "- <i>It is a telegram?</i>" + Environment.NewLine + "<i>- It is.</i>";
@@ -135,7 +150,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags6()
         {
             string s1 = "- <i>Text1!</i>" + Environment.NewLine + "- <i>Text2.</i>";
@@ -144,7 +158,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags7()
         {
             string s1 = "<i>- You think they're they gone?<i>" + Environment.NewLine + "<i>- That can't be.</i>";
@@ -153,7 +166,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags8()
         {
             string s1 = "<i>- You think they're they gone?</i>" + Environment.NewLine + "<i>- That can't be.<i>";
@@ -162,7 +174,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags9()
         {
             const string s1 = "FALCONE:<i> I didn't think</i>\r\n<i>it was going to be you,</i>";
@@ -171,7 +182,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags10()
         {
             const string s1 = "< I>Hallo!</I>";
@@ -180,7 +190,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags11()
         {
             const string s1 = "< I >Hallo!< /I>";
@@ -189,7 +198,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixInvalidItalicTags12()
         {
             const string s1 = "< I >Hallo!<I/>";
@@ -198,7 +206,22 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
+        public void FixInvalidItalicTags13()
+        {
+            var s1 = "<i>Hallo!</i>" + Environment.NewLine + "<i>Hallo!</i>" + Environment.NewLine + "<i>Hallo!</i>";
+            string s2 = HtmlUtil.FixInvalidItalicTags(s1);
+            Assert.AreEqual(s2, s1);
+        }
+
+        [TestMethod]
+        public void FixInvalidItalicTags14()
+        {
+            var s1 = "<i>Hallo!<i/>" + Environment.NewLine + "<i>Hallo!<i/>" + Environment.NewLine + "<i>Hallo!";
+            string s2 = HtmlUtil.FixInvalidItalicTags(s1);
+            Assert.AreEqual(s2, "<i>Hallo!" + Environment.NewLine + "Hallo!" + Environment.NewLine + "Hallo!</i>");
+        }
+
+        [TestMethod]
         public void FixUnneededSpacesDoubleSpace1()
         {
             const string s1 = "This is  a test";
@@ -207,7 +230,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesDoubleSpace2()
         {
             const string s1 = "This is a test  ";
@@ -216,7 +238,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesItalics1()
         {
             const string s1 = "<i> This is a test</i>";
@@ -225,7 +246,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesItalics2()
         {
             const string s1 = "<i>This is a test </i>";
@@ -234,7 +254,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphen1()
         {
             const string s1 = "This is a low- budget job";
@@ -243,7 +262,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphen2()
         {
             const string s1 = "This is a low- budget job";
@@ -252,7 +270,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphenDoNotChange1()
         {
             const string s1 = "This is it - and he likes it!";
@@ -261,7 +278,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphenDoNotChange2()
         {
             const string s1 = "What are your long- and altitude stats?";
@@ -270,7 +286,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphenDoNotChange3()
         {
             const string s1 = "Did you buy that first- or second-handed?";
@@ -279,7 +294,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphenDoNotChangeDutch1()
         {
             const string s1 = "Wat zijn je voor- en familienaam?";
@@ -288,7 +302,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesHyphenDoNotChangeDutch2()
         {
             const string s1 = "Was het in het voor- of najaar?";
@@ -297,7 +310,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesDialogDotDotDotLine1()
         {
             string s = Utilities.RemoveUnneededSpaces("- ... Careful", "en");
@@ -305,7 +317,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesDialogDotDotDotLine2()
         {
             string s = Utilities.RemoveUnneededSpaces("- Hi!" + Environment.NewLine + "- ... Careful", "en");
@@ -313,7 +324,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesFontTag1()
         {
             string s = Utilities.RemoveUnneededSpaces("<font color=\"#808080\"> (PEOPLE SPEAKING INDISTINCTLY) </font>", "en");
@@ -321,7 +331,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesFontTag2()
         {
             string s = Utilities.RemoveUnneededSpaces("Foobar\r\n<font color=\"#808080\"> (PEOPLE SPEAKING INDISTINCTLY) </font>", "en");
@@ -329,7 +338,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixUnneededSpacesFontTag3()
         {
             string s = Utilities.RemoveUnneededSpaces("<FONT COLOR=\"#808080\">- Foobar! </FONT>\r\n<font color=\"#808080\"> (PEOPLE SPEAKING INDISTINCTLY) </font>", "en");
@@ -337,7 +345,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void CountTagInTextStringOneLetterString()
         {
             int count = Utilities.CountTagInText("HHH", "H");
@@ -345,7 +352,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void CountTagInTextStringNotThere()
         {
             int count = Utilities.CountTagInText("HHH", "B");
@@ -353,7 +359,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void CountTagInTextCharNormal()
         {
             int count = Utilities.CountTagInText("HHH", 'H');
@@ -361,7 +366,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void CountTagInTextCharNotThere()
         {
             int count = Utilities.CountTagInText("HHH", 'B');
@@ -369,7 +373,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void FixHyphensAddTest()
         {
             string test1 = "<font color=\"#008080\">- Foobar." + Environment.NewLine + "Foobar.</font>";
@@ -390,7 +393,32 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
+        public void FixHyphensAddTestAssTag()
+        {
+            string test1 = "{\\an5}- At least I was going back to Hawaii." + Environment.NewLine + "Woody.";
+            string expected1 = "{\\an5}- At least I was going back to Hawaii." + Environment.NewLine + "- Woody.";
+            var sub = new Subtitle();
+            sub.Paragraphs.Add(new Paragraph(test1, 0000, 11111));
+
+            string output1 = Helper.FixHyphensAdd(sub, 0, "en");
+
+            Assert.AreEqual(output1, expected1);
+        }
+
+        [TestMethod]
+        public void FixHyphensAddTestItalic()
+        {
+            string test1 = "<i>- At least I was going back to Hawaii.</i>" + Environment.NewLine + "<i>Woody.</i>";
+            string expected1 = "<i>- At least I was going back to Hawaii.</i>" + Environment.NewLine + "<i>- Woody.</i>";
+            var sub = new Subtitle();
+            sub.Paragraphs.Add(new Paragraph(test1, 0000, 11111));
+
+            string output1 = Helper.FixHyphensAdd(sub, 0, "en");
+
+            Assert.AreEqual(output1, expected1);
+        }
+
+        [TestMethod]
         public void RemoveLineBreaks1()
         {
             string result = Utilities.RemoveLineBreaks("Hey" + Environment.NewLine + "you!");
@@ -398,7 +426,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void RemoveLineBreaks2()
         {
             string result = Utilities.RemoveLineBreaks("<i>Foobar " + Environment.NewLine + "</i> foobar.");
@@ -406,7 +433,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void RemoveLineBreaks3()
         {
             string result = Utilities.RemoveLineBreaks("<i>Foobar " + Environment.NewLine + "</i>foobar.");
@@ -414,7 +440,6 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void RemoveLineBreaks4()
         {
             string result = Utilities.RemoveLineBreaks("<i>Hey</i>" + Environment.NewLine + "<i>you!</i>");
@@ -422,11 +447,77 @@ namespace Test.Logic
         }
 
         [TestMethod]
-        [DeploymentItem("SubtitleEdit.exe")]
         public void RemoveLineBreaks5()
         {
             string result = Utilities.RemoveLineBreaks("<i>Foobar" + Environment.NewLine + "</i>");
             Assert.AreEqual(result, "<i>Foobar</i>");
+        }
+
+        [TestMethod]
+        public void IsValidRegexOk1()
+        {
+            Assert.IsTrue(Utilities.IsValidRegex(@"^(?![\s\S])"));
+        }
+
+        [TestMethod]
+        public void IsValidRegexOk2()
+        {
+            Assert.IsTrue(Utilities.IsValidRegex(@"\d+"));
+        }
+
+        [TestMethod]
+        public void IsValidRegexBad1()
+        {
+            Assert.IsFalse(Utilities.IsValidRegex(@"[\s\S(\()()(()\)"));
+        }
+
+        [TestMethod]
+        public void ReverseNumbers1()
+        {
+            Assert.AreEqual(Utilities.ReverseNumbers("Hallo 009"), "Hallo 900");
+        }
+
+        [TestMethod]
+        public void ReverseNumbers2()
+        {
+            Assert.AreEqual(Utilities.ReverseNumbers("Hallo 009 001 Bye"), "Hallo 900 100 Bye");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft1()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head."), ".I have a big head-");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft2()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("~So do I?"), "?So do I~");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft3()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("+I do too!"), "!I do too+");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft4()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("(Mom)" + Environment.NewLine + "What are you doing here?"), "(Mom)" + Environment.NewLine + "?What are you doing here");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft5()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("{\\an8}+I do too!"), "{\\an8}!I do too+");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft6()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head." + Environment.NewLine + "~So do I?" + Environment.NewLine + "+I do too!"),
+                                                                          ".I have a big head-" + Environment.NewLine + "?So do I~" + Environment.NewLine + "!I do too+");
         }
 
     }

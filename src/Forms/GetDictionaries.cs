@@ -14,7 +14,7 @@ namespace Nikse.SubtitleEdit.Forms
     {
         private List<string> _dictionaryDownloadLinks = new List<string>();
         private List<string> _descriptions = new List<string>();
-        private string _xmlName = null;
+        private string _xmlName;
 
         public GetDictionaries()
         {
@@ -29,7 +29,7 @@ namespace Nikse.SubtitleEdit.Forms
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
             labelPleaseWait.Text = string.Empty;
 
-            LoadDictionaryList("Nikse.SubtitleEdit.Resources.OpenOfficeDictionaries.xml.gz");
+            LoadDictionaryList("Nikse.SubtitleEdit.Resources.HunspellDictionaries.xml.gz");
             FixLargeFonts();
         }
 
@@ -39,20 +39,16 @@ namespace Nikse.SubtitleEdit.Forms
             _descriptions = new List<string>();
             _xmlName = xmlRessourceName;
             System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
-            Stream strm = asm.GetManifestResourceStream(_xmlName);
+            var strm = asm.GetManifestResourceStream(_xmlName);
             if (strm != null)
             {
                 comboBoxDictionaries.Items.Clear();
-                XmlDocument doc = new XmlDocument();
+                var doc = new XmlDocument();
                 using (var rdr = new StreamReader(strm))
                 using (var zip = new GZipStream(rdr.BaseStream, CompressionMode.Decompress))
+                using (var reader = XmlReader.Create(zip, new XmlReaderSettings { IgnoreProcessingInstructions = true }))
                 {
-                    byte[] data = new byte[275000];
-                    int read = zip.Read(data, 0, 275000);
-                    byte[] data2 = new byte[read];
-                    Buffer.BlockCopy(data, 0, data2, 0, read);
-                    string s = System.Text.Encoding.UTF8.GetString(data2).Trim();
-                    doc.LoadXml(s);
+                    doc.Load(reader);
                 }
 
                 foreach (XmlNode node in doc.DocumentElement.SelectNodes("Dictionary"))
@@ -75,8 +71,8 @@ namespace Nikse.SubtitleEdit.Forms
                         _dictionaryDownloadLinks.Add(downloadLink);
                         _descriptions.Add(description);
                     }
-                    comboBoxDictionaries.SelectedIndex = 0;
                 }
+                comboBoxDictionaries.SelectedIndex = 0;
             }
         }
 
@@ -93,7 +89,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 DialogResult = DialogResult.Cancel;
             }
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
             {
                 Utilities.ShowHelp("#spellcheck");
                 e.SuppressKeyPress = true;
@@ -126,7 +122,6 @@ namespace Nikse.SubtitleEdit.Forms
                 var wc = new WebClient { Proxy = Utilities.GetProxy() };
                 wc.DownloadDataCompleted += wc_DownloadDataCompleted;
                 wc.DownloadDataAsync(new Uri(url));
-                Cursor = Cursors.Default;
             }
             catch (Exception exception)
             {
@@ -141,10 +136,11 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void wc_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
         {
-            if (e.Error != null && _xmlName == "Nikse.SubtitleEdit.Resources.OpenOfficeDictionaries.xml.zip")
+            Cursor = Cursors.Default;
+            if (e.Error != null && _xmlName == "Nikse.SubtitleEdit.Resources.HunspellDictionaries.xml.gz")
             {
                 MessageBox.Show("Unable to connect to extensions.services.openoffice.org... Switching host - please re-try!");
-                LoadDictionaryList("Nikse.SubtitleEdit.Resources.HunspellDictionaries.xml.gz");
+                LoadDictionaryList("Nikse.SubtitleEdit.Resources.HunspellBackupDictionaries.xml.gz");
                 labelPleaseWait.Text = string.Empty;
                 buttonOK.Enabled = true;
                 buttonDownload.Enabled = true;

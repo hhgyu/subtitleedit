@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Globalization;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms.DCinema
 {
-    public sealed partial class DCinemaPropertiesInterop : DCinemaPropertiesForm
+    public sealed partial class DCinemaPropertiesInterop : PositionAndSizeForm
     {
         public DCinemaPropertiesInterop()
         {
@@ -23,6 +23,7 @@ namespace Nikse.SubtitleEdit.Forms.DCinema
             labelFontUri.Text = l.FontUri;
             labelFontColor.Text = l.FontColor;
             buttonFontColor.Text = l.ChooseColor;
+            buttonGenerateID.Text = l.GenerateId;
             labelEffect.Text = l.FontEffect;
             labelEffectColor.Text = l.FontEffectColor;
             buttonFontEffectColor.Text = l.ChooseColor;

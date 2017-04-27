@@ -7,7 +7,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle62 : SubtitleFormat
     {
-
         //  338:  00:24:34.00  00:24:37.10   [51]
         private static readonly Regex RegexTimeCodes = new Regex(@"^\d+:\s+\d\d:\d\d:\d\d\.\d\d\s+\d\d:\d\d:\d\d\.\d\d\s+\[\d+\]$", RegexOptions.Compiled);
 
@@ -64,6 +63,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             bool expectStartTime = true;
             var p = new Paragraph();
             subtitle.Paragraphs.Clear();
+            char[] splitChars = { '.', ':' };
             foreach (string line in lines)
             {
                 string s = line.Trim().Replace("*", string.Empty);
@@ -80,8 +80,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 subtitle.Paragraphs.Add(p);
                                 p = new Paragraph();
                             }
-                            p.StartTime = DecodeTimeCode(parts[1]);
-                            p.EndTime = DecodeTimeCode(parts[2]);
+                            p.StartTime = DecodeTimeCodeFrames(parts[1], splitChars);
+                            p.EndTime = DecodeTimeCodeFrames(parts[2], splitChars);
                             expectStartTime = false;
                         }
                         catch (Exception exception)
@@ -93,7 +93,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (string.IsNullOrWhiteSpace(line))
                 {
-                    if (p.StartTime.TotalMilliseconds == 0 && p.EndTime.TotalMilliseconds == 0)
+                    if (Math.Abs(p.StartTime.TotalMilliseconds) < 0.001 && Math.Abs(p.EndTime.TotalMilliseconds) < 0.001)
                         _errorCount++;
                     else
                         subtitle.Paragraphs.Add(p);
@@ -116,19 +116,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string part)
-        {
-            string[] parts = part.Split(new[] { '.', ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-            //00:00:07:12
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

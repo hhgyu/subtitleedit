@@ -73,7 +73,7 @@ namespace Nikse.SubtitleEdit.Core
             }
         }
 
-        private static readonly string[] AutoDetectWordsEnglish = { "we", "are", "and", "your?", "what" };
+        private static readonly string[] AutoDetectWordsEnglish = { "we", "are", "and", "your?", "what", "[TW]hat's", "You're", "(any|some|every)thing", "money", "because" };
         private static readonly string[] AutoDetectWordsDanish = { "vi", "han", "og", "jeg", "var", "men", "gider", "bliver", "virkelig", "kommer", "tilbage", "Hej" };
         private static readonly string[] AutoDetectWordsNorwegian = { "vi", "er", "og", "jeg", "var", "men" };
         private static readonly string[] AutoDetectWordsSwedish = { "vi", "är", "och", "Jag", "inte", "för" };
@@ -88,8 +88,8 @@ namespace Nikse.SubtitleEdit.Core
         private static readonly string[] AutoDetectWordsPortuguese = { "[Nn]ão", "[Ee]ntão", "uma", "ele", "bem", "isso", "você", "sim", "meu", "muito", "estou", "ela", "fazer", "tem", "já", "minha", "tudo", "só", "tenho", "agora", "vou", "seu", "quem",
                                                                        "há", "lhe", "quero", "nós", "coisa", "são", "ter", "dizer", "eles", "pode", "bom", "mesmo", "mim", "estava", "assim", "estão", "até", "quer", "temos", "acho", "obrigado", "também",
                                                                        "tens", "deus", "quê", "ainda", "noite" };
-        private static readonly string[] AutoDetectWordsGerman = { "und", "auch", "sich", "bin", "hast", "möchte" };
-        private static readonly string[] AutoDetectWordsDutch = { "van", "een", "[Hh]et", "m(ij|ĳ)", "z(ij|ĳ)n" };
+        private static readonly string[] AutoDetectWordsGerman = { "und", "auch", "sich", "bin", "hast", "möchte", "müssen", "weiß", "[Vv]ielleicht", "Warum", "jetzt" };
+        private static readonly string[] AutoDetectWordsDutch = { "van", "een", "[Hh]et", "m(ij|ĳ)", "z(ij|ĳ)n", "hebben", "alleen", "Waarom" };
         private static readonly string[] AutoDetectWordsPolish = { "Czy", "ale", "ty", "siê", "jest", "mnie" };
         private static readonly string[] AutoDetectWordsGreek = { "μου", "[Εε]ίναι", "αυτό", "Τόμπυ", "καλά", "Ενταξει", "πρεπει", "Λοιπον", "τιποτα", "ξερεις" };
         private static readonly string[] AutoDetectWordsRussian = { "[Ээч]?то", "[Нн]е", "[ТтМмбв]ы", "Да", "[Нн]ет", "Он", "его", "тебя", "как", "меня", "Но", "всё", "мне", "вас", "знаю", "ещё", "за", "нас", "чтобы", "был" };
@@ -122,11 +122,32 @@ namespace Nikse.SubtitleEdit.Core
         private static readonly string[] AutoDetectWordsRomanian1 = { "pentru", "oamenii", "decât", "[Vv]reau", "[Ss]înt", "Asteaptã", "Fãrã", "aici", "domnule", "trãiascã", "niciodatã", "înseamnã", "vorbesti", "fãcut", "spune" };
         private static readonly string[] AutoDetectWordsRomanian2 = { "pentru", "oamenii", "decat", "[Tt]rebuie", "[Aa]cum", "Poate", "vrea", "soare", "nevoie", "daca", "echilibrul", "vorbesti", "zeului", "atunci", "memoria", "soarele" };
 
+        // Czech and Slovak languages have many common words (especially when non flexed)
+        private static readonly string[] AutoDetectWordsCzechAndSlovak = {  "[Oo]n[ao]?", "[Jj]?si",
+                                                                           "[Aa]le", "[Tt]en(to)?", "[Rr]ok", "[Tt]ak", "[Aa]by", "[Tt]am", "[Jj]ed(en|na|no)", "[Nn]ež", "[Aa]ni", "[Bb]ez",
+                                                                           "[Dd]obr[ýáé]", "[Vv]šak", "[Cc]el[ýáé]", "[Nn]ov[ýáé]", "[Dd]ruh[ýáé]",
+                                                                           "jsem", "poøádku", "Pojïme", "háje", "není", "Jdeme", "všecko", "jsme", "Prosím", "Vezmi", "když", "Takže", "Dìkuji",
+                                                                           "prechádzku", "všetko", "Poïme", "potom", "Takže", "Neviem", "budúcnosti", "trochu" };
+
+        // differences between Czech and Slovak languages / Czech words / please keep the words aligned between these languages for better comparison
+        private static readonly string[] AutoDetectWordsCzech =  { ".*[Řř].*", ".*[ůě].*", "[Bb]ýt", "[Jj]sem", "[Jj]si", "[Jj]á", "[Mm]ít", "[Aa]no", "[Nn]e",  "[Nn]ic", "[Dd]en", "[Jj]en", "[Cc]o", "[Jj]ak[o]?",
+                                                                   "[Nn]ebo",      "[Pp]ři", "[Pp]ro", "[Jj](ít|du|de|deme|dou)",         "[Pp]řed.*", "[Mm]ezi",  "[Jj]eště", "[Čč]lověk", "[Pp]odle", "[Dd]alší"          };
+        // differences between Czech and Slovak languages / Slovak words / please keep the words aligned between these languages for better comparison
+        private static readonly string[] AutoDetectWordsSlovak = { ".*[Ôô].*", ".*[ä].*",  "[Bb]yť", "[Ss]om",  "[Ss]i",  "[Jj]a", "[Mm]ať", "[Áá]no", "[Nn]ie", "[Nn]ič", "[Dd]eň", "[Ll]en", "[Čč]o", "[Aa]ko",
+                                                                   "[Aa]?[Ll]ebo", "[Pp]ri", "[Pp]re", "([Íí]sť|[Ii](?:dem|de|deme|dú))", "[Pp]red.*", "[Mm]edzi", "[Ee]šte",  "[Čč]lovek", "[Pp]odľa", "[Ďď]alš(í|ia|ie)"  };
+
+        private static readonly string[] AutoDetectWordsLatvian = { "Paldies", "neesmu ", "nezinu", "viòð", "viņš", "viņu", "kungs", "esmu", "Viņš", "Velns", "viņa", "dievs", "Pagaidi", "varonis", "agrāk", "varbūt" };
+        private static readonly string[] AutoDetectWordsLithuanian = { "tavęs", "veidai", "apie", "jums", "Veidai", "Kaip", "kaip", "reikia", "Šūdas", "frensis", "Ačiū", "vilsonai", "Palauk", "Veidas", "viskas", "Tikrai", "manęs", "Tačiau", "žmogau", "Flagai", "Prašau", "Džiune", "Nakties", "šviesybe", "Supratau", "komanda", "reikia", "apie", "Kodėl", "mūsų", "Ačiū", "vyksta" };
+
         private static string AutoDetectGoogleLanguage(string text, int bestCount)
         {
             int count = GetCount(text, AutoDetectWordsEnglish);
             if (count > bestCount)
-                return "en";
+            {
+                int dutchCount = GetCount(text, AutoDetectWordsDutch);
+                if (dutchCount < count)
+                    return "en";
+            }
 
             count = GetCount(text, AutoDetectWordsDanish);
             if (count > bestCount)
@@ -278,25 +299,41 @@ namespace Nikse.SubtitleEdit.Core
             if (count > bestCount * 2)
                 return "zh"; // Chinese (simplified) - not tested...
 
+            count = GetCount(text, AutoDetectWordsCzechAndSlovak);
+            if (count > bestCount)
+            {
+                var lithuanianCount = GetCount(text, AutoDetectWordsLithuanian);
+                if (lithuanianCount <= count)
+                {
+                    int czechWordsCount = GetCount(text, AutoDetectWordsCzech);
+                    int slovakWordsCount = GetCount(text, AutoDetectWordsSlovak);
+                    if (czechWordsCount >= slovakWordsCount)
+                        return "cs"; // Czech
+                    return "sk"; // Slovak
+                }
+            }
+
+            count = GetCount(text, AutoDetectWordsLatvian);
+            if (count > bestCount * 1.2)
+                return "lv";
+
+            count = GetCount(text, AutoDetectWordsLithuanian);
+            if (count > bestCount)
+                return "lt";
+
             return string.Empty;
         }
 
         public static string AutoDetectGoogleLanguage(Subtitle subtitle)
         {
-            string languageId = AutoDetectGoogleLanguageOrNull(subtitle);
-            if (languageId == null)
-                languageId = "en";
-
-            return languageId;
+            return AutoDetectGoogleLanguageOrNull(subtitle) ?? "en";
         }
 
         public static string AutoDetectGoogleLanguageOrNull(Subtitle subtitle)
         {
-            var sb = new StringBuilder();
-            foreach (Paragraph p in subtitle.Paragraphs)
-                sb.AppendLine(p.Text);
-
-            string languageId = AutoDetectGoogleLanguage(sb.ToString(), subtitle.Paragraphs.Count / 14);
+            var s = new Subtitle(subtitle);
+            s.RemoveEmptyLines();
+            string languageId = AutoDetectGoogleLanguage(s.GetAllTexts(), s.Paragraphs.Count / 14);
             if (string.IsNullOrEmpty(languageId))
                 languageId = null;
 
@@ -309,11 +346,7 @@ namespace Nikse.SubtitleEdit.Core
                 languageName = "en_US";
             int bestCount = subtitle.Paragraphs.Count / 14;
 
-            var sb = new StringBuilder();
-            foreach (Paragraph p in subtitle.Paragraphs)
-                sb.AppendLine(p.Text);
-            string text = sb.ToString();
-
+            string text = subtitle.GetAllTexts();
             List<string> dictionaryNames = Utilities.GetDictionaryLanguages();
 
             bool containsEnGb = false;
@@ -328,7 +361,7 @@ namespace Nikse.SubtitleEdit.Core
                     containsEnUs = true;
                 if (name.Contains("[hr_HR]"))
                     containsHrHr = true;
-                if (name.Contains("[sr-Latn]"))
+                if (name.Contains("[sr_Latn]"))
                     containsSrLatn = true;
             }
 
@@ -375,13 +408,17 @@ namespace Nikse.SubtitleEdit.Core
                         count = GetCount(text, AutoDetectWordsEnglish);
                         if (count > bestCount)
                         {
-                            languageName = shortName;
-                            if (containsEnGb)
+                            int dutchCount = GetCount(text, AutoDetectWordsDutch);
+                            if (dutchCount < count)
                             {
-                                int usCount = GetCount(text, "color", "flavor", "honor", "humor", "neighbor", "honor");
-                                int gbCount = GetCount(text, "colour", "flavour", "honour", "humour", "neighbour", "honour");
-                                if (gbCount > usCount)
-                                    languageName = "en_GB";
+                                languageName = shortName;
+                                if (containsEnGb)
+                                {
+                                    int usCount = GetCount(text, "color", "flavor", "honor", "humor", "neighbor", "honor");
+                                    int gbCount = GetCount(text, "colour", "flavour", "honour", "humour", "neighbour", "honour");
+                                    if (gbCount > usCount)
+                                        languageName = "en_GB";
+                                }
                             }
                         }
                         break;
@@ -389,13 +426,17 @@ namespace Nikse.SubtitleEdit.Core
                         count = GetCount(text, AutoDetectWordsEnglish);
                         if (count > bestCount)
                         {
-                            languageName = shortName;
-                            if (containsEnUs)
+                            int dutchCount = GetCount(text, AutoDetectWordsDutch);
+                            if (dutchCount < count)
                             {
-                                int usCount = GetCount(text, "color", "flavor", "honor", "humor", "neighbor", "honor");
-                                int gbCount = GetCount(text, "colour", "flavour", "honour", "humour", "neighbour", "honour");
-                                if (gbCount < usCount)
-                                    languageName = "en_US";
+                                languageName = shortName;
+                                if (containsEnUs)
+                                {
+                                    int usCount = GetCount(text, "color", "flavor", "honor", "humor", "neighbor", "honor");
+                                    int gbCount = GetCount(text, "colour", "flavour", "honour", "humour", "neighbour", "honour");
+                                    if (gbCount < usCount)
+                                        languageName = "en_US";
+                                }
                             }
                         }
                         break;
@@ -482,7 +523,7 @@ namespace Nikse.SubtitleEdit.Core
                             }
                         }
                         break;
-                    case "sr-Latn": // Serbian (Latin)
+                    case "sr_Latn": // Serbian (Latin)
                         count = GetCount(text, AutoDetectWordsCroatianAndSerbian);
                         if (count > bestCount)
                         {
@@ -501,18 +542,41 @@ namespace Nikse.SubtitleEdit.Core
                         if (count > bestCount)
                             languageName = shortName;
                         break;
-                    case "pt_PT": // Portuguese
-                        count = GetCount(text, AutoDetectWordsPortuguese);
-                        if (count > bestCount)
-                            languageName = shortName;
-                        break;
-                    case "pt_BR": // Portuguese (Brasil)
+                    case "pt_PT": // Portuguese Portugal
+                    case "pt_BR": // Portuguese Brazil
                         count = GetCount(text, AutoDetectWordsPortuguese);
                         if (count > bestCount)
                             languageName = shortName;
                         break;
                     case "hu_HU": // Hungarian
                         count = GetCount(text, AutoDetectWordsHungarian);
+                        if (count > bestCount)
+                            languageName = shortName;
+                        break;
+                    case "cs_CZ": // Czech
+                        count = GetCount(text, AutoDetectWordsCzech);
+                        if (count > bestCount)
+                        {
+                            var lithuanianCount = GetCount(text, AutoDetectWordsLithuanian);
+                            if (count > lithuanianCount)
+                            {
+                                languageName = shortName;
+                            }
+                        }
+                        break;
+                    case "sk_SK": // Slovak
+                        count = GetCount(text, AutoDetectWordsSlovak);
+                        if (count > bestCount)
+                            languageName = shortName;
+                        break;
+                    case "lv_LV": // Latvian
+                        count = GetCount(text, AutoDetectWordsLatvian);
+                        if (count > bestCount)
+                            languageName = shortName;
+                        break;
+                    case "lt_LT": // Lithuanian
+                    case "lt":    // Lithuanian (Neutral)
+                        count = GetCount(text, AutoDetectWordsLithuanian);
                         if (count > bestCount)
                             languageName = shortName;
                         break;
@@ -573,13 +637,11 @@ namespace Nikse.SubtitleEdit.Core
 
             try
             {
-                foreach (EncodingInfo ei in Encoding.GetEncodings())
+                foreach (var enc in Configuration.AvailableEncodings)
                 {
-                    if (ei.CodePage + ": " + ei.DisplayName == Configuration.Settings.General.DefaultEncoding &&
-                        ei.Name != Encoding.UTF8.BodyName &&
-                        ei.Name != Encoding.Unicode.BodyName)
+                    if (enc.WebName == Configuration.Settings.General.DefaultEncoding && enc.WebName != Encoding.Unicode.WebName && enc.WebName != Encoding.UTF8.WebName)
                     {
-                        encoding = ei.GetEncoding();
+                        encoding = enc;
                         break;
                     }
                 }
@@ -591,12 +653,14 @@ namespace Nikse.SubtitleEdit.Core
                     file.Read(bom, 0, bom.Length);
                     if (bom[0] == 0xef && bom[1] == 0xbb && bom[2] == 0xbf)
                         encoding = Encoding.UTF8;
+                    else if (bom[0] == 0xff && bom[1] == 0xfe && bom[2] == 0 && bom[3] == 0)
+                        encoding = Encoding.GetEncoding(12000); // UTF-32 (LE)
                     else if (bom[0] == 0xff && bom[1] == 0xfe)
                         encoding = Encoding.Unicode;
                     else if (bom[0] == 0xfe && bom[1] == 0xff) // utf-16 and ucs-2
                         encoding = Encoding.BigEndianUnicode;
                     else if (bom[0] == 0 && bom[1] == 0 && bom[2] == 0xfe && bom[3] == 0xff) // ucs-4
-                        encoding = Encoding.UTF32;
+                        encoding = Encoding.GetEncoding(12001); // UTF-32 (BE)
                     else if (bom[0] == 0x2b && bom[1] == 0x2f && bom[2] == 0x76 && (bom[3] == 0x38 || bom[3] == 0x39 || bom[3] == 0x2b || bom[3] == 0x2f)) // utf-7
                         encoding = Encoding.UTF7;
                     else if (file.Length > bom.Length)
@@ -614,7 +678,7 @@ namespace Nikse.SubtitleEdit.Core
                         {
                             encoding = Encoding.UTF8;
                         }
-                        else if (couldBeUtf8 && Configuration.Settings.General.DefaultEncoding == Encoding.UTF8.BodyName)
+                        else if (couldBeUtf8 && Configuration.Settings.General.DefaultEncoding == Encoding.UTF8.WebName)
                         { // keep utf-8 encoding if it's default
                             encoding = Encoding.UTF8;
                         }
@@ -667,6 +731,7 @@ namespace Nikse.SubtitleEdit.Core
             }
             catch
             {
+                // ignored
             }
             return encoding;
         }

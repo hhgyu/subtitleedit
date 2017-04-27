@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using Nikse.SubtitleEdit.Core;
+﻿using Nikse.SubtitleEdit.Core;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Forms;
 
@@ -20,6 +20,8 @@ namespace Nikse.SubtitleEdit.Controls
 
         private bool _forceHHMMSSFF;
 
+        public bool UseVideoOffset { get; set; }
+
         private static char[] _splitChars;
 
         internal void ForceHHMMSSFF()
@@ -32,12 +34,7 @@ namespace Nikse.SubtitleEdit.Controls
         {
             get
             {
-                if (_forceHHMMSSFF)
-                    return TimeMode.HHMMSSFF;
-
-                if (Configuration.Settings == null)
-                    return TimeMode.HHMMSSMS;
-                if (Configuration.Settings.General.UseTimeFormatHHMMSSFF)
+                if (_forceHHMMSSFF || Configuration.Settings?.General.UseTimeFormatHHMMSSFF == true)
                     return TimeMode.HHMMSSFF;
                 return TimeMode.HHMMSSMS;
             }
@@ -53,9 +50,14 @@ namespace Nikse.SubtitleEdit.Controls
             if (_splitChars == null)
             {
                 var splitChars = new List<char> { ':', ',', '.' };
-                if (CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator.Length == 1)
+                string cultureSeparator = CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+                if (cultureSeparator.Length == 1)
                 {
-                    splitChars.Add(Convert.ToChar(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator));
+                    char ch = Convert.ToChar(cultureSeparator);
+                    if (!splitChars.Contains(ch))
+                    {
+                        splitChars.Add(ch);
+                    }
                 }
                 _splitChars = splitChars.ToArray();
             }
@@ -94,9 +96,7 @@ namespace Nikse.SubtitleEdit.Controls
                             SetTotalMilliseconds(0);
                     }
                 }
-
-                if (TimeCodeChanged != null)
-                    TimeCodeChanged.Invoke(this, e);
+                TimeCodeChanged?.Invoke(this, e);
             }
             numericUpDown1.Value = NumericUpDownValue;
         }
@@ -111,12 +111,13 @@ namespace Nikse.SubtitleEdit.Controls
 
         public void SetTotalMilliseconds(double milliseconds)
         {
+            if (UseVideoOffset)
+            {
+                milliseconds += Configuration.Settings.General.CurrentVideoOffsetInMs;
+            }
             if (Mode == TimeMode.HHMMSSMS)
             {
-                if (milliseconds < 0)
-                    maskedTextBox1.Mask = "-00:00:00.000";
-                else
-                    maskedTextBox1.Mask = "00:00:00.000";
+                maskedTextBox1.Mask = GetMask(milliseconds);
                 maskedTextBox1.Text = new TimeCode(milliseconds).ToString();
             }
             else
@@ -145,7 +146,7 @@ namespace Nikse.SubtitleEdit.Controls
                 startTime = startTime.Replace(' ', '0');
                 if (Mode == TimeMode.HHMMSSMS)
                 {
-                    if (startTime.EndsWith(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator))
+                    if (startTime.EndsWith(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, StringComparison.Ordinal))
                         startTime += "000";
 
                     string[] times = startTime.Split(_splitChars, StringSplitOptions.RemoveEmptyEntries);
@@ -167,8 +168,13 @@ namespace Nikse.SubtitleEdit.Controls
 
                         int milliSeconds;
                         int.TryParse(times[3].PadRight(3, '0'), out milliSeconds);
-
                         var tc = new TimeCode(hours, minutes, seconds, milliSeconds);
+
+                        if (UseVideoOffset)
+                        {
+                            tc.AddTime(-Configuration.Settings.General.CurrentVideoOffsetInMs);
+                        }
+
                         if (hours < 0 && tc.TotalMilliseconds > 0)
                             tc.TotalMilliseconds *= -1;
                         return tc;
@@ -176,7 +182,7 @@ namespace Nikse.SubtitleEdit.Controls
                 }
                 else
                 {
-                    if (startTime.EndsWith(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator) || startTime.EndsWith(':'))
+                    if (startTime.EndsWith(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator, StringComparison.Ordinal) || startTime.EndsWith(':'))
                         startTime += "00";
 
                     string[] times = startTime.Split(_splitChars, StringSplitOptions.RemoveEmptyEntries);
@@ -198,7 +204,14 @@ namespace Nikse.SubtitleEdit.Controls
                             milliSeconds = Core.SubtitleFormats.SubtitleFormat.FramesToMillisecondsMax999(milliSeconds);
                         }
 
-                        return new TimeCode(hours, minutes, seconds, milliSeconds);
+                        var tc = new TimeCode(hours, minutes, seconds, milliSeconds);
+
+                        if (UseVideoOffset)
+                        {
+                            tc.AddTime(-Configuration.Settings.General.CurrentVideoOffsetInMs);
+                        }
+
+                        return tc;
                     }
                 }
                 return null;
@@ -211,19 +224,21 @@ namespace Nikse.SubtitleEdit.Controls
                     return;
                 }
 
+                var v = new TimeCode(value.TotalMilliseconds);
+                if (UseVideoOffset)
+                {
+                    v.AddTime(Configuration.Settings.General.CurrentVideoOffsetInMs);
+                }
+
                 if (Mode == TimeMode.HHMMSSMS)
                 {
-                    if (value.TotalMilliseconds < 0)
-                        maskedTextBox1.Mask = "-00:00:00.000";
-                    else
-                        maskedTextBox1.Mask = "00:00:00.000";
-
-                    maskedTextBox1.Text = value.ToString();
+                    maskedTextBox1.Mask = GetMask(v.TotalMilliseconds);
+                    maskedTextBox1.Text = v.ToString();
                 }
                 else
                 {
                     maskedTextBox1.Mask = "00:00:00:00";
-                    maskedTextBox1.Text = value.ToHHMMSSFF();
+                    maskedTextBox1.Text = v.ToHHMMSSFF();
                 }
             }
         }
@@ -242,11 +257,11 @@ namespace Nikse.SubtitleEdit.Controls
             }
             else if (e.KeyCode == Keys.Enter)
             {
-                if (TimeCodeChanged != null)
-                    TimeCodeChanged.Invoke(this, e);
+                TimeCodeChanged?.Invoke(this, e);
                 e.SuppressKeyPress = true;
             }
         }
 
+        private string GetMask(double val) => val >= 0 ? "00:00:00.000" : "-00:00:00.000";
     }
 }

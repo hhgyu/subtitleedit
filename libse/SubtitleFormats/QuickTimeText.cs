@@ -36,15 +36,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override string ToText(Subtitle subtitle, string title)
         {
-            const string Header = @"{QTtext} {font:Tahoma}
+            const string header = @"{QTtext} {font:Tahoma}
 {plain} {size:20}
 {timeScale:30}
 {width:160} {height:32}
 {timestamps:absolute} {language:0}";
 
             var sb = new StringBuilder();
-            sb.AppendLine(Header);
-            int index = 0;
+            sb.AppendLine(header);
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 //[00:00:07.12]
@@ -55,7 +54,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 //tout le temps,
                 //[00:00:35.08]
                 sb.AppendLine(string.Format("{0}{1}{2}", EncodeTimeCode(p.StartTime) + Environment.NewLine, HtmlUtil.RemoveHtmlTags(p.Text) + Environment.NewLine, EncodeTimeCode(p.EndTime) + Environment.NewLine));
-                index++;
             }
             return sb.ToString();
         }
@@ -94,7 +92,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 int indexOfEndTime = line.IndexOf(']');
                                 if (indexOfEndTime > 0 && indexOfEndTime + 1 < line.Length)
                                     text = line.Substring(indexOfEndTime + 1);
-                                p = new Paragraph(DecodeTimeCode(parts), DecodeTimeCode(parts), text);
+                                p = new Paragraph(DecodeTimeCodeFramesFourParts(parts), DecodeTimeCodeFramesFourParts(parts), text);
                             }
                             catch
                             {
@@ -103,14 +101,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         }
                         else
                         {
-                            p.EndTime = DecodeTimeCode(parts);
+                            p.EndTime = DecodeTimeCodeFramesFourParts(parts);
                             subtitle.Paragraphs.Add(p);
 
                             string text = string.Empty;
                             int indexOfEndTime = line.IndexOf(']');
                             if (indexOfEndTime > 0 && indexOfEndTime + 1 < line.Length)
                                 text = line.Substring(indexOfEndTime + 1);
-                            p = new Paragraph(DecodeTimeCode(parts), DecodeTimeCode(parts), text);
+                            p = new Paragraph(DecodeTimeCodeFramesFourParts(parts), DecodeTimeCodeFramesFourParts(parts), text);
                         }
                     }
                 }
@@ -133,18 +131,5 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.Renumber();
         }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //[00:00:07.12]
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            TimeCode tc = new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
-            return tc;
-        }
-
     }
 }

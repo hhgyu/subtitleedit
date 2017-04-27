@@ -92,7 +92,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesFourParts(parts);
                             paragraph.StartTime = tc;
                             expecting = ExpectingLine.TimeEnd;
                         }
@@ -110,7 +110,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         try
                         {
-                            var tc = DecodeTimeCode(parts);
+                            var tc = DecodeTimeCodeFramesFourParts(parts);
                             paragraph.EndTime = tc;
                             expecting = ExpectingLine.Text;
                         }
@@ -188,15 +188,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
             }
             return list;
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            int hours = int.Parse(parts[0]);
-            int minutes = int.Parse(parts[1]);
-            int seconds = int.Parse(parts[2]);
-            int frames = int.Parse(parts[3]);
-            return new TimeCode(hours, minutes, seconds, FramesToMillisecondsMax999(frames));
         }
 
         private Encoding GetEncodingFromLanguage(byte language)

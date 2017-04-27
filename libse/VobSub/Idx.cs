@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -13,7 +12,7 @@ namespace Nikse.SubtitleEdit.Core.VobSub
         public readonly List<Color> Palette = new List<Color>();
         public readonly List<string> Languages = new List<string>();
 
-        private static Regex timeCodeLinePattern = new Regex(@"^timestamp: \d+:\d+:\d+:\d+, filepos: [\dabcdefABCDEF]+$", RegexOptions.Compiled);
+        private static readonly Regex _timeCodeLinePattern = new Regex(@"^timestamp: \d+:\d+:\d+:\d+, filepos: [\dabcdefABCDEF]+$", RegexOptions.Compiled);
 
         public Idx(string fileName)
             : this(File.ReadAllLines(fileName))
@@ -22,9 +21,10 @@ namespace Nikse.SubtitleEdit.Core.VobSub
 
         public Idx(string[] lines)
         {
+            int languageIndex = 0;
             foreach (string line in lines)
             {
-                if (timeCodeLinePattern.IsMatch(line))
+                if (_timeCodeLinePattern.IsMatch(line))
                 {
                     IdxParagraph p = GetTimeCodeAndFilePosition(line);
                     if (p != null)
@@ -43,19 +43,20 @@ namespace Nikse.SubtitleEdit.Core.VobSub
                 {
                     //id: en, index: 1
                     //id: es, index: 2
-                    string s = line.Substring("id:".Length + 1);
-                    string[] parts = s.Split(new[] { ':', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (parts.Length > 0)
+                    var parts = line.Split(new[] { ':', ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length > 1)
                     {
-                        try
+                        string twoLetterLanguageId = parts[1];
+                        string languageName = DvdSubtitleLanguage.GetLocalLanguageName(twoLetterLanguageId);
+                        if (parts.Length > 3 && parts[2].Equals("index", StringComparison.OrdinalIgnoreCase))
                         {
-                            string twoLetterLanguageId = parts[0];
-                            CultureInfo info = CultureInfo.GetCultureInfoByIetfLanguageTag(twoLetterLanguageId);
-                            Languages.Add(string.Format("{0} (0x{1:x})", info.NativeName, Languages.Count + 32));
+                            int index;
+                            if (int.TryParse(parts[3], out index))
+                                languageIndex = index;
                         }
-                        catch
-                        {
-                        }
+                        // Use U+200E (LEFT-TO-RIGHT MARK) to support right-to-left scripts
+                        Languages.Add(string.Format("{0} \x200E(0x{1:x})", languageName, languageIndex + 32));
+                        languageIndex++;
                     }
                 }
             }

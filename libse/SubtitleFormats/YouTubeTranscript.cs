@@ -39,11 +39,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override string ToText(Subtitle subtitle, string title)
         {
             var sb = new StringBuilder();
-            int index = 0;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 sb.AppendLine(string.Format("{0}" + Environment.NewLine + "{1}", EncodeTimeCode(p.StartTime), HtmlUtil.RemoveHtmlTags(p.Text.Replace(Environment.NewLine, " "))));
-                index++;
             }
             return sb.ToString();
         }
@@ -62,7 +60,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 if (RegexTimeCodes.IsMatch(line))
                 {
-                    p = new Paragraph(DecodeTimeCode(line), new TimeCode(0, 0, 0, 0), string.Empty);
+                    p = new Paragraph(DecodeTimeCode(line), new TimeCode(), string.Empty);
                     subtitle.Paragraphs.Add(p);
                 }
                 else if (string.IsNullOrWhiteSpace(line))

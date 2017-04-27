@@ -4,17 +4,19 @@ using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Windows.Forms;
 
 namespace Nikse.SubtitleEdit.Forms
 {
     public sealed partial class ChangeCasingNames : Form
     {
-        private readonly List<string> _usedNames = new List<string>();
+        private readonly HashSet<string> _usedNames = new HashSet<string>();
         private int _noOfLinesChanged;
         private Subtitle _subtitle;
-        private const string ExpectedEndChars = " ,.!?:;')<-\"\r\n";
+        private const string ExpectedEndChars = " ,.!?:;')]<-\"\r\n";
+        private NamesList _namesList;
+        private List<string> _namesListInclMulti;
+
         public ChangeCasingNames()
         {
             InitializeComponent();
@@ -31,6 +33,8 @@ namespace Nikse.SubtitleEdit.Forms
 
             buttonSelectAll.Text = Configuration.Settings.Language.FixCommonErrors.SelectAll;
             buttonInverseSelection.Text = Configuration.Settings.Language.FixCommonErrors.InverseSelection;
+            labelExtraNames.Text = Configuration.Settings.Language.ChangeCasingNames.ExtraNames;
+            buttonAddCustomNames.Text = Configuration.Settings.Language.DvdSubRip.Add;
 
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
@@ -65,6 +69,13 @@ namespace Nikse.SubtitleEdit.Forms
         {
             _subtitle = subtitle;
 
+            string language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
+            if (string.IsNullOrEmpty(language))
+                language = "en_US";
+
+            _namesList = new NamesList(Configuration.DictionariesDirectory, language, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
+            _namesListInclMulti = _namesList.GetAllNames(); // Will contains both one word names and multi names
+
             FindAllNames();
             GeneratePreview();
         }
@@ -81,12 +92,12 @@ namespace Nikse.SubtitleEdit.Forms
                 {
                     string name = item.SubItems[1].Text;
 
-                    string textNoTags = HtmlUtil.RemoveHtmlTags(text);
+                    string textNoTags = HtmlUtil.RemoveHtmlTags(text, true);
                     if (textNoTags != textNoTags.ToUpper())
                     {
                         if (item.Checked && text != null && text.Contains(name, StringComparison.OrdinalIgnoreCase) && name.Length > 1 && name != name.ToLower())
                         {
-                            var st = new StripableText(text);
+                            var st = new StrippableText(text);
                             st.FixCasing(new List<string> { name }, true, false, false, string.Empty);
                             text = st.MergedString;
                         }
@@ -109,32 +120,24 @@ namespace Nikse.SubtitleEdit.Forms
             listViewFixes.Items.Add(item);
         }
 
+        private void AddCustomNames()
+        {
+            foreach (string s in textBoxExtraNames.Text.Split(','))
+            {
+                var name = s.Trim();
+                if (name.Length > 1 && !_namesListInclMulti.Contains(name))
+                {
+                    _namesListInclMulti.Add(name);
+                }
+            }
+        }
+
         private void FindAllNames()
         {
-            string language = LanguageAutoDetect.AutoDetectLanguageName("en_US", _subtitle);
-            if (string.IsNullOrEmpty(language))
-                language = "en_US";
-
-            var namesList = new NamesList(Configuration.DictionariesFolder, language, Configuration.Settings.WordLists.UseOnlineNamesEtc, Configuration.Settings.WordLists.NamesEtcUrl);
-
-            // Will contains both one word names and multi names
-            var namesEtcList = namesList.GetAllNames();
-
-            if (language.StartsWith("en", StringComparison.Ordinal))
-            {
-                namesEtcList.Remove("Black");
-                namesEtcList.Remove("Bill");
-                namesEtcList.Remove("Long");
-                namesEtcList.Remove("Don");
-            }
-
-            var sb = new StringBuilder();
-            foreach (Paragraph p in _subtitle.Paragraphs)
-                sb.AppendLine(p.Text);
-            string text = HtmlUtil.RemoveHtmlTags(sb.ToString());
+            string text = HtmlUtil.RemoveHtmlTags(_subtitle.GetAllTexts());
             string textToLower = text.ToLower();
             listViewNames.BeginUpdate();
-            foreach (string name in namesEtcList)
+            foreach (string name in _namesListInclMulti)
             {
                 int startIndex = textToLower.IndexOf(name.ToLower(), StringComparison.Ordinal);
                 if (startIndex >= 0)
@@ -144,7 +147,7 @@ namespace Nikse.SubtitleEdit.Forms
                     {
                         bool startOk = (startIndex == 0) || (text[startIndex - 1] == ' ') || (text[startIndex - 1] == '-') ||
                                        (text[startIndex - 1] == '"') || (text[startIndex - 1] == '\'') || (text[startIndex - 1] == '>') ||
-                                       (Environment.NewLine.EndsWith(text[startIndex - 1].ToString(CultureInfo.InvariantCulture)));
+                                       (Environment.NewLine.EndsWith(text[startIndex - 1].ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
 
                         if (startOk)
                         {
@@ -277,5 +280,13 @@ namespace Nikse.SubtitleEdit.Forms
             listViewNames.ItemChecked += ListViewNamesItemChecked;
             GeneratePreview();
         }
+
+        private void buttonAddCustomNames_Click(object sender, EventArgs e)
+        {
+            AddCustomNames();
+            textBoxExtraNames.Text = string.Empty;
+            FindAllNames();
+        }
+
     }
 }

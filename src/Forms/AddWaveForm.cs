@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Windows.Forms;
+using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -52,12 +53,12 @@ namespace Nikse.SubtitleEdit.Forms
         public static Process GetCommandLineProcess(string inputVideoFile, int audioTrackNumber, string outWaveFile, string encodeParamters, out string encoderName)
         {
             encoderName = "VLC";
-            string parameters = "\"" + inputVideoFile + "\" -I dummy -vvv --no-sout-video --audio-track=" + audioTrackNumber + " --sout=\"#transcode{acodec=s16l,channels=1,ab=128}:std{access=file,mux=wav,dst=" + outWaveFile + "}\" vlc://quit";
+            string parameters = "\"" + inputVideoFile + "\" -I dummy -vvv --no-random --no-repeat --no-loop --no-sout-video --audio-track=" + audioTrackNumber + " --sout=\"#transcode{acodec=s16l,channels=1,ab=128}:std{access=file,mux=wav,dst=" + outWaveFile + "}\" vlc://quit";
             string exeFilePath;
             if (Configuration.IsRunningOnLinux())
             {
                 exeFilePath = "cvlc";
-                parameters = "-vvv --no-sout-video --audio-track=" + audioTrackNumber + " --sout '#transcode{" + encodeParamters + "}:std{mux=wav,access=file,dst=" + outWaveFile + "}' \"" + inputVideoFile + "\" vlc://quit";
+                parameters = "-vvv --no-random --no-repeat --no-loop --no-sout-video --audio-track=" + audioTrackNumber + " --sout '#transcode{" + encodeParamters + "}:std{mux=wav,access=file,dst=" + outWaveFile + "}' \"" + inputVideoFile + "\" vlc://quit";
             }
             else if (Configuration.IsRunningOnMac())
             {
@@ -370,7 +371,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (e.KeyCode == Keys.Escape)
                 DialogResult = DialogResult.Cancel;
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
             {
                 Utilities.ShowHelp("#waveform");
                 e.SuppressKeyPress = true;

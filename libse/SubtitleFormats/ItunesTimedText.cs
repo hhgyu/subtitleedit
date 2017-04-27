@@ -14,9 +14,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             get { return ".itt"; }
         }
 
+        public new const string NameOfFormat = "iTunes Timed Text";
+
         public override string Name
         {
-            get { return "iTunes Timed Text"; }
+            get { return NameOfFormat; }
         }
 
         public override bool IsTimeBased
@@ -29,12 +31,16 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (fileName != null && !fileName.EndsWith(Extension, StringComparison.OrdinalIgnoreCase))
                 return false;
 
+            if (new NetflixTimedText().IsMine(lines, fileName))
+                return false;
+
             return base.IsMine(lines, fileName);
         }
 
         public override string ToText(Subtitle subtitle, string title)
         {
             XmlNode styleHead = null;
+            bool convertedFromSubStationAlpha = false;
             if (subtitle.Header != null)
             {
                 try
@@ -71,6 +77,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 if (ssaStyle.Bold)
                                     fontWeight = "bold";
                                 AddStyleToXml(x, styleHead, xnsmgr, ssaStyle.Name, ssaStyle.FontName, fontWeight, fontStyle, Utilities.ColorToHex(ssaStyle.Primary), ssaStyle.FontSize.ToString());
+                                convertedFromSubStationAlpha = true;
                             }
                         }
                         catch
@@ -88,21 +95,21 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             nsmgr.AddNamespace("tts", "http://www.w3.org/ns/10/ttml#style");
             nsmgr.AddNamespace("ttm", "http://www.w3.org/ns/10/ttml#metadata");
 
-            string frameRate = "24";
+            string frameRate = ((int)Math.Round(Configuration.Settings.General.CurrentFrameRate)).ToString();
             string frameRateMultiplier = "999 1000";
-            if (Math.Abs(Configuration.Settings.General.CurrentFrameRate - 30.0) < 0.2)
+            if (Configuration.Settings.General.CurrentFrameRate % 1.0 < 0.01)
             {
-                frameRate = "30";
-            }
-            else if (Math.Abs(Configuration.Settings.General.CurrentFrameRate - 25.0) < 0.01)
-            {
-                frameRate = "25";
                 frameRateMultiplier = "1 1";
+            }
+            string dropMode = "nonDrop";
+            if (Math.Abs(Configuration.Settings.General.CurrentFrameRate - 29.97) < 0.01)
+            {
+                dropMode = "dropNTSC";
             }
 
             const string language = "en-US";
             string xmlStructure = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>" + Environment.NewLine +
-            "<tt xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/ns/ttml\" xmlns:tt=\"http://www.w3.org/ns/ttml\" xmlns:tts=\"http://www.w3.org/ns/ttml#styling\" xmlns:ttp=\"http://www.w3.org/ns/ttml#parameter\" xml:lang=\"" + language + "\" ttp:timeBase=\"smpte\" ttp:frameRate=\"" + frameRate + "\" ttp:frameRateMultiplier=\"" + frameRateMultiplier + "\" ttp:dropMode=\"nonDrop\">" + Environment.NewLine +
+            "<tt xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.w3.org/ns/ttml\" xmlns:tt=\"http://www.w3.org/ns/ttml\" xmlns:tts=\"http://www.w3.org/ns/ttml#styling\" xmlns:ttp=\"http://www.w3.org/ns/ttml#parameter\" xml:lang=\"" + language + "\" ttp:timeBase=\"smpte\" ttp:frameRate=\"" + frameRate + "\" ttp:frameRateMultiplier=\"" + frameRateMultiplier + "\" ttp:dropMode=\"" + dropMode + "\">" + Environment.NewLine +
             "   <head>" + Environment.NewLine +
             "       <styling>" + Environment.NewLine +
             "         <style tts:fontSize=\"100%\" tts:color=\"white\" tts:fontStyle=\"normal\" tts:fontWeight=\"normal\" tts:fontFamily=\"sansSerif\" xml:id=\"normal\"/>" + Environment.NewLine +
@@ -173,14 +180,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     hasTopRegion = true;
             }
 
-            int no = 0;
+            var headerStyles = GetStylesFromHeader(subtitle.Header);
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 XmlNode paragraph = xml.CreateElement("p", "http://www.w3.org/ns/ttml");
                 string text = p.Text;
 
                 XmlAttribute regionP = xml.CreateAttribute("region");
-                if (text.StartsWith("{\\an7}") || text.StartsWith("{\\an8}") || text.StartsWith("{\\an9}"))
+                if (text.StartsWith("{\\an7}", StringComparison.Ordinal) || text.StartsWith("{\\an8}", StringComparison.Ordinal) || text.StartsWith("{\\an9}", StringComparison.Ordinal))
                 {
                     if (hasTopRegion)
                     {
@@ -193,10 +200,18 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     regionP.InnerText = "bottom";
                     paragraph.Attributes.Append(regionP);
                 }
-                if (text.StartsWith("{\\an") && text.Length > 6 && text[5] == '}')
+                if (text.StartsWith("{\\an", StringComparison.Ordinal) && text.Length > 6 && text[5] == '}')
                     text = text.Remove(0, 6);
 
-                if (subtitle.Header != null && p.Style != null && GetStylesFromHeader(subtitle.Header).Contains(p.Style))
+                if (convertedFromSubStationAlpha)
+                {
+                    if (string.IsNullOrEmpty(p.Style))
+                    {
+                        p.Style = p.Extra;
+                    }
+                }
+
+                if (subtitle.Header != null && p.Style != null && headerStyles.Contains(p.Style))
                 {
                     if (p.Style != defaultStyle)
                     {
@@ -213,6 +228,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
 
                 bool first = true;
+                bool italicOn = false;
                 foreach (string line in text.SplitToLines())
                 {
                     if (!first)
@@ -231,7 +247,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         {
                             skipCount--;
                         }
-                        else if (line.Substring(i).StartsWith("<i>"))
+                        else if (line.Substring(i).StartsWith("<i>", StringComparison.Ordinal))
                         {
                             styles.Push(currentStyle);
                             currentStyle = xml.CreateNode(XmlNodeType.Element, "span", null);
@@ -240,8 +256,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             attr.InnerText = "italic";
                             currentStyle.Attributes.Append(attr);
                             skipCount = 2;
+                            italicOn = true;
                         }
-                        else if (line.Substring(i).StartsWith("<b>"))
+                        else if (line.Substring(i).StartsWith("<b>", StringComparison.Ordinal))
                         {
                             currentStyle = xml.CreateNode(XmlNodeType.Element, "span", null);
                             paragraph.AppendChild(currentStyle);
@@ -250,7 +267,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             currentStyle.Attributes.Append(attr);
                             skipCount = 2;
                         }
-                        else if (line.Substring(i).StartsWith("<font "))
+                        else if (line.Substring(i).StartsWith("<font ", StringComparison.Ordinal))
                         {
                             int endIndex = line.Substring(i + 1).IndexOf('>');
                             if (endIndex > 0)
@@ -276,7 +293,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 skipCount = line.Length;
                             }
                         }
-                        else if (line.Substring(i).StartsWith("</i>") || line.Substring(i).StartsWith("</b>") || line.Substring(i).StartsWith("</font>"))
+                        else if (line.Substring(i).StartsWith("</i>", StringComparison.Ordinal) || line.Substring(i).StartsWith("</b>", StringComparison.Ordinal) || line.Substring(i).StartsWith("</font>", StringComparison.Ordinal))
                         {
                             currentStyle = xml.CreateTextNode(string.Empty);
                             if (styles.Count > 0)
@@ -285,13 +302,23 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 currentStyle.InnerText = string.Empty;
                             }
                             paragraph.AppendChild(currentStyle);
-                            if (line.Substring(i).StartsWith("</font>"))
+                            if (line.Substring(i).StartsWith("</font>", StringComparison.Ordinal))
                                 skipCount = 6;
                             else
                                 skipCount = 3;
+                            italicOn = false;
                         }
                         else
                         {
+                            if (i == 0 && italicOn && !(line.Substring(i).StartsWith("<i>", StringComparison.Ordinal)))
+                            {
+                                styles.Push(currentStyle);
+                                currentStyle = xml.CreateNode(XmlNodeType.Element, "span", null);
+                                paragraph.AppendChild(currentStyle);
+                                XmlAttribute attr = xml.CreateAttribute("tts:fontStyle", "http://www.w3.org/ns/10/ttml#style");
+                                attr.InnerText = "italic";
+                                currentStyle.Attributes.Append(attr);
+                            }
                             currentStyle.InnerText = currentStyle.InnerText + line[i];
                         }
                     }
@@ -307,7 +334,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 paragraph.Attributes.Append(end);
 
                 div.AppendChild(paragraph);
-                no++;
             }
             string xmlString = ToUtf8XmlString(xml).Replace(" xmlns=\"\"", string.Empty).Replace(" xmlns:tts=\"http://www.w3.org/ns/10/ttml#style\">", ">").Replace("<br />", "<br/>");
             if (subtitle.Header == null)

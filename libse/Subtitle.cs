@@ -14,8 +14,8 @@ namespace Nikse.SubtitleEdit.Core
         private readonly List<HistoryItem> _history;
         private SubtitleFormat _format;
         private bool _wasLoadedWithFrameNumbers;
-        public string Header { get; set; }
-        public string Footer { get; set; }
+        public string Header { get; set; } = string.Empty;
+        public string Footer { get; set; } = string.Empty;
 
         public string FileName { get; set; }
 
@@ -65,6 +65,12 @@ namespace Nikse.SubtitleEdit.Core
             _wasLoadedWithFrameNumbers = subtitle.WasLoadedWithFrameNumbers;
             Header = subtitle.Header;
             Footer = subtitle.Footer;
+            FileName = subtitle.FileName;
+        }
+
+        public Subtitle(List<Paragraph> paragraphs) : this()
+        {
+            _paragraphs = paragraphs;
         }
 
         public List<Paragraph> Paragraphs
@@ -119,13 +125,12 @@ namespace Nikse.SubtitleEdit.Core
             return LoadSubtitle(fileName, out encoding, useThisEncoding, false);
         }
 
-        public SubtitleFormat LoadSubtitle(string fileName, out Encoding encoding, Encoding useThisEncoding, bool batchMode)
+        public SubtitleFormat LoadSubtitle(string fileName, out Encoding encoding, Encoding useThisEncoding, bool batchMode, double? sourceFrameRate = null)
         {
             FileName = fileName;
 
             _paragraphs = new List<Paragraph>();
 
-            var lines = new List<string>();
             StreamReader sr;
             if (useThisEncoding != null)
             {
@@ -163,8 +168,7 @@ namespace Nikse.SubtitleEdit.Core
             }
 
             encoding = sr.CurrentEncoding;
-            while (!sr.EndOfStream)
-                lines.Add(sr.ReadLine());
+            var lines = sr.ReadToEnd().SplitToLines().ToList();
             sr.Close();
 
             foreach (SubtitleFormat subtitleFormat in SubtitleFormat.AllSubtitleFormats)
@@ -173,6 +177,7 @@ namespace Nikse.SubtitleEdit.Core
                 {
                     Header = null;
                     subtitleFormat.BatchMode = batchMode;
+                    subtitleFormat.BatchSourceFrameRate = sourceFrameRate;
                     subtitleFormat.LoadSubtitle(this, lines, fileName);
                     _format = subtitleFormat;
                     _wasLoadedWithFrameNumbers = _format.IsFrameBased;
@@ -221,7 +226,7 @@ namespace Nikse.SubtitleEdit.Core
         }
 
         /// <summary>
-        /// Creates subtitle as text in it'snative format
+        /// Creates subtitle as text in its native format.
         /// </summary>
         /// <param name="format">Format to output</param>
         /// <returns>Native format as text string</returns>
@@ -299,10 +304,8 @@ namespace Nikse.SubtitleEdit.Core
         {
             foreach (Paragraph p in Paragraphs)
             {
-                double startFrame = p.StartTime.TotalMilliseconds / TimeCode.BaseUnit * oldFrameRate;
-                double endFrame = p.EndTime.TotalMilliseconds / TimeCode.BaseUnit * oldFrameRate;
-                p.StartTime.TotalMilliseconds = startFrame * (TimeCode.BaseUnit / newFrameRate);
-                p.EndTime.TotalMilliseconds = endFrame * (TimeCode.BaseUnit / newFrameRate);
+                p.StartTime.TotalMilliseconds = (p.StartTime.TotalMilliseconds * oldFrameRate / newFrameRate);
+                p.EndTime.TotalMilliseconds = (p.EndTime.TotalMilliseconds * oldFrameRate / newFrameRate);
                 p.CalculateFrameNumbersFromTimeCodes(newFrameRate);
             }
         }
@@ -325,7 +328,7 @@ namespace Nikse.SubtitleEdit.Core
             {
                 if (selectedIndexes == null || selectedIndexes.Contains(i))
                 {
-                    double nextStartMilliseconds = _paragraphs[_paragraphs.Count - 1].EndTime.TotalMilliseconds + TimeCode.BaseUnit;
+                    double nextStartMilliseconds = double.MaxValue;
                     if (i + 1 < _paragraphs.Count)
                         nextStartMilliseconds = _paragraphs[i + 1].StartTime.TotalMilliseconds;
 
@@ -344,7 +347,7 @@ namespace Nikse.SubtitleEdit.Core
             {
                 if (selectedIndexes == null || selectedIndexes.Contains(i))
                 {
-                    double nextStartMilliseconds = _paragraphs[_paragraphs.Count - 1].EndTime.TotalMilliseconds + TimeCode.BaseUnit;
+                    double nextStartMilliseconds = double.MaxValue;
                     if (i + 1 < _paragraphs.Count)
                         nextStartMilliseconds = _paragraphs[i + 1].StartTime.TotalMilliseconds;
 
@@ -373,23 +376,31 @@ namespace Nikse.SubtitleEdit.Core
             {
                 if (selectedIndexes == null || selectedIndexes.Contains(i))
                 {
-                    Paragraph p = _paragraphs[i];
-                    double duration = Utilities.GetOptimalDisplayMilliseconds(p.Text);
-                    p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
-                    while (Utilities.GetCharactersPerSecond(p) > maxCharactersPerSecond)
-                    {
-                        duration++;
-                        p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
-                    }
-
-                    Paragraph next = GetParagraphOrDefault(i + 1);
-                    if (next != null && p.StartTime.TotalMilliseconds + duration + Configuration.Settings.General.MinimumMillisecondsBetweenLines > next.StartTime.TotalMilliseconds)
-                    {
-                        p.EndTime.TotalMilliseconds = next.StartTime.TotalMilliseconds - Configuration.Settings.General.MinimumMillisecondsBetweenLines;
-                        if (p.Duration.TotalMilliseconds <= 0)
-                            p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + 1;
-                    }
+                    RecalculateDisplayTime(maxCharactersPerSecond, i);
                 }
+            }
+        }
+
+        public void RecalculateDisplayTime(double maxCharactersPerSecond, int index)
+        {
+            Paragraph p = GetParagraphOrDefault(index);
+            if (p == null)
+                return;
+
+            double duration = Utilities.GetOptimalDisplayMilliseconds(p.Text);
+            p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
+            while (Utilities.GetCharactersPerSecond(p) > maxCharactersPerSecond)
+            {
+                duration++;
+                p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + duration;
+            }
+
+            Paragraph next = GetParagraphOrDefault(index + 1);
+            if (next != null && p.StartTime.TotalMilliseconds + duration + Configuration.Settings.General.MinimumMillisecondsBetweenLines > next.StartTime.TotalMilliseconds)
+            {
+                p.EndTime.TotalMilliseconds = next.StartTime.TotalMilliseconds - Configuration.Settings.General.MinimumMillisecondsBetweenLines;
+                if (p.Duration.TotalMilliseconds <= 0)
+                    p.EndTime.TotalMilliseconds = p.StartTime.TotalMilliseconds + 1;
             }
         }
 
@@ -572,6 +583,8 @@ namespace Nikse.SubtitleEdit.Core
         public string GetFastHashCode()
         {
             var sb = new StringBuilder(Paragraphs.Count * 50);
+            if (Header != null)
+                sb.Append(Header.Trim());
             for (int i = 0; i < Paragraphs.Count; i++)
             {
                 var p = Paragraphs[i];
@@ -582,5 +595,18 @@ namespace Nikse.SubtitleEdit.Core
             return sb.ToString().TrimEnd();
         }
 
+        /// <summary>
+        /// Concatenates all the Paragraph its Text property from Paragraphs, using the default line terminator between each Text.
+        /// </summary>
+        /// <returns>Contatenated Text property of all Paragraph present in Paragraphs property.</returns>
+        public string GetAllTexts()
+        {
+            var sb = new StringBuilder();
+            foreach (Paragraph p in Paragraphs)
+            {
+                sb.AppendLine(p.Text);
+            }
+            return sb.ToString();
+        }
     }
 }

@@ -7,7 +7,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle80 : SubtitleFormat
     {
-
         // 1<HT>01033902/01034028<HT>xxx
         private static readonly Regex RegexTimeCode = new Regex(@"^\d+\t\d+\/\d+\t", RegexOptions.Compiled);
 
@@ -70,11 +69,17 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         }
                         try
                         {
-                            paragraph = new Paragraph { StartTime = DecodeTimeCode(parts[0]), EndTime = DecodeTimeCode(parts[1]) };
+                            var startTime = parts[0].Trim();
+                            var endTime = parts[1].Trim();
+
+                            string[] startTimeParts = { startTime.Substring(0, 2), startTime.Substring(2, 2), startTime.Substring(4, 2), startTime.Substring(6, 2) };
+                            string[] endTimeParts = { endTime.Substring(0, 2), endTime.Substring(2, 2), endTime.Substring(4, 2), endTime.Substring(6, 2) };
+
+                            paragraph = new Paragraph { StartTime = DecodeTimeCodeFramesFourParts(startTimeParts), EndTime = DecodeTimeCodeFramesFourParts(endTimeParts) };
                             subtitle.Paragraphs.Add(paragraph);
-                            text = new StringBuilder();
+                            text.Clear();
                             s = s.Remove(0, 18 + lineParts[0].Length).Trim();
-                            var idxA = s.IndexOf("＠");
+                            var idxA = s.IndexOf('＠');
                             if (idxA > 0)
                             {
                                 s = s.Substring(0, idxA - 1).Trim();
@@ -93,7 +98,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (paragraph != null && text.Length < 150)
                 {
-                    var idxA = s.IndexOf("＠");
+                    var idxA = s.IndexOf('＠');
                     if (idxA > 0)
                     {
                         s = s.Substring(0, idxA - 1).Trim();
@@ -118,16 +123,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static string EncodeTimeCode(TimeCode time)
         {
             return time.ToHHMMSSFF().Replace(":", string.Empty);
-        }
-
-        private static TimeCode DecodeTimeCode(string part)
-        {
-            part = part.Trim();
-            string hour = part.Substring(0,2);
-            string minutes = part.Substring(2, 2);
-            string seconds = part.Substring(4, 2);
-            string frames = part.Substring(6, 2);
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

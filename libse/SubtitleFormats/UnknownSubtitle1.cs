@@ -42,17 +42,18 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             const string paragraphWriteFormat = "{0} – {1} {2}";
 
             var sb = new StringBuilder();
+            const string format = "{0:0}:{1:00}";
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 int seconds = p.StartTime.Seconds;
                 if (p.StartTime.Milliseconds >= 500)
                     seconds++;
-                string startTime = string.Format("{0:0}:{1:00}", (int)(p.StartTime.Minutes + p.StartTime.Hours * 60), seconds);
+                string startTime = string.Format(format, p.StartTime.Minutes + p.StartTime.Hours * 60, seconds);
 
                 seconds = p.EndTime.Seconds;
                 if (p.EndTime.Milliseconds >= 500)
                     seconds++;
-                string timeOut = string.Format("{0:0}:{1:00}", (int)(p.EndTime.Minutes + p.EndTime.Hours * 60), seconds);
+                string timeOut = string.Format(format, p.EndTime.Minutes + p.EndTime.Hours * 60, seconds);
 
                 sb.AppendLine(string.Format(paragraphWriteFormat, startTime, timeOut, p.Text));
             }
@@ -65,24 +66,22 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             _errorCount = 0;
 
             subtitle.Paragraphs.Clear();
-            var text = new StringBuilder();
-
+            var sb = new StringBuilder();
+            char[] splitChars = { '–', ' ' };
             foreach (string line in lines)
             {
-                var match = RegexTimeCodes.Match(line);
-                if (match.Success)
+                Match match;
+                if (line.Length > 11 && (match = RegexTimeCodes.Match(line)).Success)
                 {
                     if (p != null)
-                        p.Text = (p.Text + Environment.NewLine + text.ToString().Trim()).Trim();
-                    var parts = line.Substring(0, match.Length).Trim().Split(new[] { '–', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        p.Text = (p.Text + Environment.NewLine + sb).Trim();
+                    var parts = line.Substring(0, match.Length).Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
                     try
                     {
-                        p = new Paragraph();
-                        p.StartTime = DecodeTimeCode(parts[0]);
-                        p.EndTime = DecodeTimeCode(parts[1]);
-                        p.Text = line.Substring(match.Length - 1).Trim();
+                        p = new Paragraph { StartTime = DecodeTimeCode(parts[0]), EndTime = DecodeTimeCode(parts[1]) };
+                        p.Text = line.Substring(match.Length).Trim();
                         subtitle.Paragraphs.Add(p);
-                        text = new StringBuilder();
+                        sb.Clear();
                     }
                     catch
                     {
@@ -96,13 +95,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else
                 {
-                    text.AppendLine(line);
+                    sb.AppendLine(line);
                 }
                 if (_errorCount > 20)
                     return;
             }
             if (p != null)
-                p.Text = (p.Text + Environment.NewLine + text.ToString().Trim()).Trim();
+                p.Text = (p.Text + Environment.NewLine + sb).Trim();
 
             subtitle.Renumber();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -26,10 +27,11 @@ namespace Nikse.SubtitleEdit.Core.Forms
 
         public string RemoveHearImpairedtagsInsideLine(string newText)
         {
+            const string endChars = ".?!";
             for (int i = 6; i < newText.Length; i++)
             {
                 var s = newText.Substring(i);
-                if (s.Length > 2 && ".?!".Contains(s[0]))
+                if (s.Length > 2 && endChars.Contains(s[0]))
                 {
                     var pre = string.Empty;
 
@@ -55,7 +57,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                             s = s.Remove(0, 1);
                         }
 
-                        if (HasHearImpariedTagsAtStart(s))
+                        if (HasHearImpairedTagsAtStartOrEnd(s))
                         {
                             s = RemoveStartEndTags(s);
                             newText = newText.Substring(0, i + 1) + pre + " " + s;
@@ -100,7 +102,8 @@ namespace Nikse.SubtitleEdit.Core.Forms
             foreach (string line in lines)
             {
                 int indexOfColon = line.IndexOf(':');
-                if (indexOfColon <= 0 || IsInsideBrackets(line, indexOfColon))
+                bool isLastColon = count == lines.Length - 1 && !HtmlUtil.RemoveHtmlTags(line).TrimEnd(':').Contains(':');
+                if (indexOfColon <= 0 || IsInsideBrackets(line, indexOfColon) || (isLastColon && Utilities.CountTagInText(HtmlUtil.RemoveHtmlTags(line), ' ') > 1))
                 {
                     newText = (newText + Environment.NewLine + line).Trim();
 
@@ -129,7 +132,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                                 {
                                     s = s.Remove(indexOf + 1, indexOfColon - indexOf);
                                     s = s.Insert(indexOf + 1, " -");
-                                    if (newText.StartsWith("<i>") && !newText.StartsWith("<i>-"))
+                                    if (newText.StartsWith("<i>", StringComparison.Ordinal) && !newText.StartsWith("<i>-", StringComparison.Ordinal))
                                         newText = "<i>- " + newText.Remove(0, 3);
                                     else if (!newText.StartsWith("-"))
                                         newText = "- " + newText;
@@ -182,7 +185,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                             }
                             else
                             {
-                                var preStripable = new StripableText(pre);
+                                var preStrippable = new StrippableText(pre);
                                 var remove = true;
 
                                 if (indexOfColon < line.Length - 1)
@@ -199,7 +202,9 @@ namespace Nikse.SubtitleEdit.Core.Forms
                                 string l1Trimmed = HtmlUtil.RemoveHtmlTags(lines[0]).TrimEnd('"');
                                 if (count == 1 && lines.Length == 2 && !l1Trimmed.EndsWith('.') &&
                                                                        !l1Trimmed.EndsWith('!') &&
-                                                                       !l1Trimmed.EndsWith('?'))
+                                                                       !l1Trimmed.EndsWith('?') &&
+                                                                       !l1Trimmed.EndsWith("--", StringComparison.Ordinal) &&
+                                                                       !l1Trimmed.EndsWith("—", StringComparison.Ordinal))
                                 {
                                     remove = false;
                                 }
@@ -239,7 +244,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                                     else if (newText.EndsWith("</u>", StringComparison.Ordinal) && text.StartsWith("<u>", StringComparison.Ordinal) && !newText.StartsWith("<u>", StringComparison.Ordinal))
                                         newText = "<u>" + newText;
 
-                                    if (!IsHIDescription(preStripable.StrippedText))
+                                    if (!IsHIDescription(preStrippable.StrippedText))
                                         noOfNames++;
                                 }
                                 else
@@ -320,19 +325,19 @@ namespace Nikse.SubtitleEdit.Core.Forms
                 var arr = newText.SplitToLines();
                 if (arr.Length == 2 && arr[0].Length > 1 && arr[1].Length > 1)
                 {
-                    string arr0 = new StripableText(arr[0]).StrippedText;
-                    var arr1Stripable = new StripableText(arr[1]);
-                    string arr1 = arr1Stripable.StrippedText;
+                    string arr0 = new StrippableText(arr[0]).StrippedText;
+                    var arr1Strippable = new StrippableText(arr[1]);
+                    string arr1 = arr1Strippable.StrippedText;
 
                     if (arr0.Length > 0 && arr1.Length > 1)
                     {
                         // line continuation?
-                        if (Utilities.LowercaseLetters.Contains(arr1[0])) // second line starts with lower case letter
+                        if (char.IsLower(arr1[0])) // second line starts with lower case letter
                         {
                             char c = arr0[arr0.Length - 1];
-                            if (Utilities.LowercaseLetters.Contains(c) || c == ',') // first line ends with comma or lower case letter
+                            if (char.IsLower(c) || c == ',') // first line ends with comma or lower case letter
                             {
-                                if (!arr1Stripable.Pre.Contains("..."))
+                                if (!arr1Strippable.Pre.Contains("..."))
                                 {
                                     insertDash = false;
                                 }
@@ -342,9 +347,9 @@ namespace Nikse.SubtitleEdit.Core.Forms
                         if (insertDash)
                         {
                             string arr0QuoteTrimmed = arr[0].TrimEnd('"');
-                            if (arr0QuoteTrimmed.Length > 0 && !".?!".Contains(arr0QuoteTrimmed[arr0QuoteTrimmed.Length - 1]) && !arr0QuoteTrimmed.EndsWith("</i>", StringComparison.Ordinal))
+                            if (arr0QuoteTrimmed.Length > 0 && !".?!".Contains(arr0QuoteTrimmed[arr0QuoteTrimmed.Length - 1]) && !arr0QuoteTrimmed.EndsWith("</i>", StringComparison.Ordinal) && !arr0QuoteTrimmed.EndsWith("--", StringComparison.Ordinal) && !arr0QuoteTrimmed.EndsWith("—", StringComparison.Ordinal))
                             {
-                                if (!arr1Stripable.Pre.Contains('-'))
+                                if (!arr1Strippable.Pre.Contains('-'))
                                 {
                                     insertDash = false;
                                 }
@@ -363,16 +368,20 @@ namespace Nikse.SubtitleEdit.Core.Forms
                 {
                     if (indexOfDialogChar < 0 || indexOfDialogChar > 4)
                     {
-                        var st = new StripableText(newText, string.Empty, string.Empty);
+                        var st = new StrippableText(newText, string.Empty, string.Empty);
                         newText = st.Pre + "- " + st.StrippedText + st.Post;
                     }
 
                     int indexOfNewLine = newText.IndexOf(Environment.NewLine, StringComparison.Ordinal);
                     string second = newText.Substring(indexOfNewLine).Trim();
-                    indexOfDialogChar = second.IndexOf('-');
+                    indexOfDialogChar = second.IndexOf(" -", StringComparison.Ordinal);
                     if (indexOfDialogChar < 0 || indexOfDialogChar > 6)
                     {
-                        var st = new StripableText(second, String.Empty, String.Empty);
+                        indexOfDialogChar = second.IndexOf("- ", StringComparison.Ordinal);
+                    }
+                    if ((indexOfDialogChar < 0 || indexOfDialogChar > 6) && !second.StartsWith('-'))
+                    {
+                        var st = new StrippableText(second, String.Empty, String.Empty);
                         second = st.Pre + "- " + st.StrippedText + st.Post;
                         newText = newText.Remove(indexOfNewLine) + Environment.NewLine + second;
                     }
@@ -380,8 +389,8 @@ namespace Nikse.SubtitleEdit.Core.Forms
             }
             else if (newText.Contains('-') && !newText.Contains(Environment.NewLine))
             {
-                var st = new StripableText(newText);
-                if (st.Pre.Contains('-'))
+                var st = new StrippableText(newText);
+                if (st.Pre.Contains('-') && !st.Pre.Contains("--"))
                     newText = st.Pre.Replace("-", string.Empty) + st.StrippedText + st.Post;
             }
             else if (removedInSecondLine && !removedInFirstLine && Utilities.GetNumberOfLines(newText) == 2)
@@ -436,7 +445,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
 
         public string RemoveTextFromHearImpaired(string text)
         {
-            if (StartsAndEndsWithHearImpariedTags(HtmlUtil.RemoveHtmlTags(text, true).TrimStart(TrimStartNoiseChar)))
+            if (StartsAndEndsWithHearImpairedTags(HtmlUtil.RemoveHtmlTags(text, true).TrimStart(TrimStartNoiseChar)))
             {
                 return string.Empty;
             }
@@ -459,7 +468,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                 pre = pre.Replace(Settings.CustomStart, string.Empty);
                 post = post.Replace(Settings.CustomEnd, string.Empty);
             }
-            var st = new StripableText(text, pre, post);
+            var st = new StrippableText(text, pre, post);
             var sb = new StringBuilder();
             var parts = st.StrippedText.Trim().SplitToLines();
             int lineNumber = 0;
@@ -468,13 +477,11 @@ namespace Nikse.SubtitleEdit.Core.Forms
             int noOfNamesRemovedNotInLineOne = 0;
             foreach (string s in parts)
             {
-                var stSub = new StripableText(s, pre, post);
+                var stSub = new StrippableText(s, pre, post);
                 string strippedText = stSub.StrippedText;
-                if (lineNumber == parts.Length - 1 && st.Post.Contains('?'))
+                if ((lineNumber == parts.Length - 1 && st.Post.Contains('?')) || stSub.Post.Contains('?'))
                     strippedText += "?";
-                else if (stSub.Post.Contains('?'))
-                    strippedText += "?";
-                if (!StartsAndEndsWithHearImpariedTags(strippedText))
+                if (!StartsAndEndsWithHearImpairedTags(strippedText))
                 {
                     if (removedDialogInFirstLine && stSub.Pre.Contains("- "))
                         stSub.Pre = stSub.Pre.Replace("- ", string.Empty);
@@ -494,7 +501,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                         }
                     }
 
-                    if (stSub.Pre == "<i>- " && newText.StartsWith("</i>"))
+                    if (stSub.Pre == "<i>- " && newText.StartsWith("</i>", StringComparison.Ordinal))
                         sb.AppendLine("- " + newText.Remove(0, 4).Trim() + stSub.Post);
                     else
                         sb.AppendLine(stSub.Pre + newText + stSub.Post);
@@ -527,6 +534,14 @@ namespace Nikse.SubtitleEdit.Core.Forms
 
                     if (s.Contains("<i>") && !s.Contains("</i>") && st.Post.Contains("</i>"))
                         st.Post = st.Post.Replace("</i>", string.Empty);
+
+                    if (lineNumber == parts.Length - 1)
+                    {
+                        if (st.Post.Replace("♪", string.Empty).Replace("♫", string.Empty).Trim().Length == 0)
+                        {
+                            st.Post = string.Empty;
+                        }
+                    }
                 }
                 lineNumber++;
             }
@@ -547,9 +562,9 @@ namespace Nikse.SubtitleEdit.Core.Forms
             if (Settings.RemoveInterjections)
                 text = RemoveInterjections(text);
 
-            st = new StripableText(text, " >-\"'‘`´♪¿¡.…—", " -\"'`´♪.!?:…—");
+            st = new StrippableText(text, " >-\"'‘`´♪¿¡.…—", " -\"'`´♪.!?:…—");
             text = st.StrippedText;
-            if (StartsAndEndsWithHearImpariedTags(text))
+            if (StartsAndEndsWithHearImpairedTags(text))
             {
                 text = RemoveStartEndTags(text);
             }
@@ -563,7 +578,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                 var splitParts = HtmlUtil.RemoveHtmlTags(text).Replace(" ", string.Empty).Split(splitChars, StringSplitOptions.RemoveEmptyEntries);
                 if (splitParts.Length == 2)
                 {
-                    var temp = new StripableText(text);
+                    var temp = new StrippableText(text);
                     temp.StrippedText = temp.StrippedText.Replace(Environment.NewLine, " ");
                     int splitIndex = temp.StrippedText.LastIndexOfAny(splitChars);
                     if (splitIndex > 0)
@@ -602,7 +617,14 @@ namespace Nikse.SubtitleEdit.Core.Forms
                  oldText.Contains(Environment.NewLine + "<i>- ") ||
                  oldText.Contains(Environment.NewLine + "<i> - ")))
             {
-                text = text.TrimStart().TrimStart('-').TrimStart();
+                if (text.StartsWith("<i>-", StringComparison.Ordinal))
+                {
+                    text = "<i>" + text.Remove(0,4).Trim();
+                }
+                else
+                {
+                    text = text.TrimStart().TrimStart('-').TrimStart();
+                }
             }
             if (oldText.TrimStart().StartsWith('-') && !oldText.TrimStart().StartsWith("--", StringComparison.Ordinal) &&
                 text != null && !text.Contains(Environment.NewLine) &&
@@ -660,7 +682,6 @@ namespace Nikse.SubtitleEdit.Core.Forms
             {
                 text = "<i>" + text.Remove(0, removeText.Length).TrimStart(' ');
             }
-
 
             if (oldText != text)
             {
@@ -823,6 +844,19 @@ namespace Nikse.SubtitleEdit.Core.Forms
                         {
                             int index = match.Index;
                             string temp = text.Remove(index, s.Length);
+                            while (index == 0 && temp.StartsWith("... ", StringComparison.Ordinal))
+                            {
+                                temp = temp.Remove(3, 1);
+                            }
+                            while (index == 3 && temp.StartsWith("<i>... ", StringComparison.Ordinal))
+                            {
+                                temp = temp.Remove(6, 1);
+                            }
+                            while (index > 2 && (" \r\n".Contains(text.Substring(index - 1, 1))) && temp.Substring(index).StartsWith("... ", StringComparison.Ordinal))
+                            {
+                                temp = temp.Remove(index + 3, 1);
+                            }
+
                             if (temp.Remove(0, index) == " —" && temp.EndsWith("—  —", StringComparison.Ordinal))
                             {
                                 temp = temp.Remove(temp.Length - 3);
@@ -895,6 +929,11 @@ namespace Nikse.SubtitleEdit.Core.Forms
                                             temp = temp.Remove(subIndex, 2);
                                             removeAfter = false;
                                         }
+                                        else if (index > 2 && subTemp.StartsWith("-  —", StringComparison.Ordinal))
+                                        {
+                                            temp = temp.Remove(subIndex + 2, 2).Replace("  ", " ");
+                                            removeAfter = false;
+                                        }
                                     }
                                 }
                                 if (removeAfter && temp.Length > index - s.Length + 2)
@@ -922,6 +961,10 @@ namespace Nikse.SubtitleEdit.Core.Forms
                                 {
                                     temp = temp.Remove(index - 2, 1);
                                     index--;
+                                }
+                                if (subTemp.StartsWith("- ...", StringComparison.Ordinal))
+                                {
+                                    removeAfter = false;
                                 }
                             }
 
@@ -975,7 +1018,7 @@ namespace Nikse.SubtitleEdit.Core.Forms
                             if (temp.EndsWith(Environment.NewLine + "- ", StringComparison.Ordinal))
                                 temp = temp.Remove(temp.Length - 2).TrimEnd();
 
-                            var st = new StripableText(temp);
+                            var st = new StrippableText(temp);
                             if (st.StrippedText.Length == 0)
                                 return string.Empty;
 
@@ -1169,21 +1212,12 @@ namespace Nikse.SubtitleEdit.Core.Forms
             return RemoveHearImpairedTags(text) != text;
         }
 
-        public bool HasHearImpariedTagsAtStart(string text)
+        public bool HasHearImpairedTagsAtStartOrEnd(string text)
         {
-            if (Settings.OnlyIfInSeparateLine)
-                return StartsAndEndsWithHearImpariedTags(text);
-            return HasHearImpairedText(text);
+            return Settings.OnlyIfInSeparateLine ? StartsAndEndsWithHearImpairedTags(text) : HasHearImpairedText(text);
         }
 
-        public bool HasHearImpariedTagsAtEnd(string text)
-        {
-            if (Settings.OnlyIfInSeparateLine)
-                return StartsAndEndsWithHearImpariedTags(text);
-            return HasHearImpairedText(text);
-        }
-
-        private bool StartsAndEndsWithHearImpariedTags(string text)
+        private bool StartsAndEndsWithHearImpairedTags(string text)
         {
             return (Settings.RemoveTextBetweenSquares && text.StartsWith('[') && text.EndsWith(']') && !text.Trim('[').Contains('[')) ||
                    (Settings.RemoveTextBetweenBrackets && text.StartsWith('{') && text.EndsWith('}') && !text.Trim('{').Contains('{')) ||
@@ -1222,6 +1256,10 @@ namespace Nikse.SubtitleEdit.Core.Forms
                 {
                     text = text.Remove(start - 1, 2);
                 }
+                else if (start == 0 && text.Length > 1 && text[0] == ':')
+                {
+                    text = text.Remove(0, 1).TrimStart();
+                }
                 start = text.IndexOf(startTag, StringComparison.Ordinal);
             }
             while (start >= 0 && text.Length - start - startTag.Length >= endTag.Length);
@@ -1234,15 +1272,16 @@ namespace Nikse.SubtitleEdit.Core.Forms
             if (!Settings.RemoveIfAllUppercase)
                 return text;
 
-            var lines = text.SplitToLines();
             var sb = new StringBuilder();
-            foreach (var line in lines)
+            char[] endTrimChars = { '.', '!', '?', ':' };
+            char[] trimChars = { ' ', '-', '—' };
+            foreach (var line in text.SplitToLines())
             {
                 var lineNoHtml = HtmlUtil.RemoveHtmlTags(line, true);
                 if (lineNoHtml == lineNoHtml.ToUpper() && lineNoHtml != lineNoHtml.ToLower())
                 {
-                    var temp = lineNoHtml.TrimEnd('.', '!', '?', ':').Trim().Trim(' ', '-', '—');
-                    if (temp.Length == 1 || temp == "YES" || temp == "NO" || temp == "WHY" || temp == "HI")
+                    var temp = lineNoHtml.TrimEnd(endTrimChars).Trim().Trim(trimChars);
+                    if (temp.Length == 1 || temp == "YES" || temp == "NO" || temp == "WHY" || temp == "HI" || temp == "OK")
                     {
                         sb.AppendLine(line);
                     }

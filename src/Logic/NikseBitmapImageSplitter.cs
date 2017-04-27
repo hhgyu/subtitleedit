@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Nikse.SubtitleEdit.Core;
 
 namespace Nikse.SubtitleEdit.Logic
 {
@@ -42,7 +42,7 @@ namespace Nikse.SubtitleEdit.Logic
             for (int y = 0; y < maxTop; y++)
             {
                 bool allTransparent = true;
-                for (int x = 1; x < bmp.Width - 1; x++)
+                for (int x = 0; x < bmp.Width; x++)
                 {
                     int a = bmp.GetAlpha(x, y);
                     if (a != 0)
@@ -63,7 +63,7 @@ namespace Nikse.SubtitleEdit.Logic
             bool bottomCroppingDone = false;
             for (int y = bmp.Height - 1; y > 3; y--)
             {
-                for (int x = 1; x < bmp.Width - 1; x++)
+                for (int x = 0; x < bmp.Width; x++)
                 {
                     int a = bmp.GetAlpha(x, y);
                     if (a != 0)
@@ -76,6 +76,8 @@ namespace Nikse.SubtitleEdit.Logic
                 if (bottomCroppingDone)
                     break;
             }
+            if (h - startTop + 1 <= 0)
+                return new NikseBitmap(0, 0);
             return bmp.CopyRectangle(new Rectangle(0, startTop, bmp.Width, h - startTop + 1));
         }
 
@@ -191,8 +193,7 @@ namespace Nikse.SubtitleEdit.Logic
                 {
                     if (size > 100)
                         return SplitVerticalTransparentOrBlack(bmp);
-                    else
-                        parts.Add(new ImageSplitterItem(0, startY, bmp));
+                    parts.Add(new ImageSplitterItem(0, startY, bmp));
                 }
                 else
                 {
@@ -245,16 +246,16 @@ namespace Nikse.SubtitleEdit.Logic
             }
             if (size > 2)
             {
-                if (size == bmp.Height)
-                    parts.Add(new ImageSplitterItem(0, startY, bmp));
-                else
-                    parts.Add(new ImageSplitterItem(0, startY, bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1))));
+                parts.Add(size == bmp.Height ? new ImageSplitterItem(0, startY, bmp) : new ImageSplitterItem(0, startY, bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1))));
             }
             return parts;
         }
 
-        public static List<ImageSplitterItem> SplitVertical(NikseBitmap bmp, int minLineHeight)
-        { // split into lines
+        /// <summary>
+        /// split into lines
+        /// </summary>
+        public static List<ImageSplitterItem> SplitVertical(NikseBitmap bmp, int minLineHeight, double averageLineHeight = -1)
+        {
             int startY = 0;
             int size = 0;
             var parts = new List<ImageSplitterItem>();
@@ -272,6 +273,120 @@ namespace Nikse.SubtitleEdit.Logic
                 }
                 if (allTransparent)
                 {
+                    if (size > 1 && size <= minLineHeight)
+                    {
+                        size++; // at least 'lineMinHeight' pixels, like top of 'i'
+                    }
+                    else
+                    {
+                        if (size > 1)
+                        {
+                            var part = bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1));
+                            parts.Add(new ImageSplitterItem(0, startY, part));
+                        }
+                        size = 0;
+                        startY = y;
+                    }
+                }
+                else
+                {
+                    size++;
+                }
+            }
+            if (size > 1)
+            {
+                if (size == bmp.Height)
+                {
+                    if (size > 100)
+                        return SplitVerticalTransparentOrBlack(bmp);
+                    parts.Add(new ImageSplitterItem(0, startY, bmp));
+                }
+                else
+                {
+                    parts.Add(new ImageSplitterItem(0, startY, bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1))));
+                }
+            }
+            if (parts.Count == 1 && averageLineHeight > 5 && bmp.Height > averageLineHeight * 3)
+            {
+                return SplitVerticalAggresive(bmp, minLineHeight, averageLineHeight);
+            }
+            return parts;
+        }
+
+        private static List<ImageSplitterItem> SplitVerticalAggresive(NikseBitmap bmp, int minLineHeight, double averageLineHeight)
+        {
+            int startY = 0;
+            int size = 0;
+            var parts = new List<ImageSplitterItem>();
+            for (int y = 0; y < bmp.Height; y++)
+            {
+                int a;
+                bool allTransparent = true;
+                for (int x = 0; x < bmp.Width; x++)
+                {
+                    a = bmp.GetAlpha(x, y);
+                    if (a != 0)
+                    {
+                        allTransparent = false;
+                        break;
+                    }
+                }
+
+                if (size > 5 && size >= minLineHeight && size > averageLineHeight && !allTransparent && bmp.Width > 50 && y < bmp.Height - 5)
+                {
+                    var leftX = 0;
+                    while (leftX < bmp.Width)
+                    {
+                        a = bmp.GetAlpha(leftX, y);
+                        if (a != 0)
+                        {
+                            break;
+                        }
+                        leftX++;
+                    }
+                    var rightX = bmp.Width;
+                    while (rightX > 0)
+                    {
+                        a = bmp.GetAlpha(rightX, y - 1);
+                        if (a != 0)
+                        {
+                            break;
+                        }
+                        rightX--;
+                    }
+                    if (leftX >= rightX)
+                    {
+                        allTransparent = true;
+                    }
+
+                    leftX = 0;
+                    while (leftX < bmp.Width)
+                    {
+                        a = bmp.GetAlpha(leftX, y - 1);
+                        if (a != 0)
+                        {
+                            break;
+                        }
+                        leftX++;
+                    }
+                    rightX = bmp.Width;
+                    while (rightX > 0)
+                    {
+                        a = bmp.GetAlpha(rightX, y);
+                        if (a != 0)
+                        {
+                            break;
+                        }
+                        rightX--;
+                    }
+                    if (leftX >= rightX)
+                    {
+                        allTransparent = true;
+                    }
+                }
+
+                if (allTransparent)
+                {
                     if (size > 2 && size <= minLineHeight)
                     {
                         size++; // at least 'lineMinHeight' pixels, like top of 'i'
@@ -280,10 +395,8 @@ namespace Nikse.SubtitleEdit.Logic
                     {
                         if (size > 2)
                         {
-                            NikseBitmap part = bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1));
-                            //                            part.Save("c:\\line_0_to_width.bmp");
+                            var part = bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1));
                             parts.Add(new ImageSplitterItem(0, startY, part));
-                            //                            bmp.Save("c:\\original.bmp");
                         }
                         size = 0;
                         startY = y;
@@ -300,13 +413,16 @@ namespace Nikse.SubtitleEdit.Logic
                 {
                     if (size > 100)
                         return SplitVerticalTransparentOrBlack(bmp);
-                    else
-                        parts.Add(new ImageSplitterItem(0, startY, bmp));
+                    parts.Add(new ImageSplitterItem(0, startY, bmp));
                 }
                 else
                 {
                     parts.Add(new ImageSplitterItem(0, startY, bmp.CopyRectangle(new Rectangle(0, startY, bmp.Width, size + 1))));
                 }
+            }
+            if (parts.Count == 1 && averageLineHeight > 5 && bmp.Height > averageLineHeight * 3)
+            {
+                return parts;
             }
             return parts;
         }
@@ -336,21 +452,21 @@ namespace Nikse.SubtitleEdit.Logic
             int size = 0;
             int startX = 0;
             int lastEndX = 0;
-            int y = 0;
             bool spaceJustAdded = false;
 
             for (int x = 0; x < bmp.Width - 1; x++)
             {
-                bool allTransparent = IsVerticalLineTransparent(bmp, ref y, x);
+                int y;
+                bool allTransparent = IsVerticalLineTransparent(bmp, out y, x);
 
                 // check if line is transparent and cursive
                 bool cursiveOk = false;
-                int tempY = 0;
+                int tempY;
                 if (allTransparent == false &&
                     size > 5 &&
                     y > 3 &&
                     x < bmp.Width - 2 &&
-                    !IsVerticalLineTransparent(bmp, ref tempY, x + 1))
+                    !IsVerticalLineTransparent(bmp, out tempY, x + 1))
                 {
                     //Add space?
                     if (lastEndX > 0 && lastEndX + xOrMorePixelsMakesSpace < startX)
@@ -358,8 +474,7 @@ namespace Nikse.SubtitleEdit.Logic
                         int cleanCount = 0;
                         for (int j = lastEndX; j < startX; j++)
                         {
-                            int y1 = j;
-                            if (IsVerticalLineTransparentAlphaOnly(bmp, ref y1, j))
+                            if (IsVerticalLineTransparentAlphaOnly(bmp, j))
                                 cleanCount++;
                         }
                         if (cleanCount > 0 && !spaceJustAdded)
@@ -420,8 +535,7 @@ namespace Nikse.SubtitleEdit.Logic
                                     int cleanCount = 0;
                                     for (int j = lastEndX; j < startX; j++)
                                     {
-                                        int y1 = j;
-                                        if (IsVerticalLineTransparentAlphaOnly(bmp, ref y1, j))
+                                        if (IsVerticalLineTransparentAlphaOnly(bmp, j))
                                             cleanCount++;
                                     }
                                     if (cleanCount > 2 && !spaceJustAdded)
@@ -526,15 +640,12 @@ namespace Nikse.SubtitleEdit.Logic
             return cursiveOk;
         }
 
-        private static bool IsVerticalLineTransparent(NikseBitmap bmp, ref int y, int x)
+        private static bool IsVerticalLineTransparent(NikseBitmap bmp, out int y, int x)
         {
             for (y = 0; y < bmp.Height - 1; y++)
             {
                 var argb = bmp.GetPixelColors(x, y);
-                if (argb[0] < 10 || IsColorClose(argb[0], argb[1], argb[2], argb[3], Color.Black, 280)) // still dark color...
-                {
-                }
-                else
+                if (argb[0] >= 10 && !IsColorClose(argb[0], argb[1], argb[2], argb[3], Color.Black, 280))
                 {
                     return false;
                 }
@@ -542,22 +653,17 @@ namespace Nikse.SubtitleEdit.Logic
             return true;
         }
 
-        private static bool IsVerticalLineTransparentAlphaOnly(NikseBitmap bmp, ref int y, int x)
+        private static bool IsVerticalLineTransparentAlphaOnly(NikseBitmap bmp, int x)
         {
-            bool allTransparent = true;
-            for (y = 0; y < bmp.Height - 1; y++)
+            for (int y = 0; y < bmp.Height - 1; y++)
             {
                 int a = bmp.GetAlpha(x, y);
-                if (a == 0) // still dark color...
+                if (a != 0) // not a dark color
                 {
-                }
-                else
-                {
-                    allTransparent = false;
-                    break;
+                    return false;
                 }
             }
-            return allTransparent;
+            return true;
         }
 
         public static List<ImageSplitterItem> SplitBitmapToLetters(NikseBitmap bmp, int xOrMorePixelsMakesSpace, bool rightToLeft, bool topToBottom)
@@ -584,43 +690,40 @@ namespace Nikse.SubtitleEdit.Logic
                 }
                 if (rightToLeft)
                     line.Reverse();
-                foreach (ImageSplitterItem item in line)
-                    list.Add(item);
+                list.AddRange(line);
                 lineCount++;
             }
 
             return list;
         }
 
-        public static List<ImageSplitterItem> SplitBitmapToLettersNew(NikseBitmap bmp, int xOrMorePixelsMakesSpace, bool rightToLeft, bool topToBottom, int minLineHeight)
+        public static List<ImageSplitterItem> SplitBitmapToLettersNew(NikseBitmap bmp, int xOrMorePixelsMakesSpace, bool rightToLeft, bool topToBottom, int minLineHeight, double averageLineHeight = -1)
         {
             var list = new List<ImageSplitterItem>();
 
             // split into seperate lines
-            List<ImageSplitterItem> verticalBitmaps = SplitVertical(bmp, minLineHeight);
+            List<ImageSplitterItem> verticalBitmaps = SplitVertical(bmp, minLineHeight, averageLineHeight);
 
             if (!topToBottom)
                 verticalBitmaps.Reverse();
 
             // split into letters
-            int lineCount = 0;
-            foreach (ImageSplitterItem b in verticalBitmaps)
+            for (int index = 0; index < verticalBitmaps.Count; index++)
             {
-                if (lineCount > 0)
+                var b = verticalBitmaps[index];
+                if (index > 0)
                     list.Add(new ImageSplitterItem(Environment.NewLine));
                 var line = new List<ImageSplitterItem>();
-                foreach (ImageSplitterItem item in SplitHorizontalNew(b, xOrMorePixelsMakesSpace))
+                foreach (var item in SplitHorizontalNew(b, xOrMorePixelsMakesSpace))
                 {
+                    item.Top = index > 0 ? item.Y - b.Y : item.Y;
                     item.ParentY = item.Y;
                     line.Add(item);
                 }
                 if (rightToLeft)
                     line.Reverse();
-                foreach (ImageSplitterItem item in line)
-                    list.Add(item);
-                lineCount++;
+                list.AddRange(line);
             }
-
             return list;
         }
 
@@ -659,26 +762,28 @@ namespace Nikse.SubtitleEdit.Logic
                 {
                     var bmp0 = new NikseBitmap(bmp);
                     // remove pixels after current;
-                    int k = 0;
-                    foreach (Point p in points)
+                    for (int index = 0; index < points.Count; index++)
                     {
-                        bmp0.MakeVerticalLinePartTransparent(p.X, p.X + k, p.Y);
-                        k++;
+                        var p = points[index];
+                        bmp0.MakeVerticalLinePartTransparent(p.X, p.X + index, p.Y);
                     }
                     width = FindMaxX(points, x) - startX;
-                    width++;
-                    NikseBitmap b1 = bmp0.CopyRectangle(new Rectangle(startX, 0, width, bmp.Height));
-
-                    if (spacePixels >= xOrMorePixelsMakesSpace && parts.Count > 0)
-                        parts.Add(new ImageSplitterItem(" "));
+                    width--;
+                    startX++;
+                    var b1 = bmp0.CopyRectangle(new Rectangle(startX, 0, width, bmp.Height));
 
                     int addY;
                     b1 = CropTopAndBottom(b1, out addY);
-                    parts.Add(new ImageSplitterItem(startX + lineSplitterItem.X, addY + lineSplitterItem.Y, b1)); //y is what?
+
+                    if (spacePixels >= xOrMorePixelsMakesSpace && parts.Count > 0)
+                        parts.Add(new ImageSplitterItem(" ") { Y = addY + lineSplitterItem.Y });
+
+                    if (b1.Width > 0 && b1.Height > 0)
+                        parts.Add(new ImageSplitterItem(startX + lineSplitterItem.X, addY + lineSplitterItem.Y, b1)); //y is what?
 
                     // remove pixels before next letter;
                     const int begin = 0;
-                    foreach (Point p in points)
+                    foreach (var p in points)
                     {
                         bmp.MakeVerticalLinePartTransparent(begin, p.X, p.Y);
                     }
@@ -698,17 +803,20 @@ namespace Nikse.SubtitleEdit.Logic
 
         private static int FindMinX(List<Point> points, int x)
         {
-            foreach (Point p in points)
+            for (int index = 0; index < points.Count; index++)
             {
+                var p = points[index];
                 if (p.X < x)
                     x = p.X;
             }
             return x;
         }
+
         private static int FindMaxX(List<Point> points, int x)
         {
-            foreach (Point p in points)
+            for (int index = 0; index < points.Count; index++)
             {
+                var p = points[index];
                 if (p.X > x)
                     x = p.X;
             }
@@ -828,8 +936,7 @@ namespace Nikse.SubtitleEdit.Logic
                 }
                 if (rightToLeft)
                     line.Reverse();
-                foreach (ImageSplitterItem item in line)
-                    list.Add(item);
+                list.AddRange(line);
                 lineCount++;
             }
 

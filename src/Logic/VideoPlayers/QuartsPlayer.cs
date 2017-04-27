@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using QuartzTypeLib;
+using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
-using QuartzTypeLib;
-using System.ComponentModel;
 
 //http://msdn.microsoft.com/en-us/library/dd375454%28VS.85%29.aspx
 //http://msdn.microsoft.com/en-us/library/dd387928%28v=vs.85%29.aspx
@@ -143,7 +143,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
             const int wsChild = 0x40000000;
 
             string ext = System.IO.Path.GetExtension(videoFileName).ToLower();
-            bool isAudio = ext == ".mp3" || ext == ".wav" || ext == ".wma" || ext == ".ogg" || ext == ".mpa" || ext == ".m4a" || ext == ".ape" || ext == ".aiff" || ext == ".flac" || ext == ".acc" || ext == ".mka";
+            bool isAudio = ext == ".mp3" || ext == ".wav" || ext == ".wma" || ext == ".ogg" || ext == ".mpa" || ext == ".m4a" || ext == ".ape" || ext == ".aiff" || ext == ".flac" || ext == ".aac" || ext == ".mka";
 
             OnVideoLoaded = onVideoLoaded;
             OnVideoEnded = onVideoEnded;

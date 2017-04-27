@@ -83,13 +83,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 sb.AppendLine(line);
 
             string rtf = sb.ToString().Trim();
-            if (!rtf.StartsWith("{\\rtf"))
+            if (!rtf.StartsWith("{\\rtf", StringComparison.Ordinal))
                 return;
 
             lines = rtf.FromRtf().SplitToLines().ToList();
             _errorCount = 0;
             Paragraph p = null;
-            sb = new StringBuilder();
+            sb.Clear();
             foreach (string line in lines)
             {
                 string s = line.TrimEnd();
@@ -102,7 +102,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             p.Text = sb.ToString().Trim();
                             subtitle.Paragraphs.Add(p);
                         }
-                        sb = new StringBuilder();
+                        sb.Clear();
                         string[] arr = s.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         if (arr.Length == 3)
                             p = new Paragraph(DecodeTimeCode(arr[1]), DecodeTimeCode(arr[2]), string.Empty);

@@ -10,7 +10,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     public class Idx : SubtitleFormat
     {
         // timestamp: 00:00:01:401, filepos: 000000000
-        private static Regex _regexTimeCodes = new Regex(@"^timestamp: \d+:\d+:\d+:\d+, filepos: [\dabcdefABCDEF]+$", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"^timestamp: \d+:\d+:\d+:\d+, filepos: [\dabcdefABCDEF]+$", RegexOptions.Compiled);
 
         public Hashtable NonTimeCodes = new Hashtable();
 
@@ -35,9 +35,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (string line in lines)
             {
                 if (line.StartsWith("timestamp: ", StringComparison.Ordinal))
-                    subtitleCount++;
+                {
+                    if (++subtitleCount > 10)
+                        return true;
+                }
             }
-            return subtitleCount > 10;
+            return false;
         }
 
         public override string ToText(Subtitle subtitle, string title)
@@ -80,11 +83,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             _errorCount = 0;
 
             subtitle.Paragraphs.Clear();
+            char[] splitChars = { ',', ':' };
             foreach (string line in lines)
             {
-                if (_regexTimeCodes.IsMatch(line))
+                if (RegexTimeCodes.IsMatch(line))
                 {
-                    Paragraph p = GetTimeCodes(line);
+                    Paragraph p = GetParagraph(line.Split(splitChars, StringSplitOptions.RemoveEmptyEntries));
                     if (p != null)
                         subtitle.Paragraphs.Add(p);
                     else
@@ -105,11 +109,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             }
         }
 
-        private static Paragraph GetTimeCodes(string line)
+        private static Paragraph GetParagraph(string[] parts)
         {
             // timestamp: 00:00:01:401, filepos: 000000000
-
-            string[] parts = line.Split(new[] { ',', ':' }, StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 7)
             {
                 int hours;
@@ -122,10 +124,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     int.TryParse(parts[4], out milliseconds))
                 {
                     return new Paragraph
-                                {
-                                    StartTime = { TimeSpan = new TimeSpan(0, hours, minutes, seconds, milliseconds) },
-                                    Text = parts[6]
-                                };
+                    {
+                        StartTime = { TimeSpan = new TimeSpan(0, hours, minutes, seconds, milliseconds) },
+                        Text = parts[6]
+                    };
                 }
             }
             return null;

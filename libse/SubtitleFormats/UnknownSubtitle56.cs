@@ -41,13 +41,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             var sb = new StringBuilder();
             const string format = "{0:0000}\t{1}\t{2}";
-            int count = 1;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 sb.AppendLine(string.Format(format, 1, EncodeTimeCode(p.StartTime), EncodeTimeCode(p.EndTime)));
                 sb.AppendLine(HtmlUtil.RemoveHtmlTags(p.Text));
                 sb.AppendLine();
-                count++;
             }
             return sb.ToString();
         }
@@ -63,6 +61,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             bool expectStartTime = true;
             var p = new Paragraph();
             subtitle.Paragraphs.Clear();
+            char[] splitChars = { '.', ':' };
             foreach (string line in lines)
             {
                 string s = line.Trim();
@@ -79,8 +78,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 subtitle.Paragraphs.Add(p);
                                 p = new Paragraph();
                             }
-                            p.StartTime = DecodeTimeCode(parts[1]);
-                            p.EndTime = DecodeTimeCode(parts[2]);
+                            p.StartTime = DecodeTimeCodeFrames(parts[1], splitChars);
+                            p.EndTime = DecodeTimeCodeFrames(parts[2], splitChars);
                             expectStartTime = false;
                         }
                         catch (Exception exception)
@@ -118,19 +117,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string part)
-        {
-            string[] parts = part.Split(new[] { '.', ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-            //00:00:07:12
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

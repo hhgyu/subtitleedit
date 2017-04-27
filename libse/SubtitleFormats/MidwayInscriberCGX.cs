@@ -7,7 +7,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class MidwayInscriberCGX : SubtitleFormat
     {
-        private static readonly Regex regexTimeCodes = new Regex(@"<\d\d:\d\d:\d\d:\d\d> <\d\d:\d\d:\d\d:\d\d>$", RegexOptions.Compiled);
+        private static readonly Regex RegexTimeCodes = new Regex(@"<\d\d:\d\d:\d\d:\d\d> <\d\d:\d\d:\d\d:\d\d>$", RegexOptions.Compiled);
 
         public override string Extension
         {
@@ -65,25 +65,24 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.Paragraphs.Clear();
             sb.Clear();
-            char[] splitChar = { ':' };
             foreach (string line in lines)
             {
                 if (!string.IsNullOrWhiteSpace(line))
                 {
-                    if (regexTimeCodes.IsMatch(line))
+                    if (RegexTimeCodes.IsMatch(line))
                     {
-                        int idx = regexTimeCodes.Match(line).Index;
+                        int idx = RegexTimeCodes.Match(line).Index;
                         string temp = line.Substring(0, idx).Trim();
                         sb.AppendLine(temp);
 
                         string start = line.Substring(idx + 1, 11);
                         string end = line.Substring(idx + 15, 11);
 
-                        string[] startParts = start.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
-                        string[] endParts = end.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
+                        string[] startParts = start.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
+                        string[] endParts = end.Split(SplitCharColon, StringSplitOptions.RemoveEmptyEntries);
                         if (startParts.Length == 4 && endParts.Length == 4)
                         {
-                            var p = new Paragraph(DecodeTimeCode(startParts), DecodeTimeCode(endParts), sb.ToString().Trim());
+                            var p = new Paragraph(DecodeTimeCodeFramesFourParts(startParts), DecodeTimeCodeFramesFourParts(endParts), sb.ToString().Trim());
                             subtitle.Paragraphs.Add(p);
                         }
                         sb.Clear();
@@ -97,21 +96,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     return;
             }
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            //00:00:07:12
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-
-            int milliseconds = (int)((1000 / Configuration.Settings.General.CurrentFrameRate) * frames);
-            if (milliseconds > 999)
-                milliseconds = 999;
-
-            return new TimeCode(hour, minutes, seconds, milliseconds);
         }
 
     }

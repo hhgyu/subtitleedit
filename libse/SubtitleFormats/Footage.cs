@@ -64,7 +64,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 count++;
                 string text = HtmlUtil.RemoveHtmlTags(p.Text);
-                if (p.Text.StartsWith("<i>") && p.Text.EndsWith("</i>"))
+                if (p.Text.StartsWith("<i>", StringComparison.Ordinal) && p.Text.EndsWith("</i>", StringComparison.Ordinal))
                     text = "#" + text;
                 sb.AppendLine(string.Format(paragraphWriteFormat, EncodeTimeCode(p.StartTime), EncodeTimeCode(p.EndTime), text, Environment.NewLine, count));
             }
@@ -78,6 +78,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             _errorCount = 0;
 
             subtitle.Paragraphs.Clear();
+            char[] splitChar = { ',' };
             foreach (string line in lines)
             {
                 if (line.EndsWith('.') && Utilities.IsInteger(line.TrimEnd('.')))
@@ -89,7 +90,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeStart && RegexTimeCode.IsMatch(line))
                 {
-                    string[] parts = line.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2)
                     {
                         try
@@ -107,7 +108,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (paragraph != null && expecting == ExpectingLine.TimeEnd && RegexTimeCode.IsMatch(line))
                 {
-                    string[] parts = line.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = line.Split(splitChar, StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length == 2)
                     {
                         try
@@ -153,7 +154,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             int frames = MillisecondsToFrames(time.TotalMilliseconds);
             int footage = frames / 16;
-            int rest = (int)((frames % 16) / 16.0 * 24.0);
+            int rest = (int)Math.Round(frames % 16.0 / 16.0 * 24.0);
             return string.Format("{0:00},{1:00}", footage, rest).PadLeft(8);
         }
 
@@ -161,7 +162,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             int frames16 = int.Parse(parts[0]);
             int frames = int.Parse(parts[1]);
-            return new TimeCode(0, 0, 0, FramesToMilliseconds(16 * frames16 + frames));
+            return new TimeCode(FramesToMilliseconds(16 * frames16 + (frames * 16.0 / 24.0)));
         }
 
     }

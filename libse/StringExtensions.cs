@@ -87,7 +87,12 @@ namespace Nikse.SubtitleEdit.Core
 
         public static string[] SplitToLines(this string source)
         {
-            return source.Replace("\r\n", "\n").Replace('\r', '\n').Replace('\u2028', '\n').Split('\n');
+            return source.Replace("\r\r\n", "\n").Replace("\r\n", "\n").Replace('\r', '\n').Replace('\u2028', '\n').Split('\n');
+        }
+
+        public static int CountWords(this string source)
+        {
+            return HtmlUtil.RemoveHtmlTags(source, true).Split(new[] { ' ', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Length;
         }
 
         // http://www.codeproject.com/Articles/43726/Optimizing-string-operations-in-C
@@ -144,46 +149,87 @@ namespace Nikse.SubtitleEdit.Core
         {
             if (string.IsNullOrEmpty(s))
                 return s;
+            int len = s.Length;
+            int k = -1;
+            for (int i = len - 1; i >= 0; i--)
+            {
+                char ch = s[i];
+                if (k < 2)
+                {
+                    if (ch == 0x20)
+                    {
+                        k = i + 1;
+                    }
+                }
+                else if (ch != 0x20)
+                {
+                    // Two or more white-spaces found!
+                    if (k - (i + 1) > 1)
+                    {
+                        // Keep only one white-space.
+                        s = s.Remove(i + 1, k - (i + 2));
+                    }
 
-            while (s.Contains("  "))
-                s = s.Replace("  ", " ");
-            s = s.Replace(" " + Environment.NewLine, Environment.NewLine);
-            return s.Replace(Environment.NewLine + " ", Environment.NewLine);
+                    // No white-space after/before line break.
+                    if ((ch == '\n' || ch == '\r') && i + 1 < s.Length && s[i + 1] == 0x20)
+                    {
+                        s = s.Remove(i + 1, 1);
+                    }
+                    // Reset remove length.
+                    k = -1;
+                }
+                if (ch == 0x20 && i + 1 < s.Length && (s[i + 1] == '\n' || s[i + 1] == '\r'))
+                {
+                    s = s.Remove(i, 1);
+                }
+            }
+            return s;
         }
 
         public static bool ContainsLetter(this string s)
         {
-            if (string.IsNullOrWhiteSpace(s))
-                return false;
-
-            foreach (var c in s)
+            if (s != null)
             {
-                if (char.IsLetter(c))
-                    return true;
+                foreach (var index in StringInfo.ParseCombiningCharacters(s))
+                {
+                    var uc = CharUnicodeInfo.GetUnicodeCategory(s, index);
+                    if (uc == UnicodeCategory.LowercaseLetter || uc == UnicodeCategory.UppercaseLetter || uc == UnicodeCategory.TitlecaseLetter || uc == UnicodeCategory.ModifierLetter || uc == UnicodeCategory.OtherLetter)
+                        return true;
+                }
             }
             return false;
         }
 
         public static string RemoveControlCharacters(this string s)
         {
-            var sb = new StringBuilder(s.Length);
-            foreach (var ch in s)
+            int max = s.Length;
+            var newStr = new char[max];
+            int newIdx = 0;
+            for (int index = 0; index < max; index++)
             {
-                if (!Char.IsControl(ch))
-                    sb.Append(ch);
+                var ch = s[index];
+                if (!char.IsControl(ch))
+                {
+                    newStr[newIdx++] = ch;
+                }
             }
-            return sb.ToString();
+            return new string(newStr, 0, newIdx);
         }
 
         public static string RemoveControlCharactersButWhiteSpace(this string s)
         {
-            var sb = new StringBuilder(s.Length);
-            foreach (var ch in s)
+            int max = s.Length;
+            var newStr = new char[max];
+            int newIdx = 0;
+            for (int index = 0; index < max; index++)
             {
-                if (!Char.IsControl(ch) || ch == '\u000d' || ch == '\u000a' || ch == '\u0009')
-                    sb.Append(ch);
+                var ch = s[index];
+                if (!char.IsControl(ch) || ch == '\u000d' || ch == '\u000a' || ch == '\u0009')
+                {
+                    newStr[newIdx++] = ch;
+                }
             }
-            return sb.ToString();
+            return new string(newStr, 0, newIdx);
         }
 
         public static string CapitalizeFirstLetter(this string s, CultureInfo ci = null)

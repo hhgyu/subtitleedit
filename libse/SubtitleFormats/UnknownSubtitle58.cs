@@ -62,7 +62,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 sb.AppendLine(line);
 
             string rtf = sb.ToString().Trim();
-            if (!rtf.StartsWith("{\\rtf"))
+            if (!rtf.StartsWith("{\\rtf", StringComparison.Ordinal))
                 return;
 
             string[] arr = rtf.FromRtf().SplitToLines();
@@ -84,13 +84,13 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         {
                             if (!string.IsNullOrEmpty(p.Text))
                             {
-                                p.EndTime = DecodeTimeCode(parts[0]);
+                                p.EndTime = DecodeTimeCodeFrames(parts[0], SplitCharColon);
                                 subtitle.Paragraphs.Add(p);
                                 p = new Paragraph();
                             }
                             else
                             {
-                                p.StartTime = DecodeTimeCode(parts[0]);
+                                p.StartTime = DecodeTimeCodeFrames(parts[0], SplitCharColon);
                             }
                         }
                         catch (Exception exception)
@@ -120,19 +120,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.RemoveEmptyLines();
             subtitle.Renumber();
-        }
-
-        private static TimeCode DecodeTimeCode(string part)
-        {
-            string[] parts = part.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-
-            //00:00:07:12
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
         }
 
     }

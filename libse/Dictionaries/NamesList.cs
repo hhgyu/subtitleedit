@@ -10,6 +10,7 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         private readonly string _dictionaryFolder;
         private readonly HashSet<string> _namesList;
         private readonly HashSet<string> _namesMultiList;
+        private readonly HashSet<string> _blackList;
         private readonly string _languageName;
 
         public NamesList(string dictionaryFolder, string languageName, bool useOnlineNamesEtc, string namesEtcUrl)
@@ -19,45 +20,38 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
 
             _namesList = new HashSet<string>();
             _namesMultiList = new HashSet<string>();
+            _blackList = new HashSet<string>();
 
+            LoadNamesList(GetLocalNamesFileName()); // e.g: en_names.xml (culture insensitive)
             if (useOnlineNamesEtc && !string.IsNullOrEmpty(namesEtcUrl))
             {
                 try
                 {
-                    var xml = Utilities.DownloadString(Configuration.Settings.WordLists.NamesEtcUrl);
-                    var namesDoc = new XmlDocument();
-                    namesDoc.LoadXml(xml);
-                    LoadNames(_namesList, _namesMultiList, namesDoc);
+                    LoadNamesList(Configuration.Settings.WordLists.NamesUrl);
                 }
                 catch (Exception exception)
                 {
-                    LoadNamesList(Path.Combine(_dictionaryFolder, "names_etc.xml"), _namesList, _namesMultiList);
                     System.Diagnostics.Debug.WriteLine(exception.Message);
                 }
             }
             else
             {
-                LoadNamesList(Path.Combine(_dictionaryFolder, "names_etc.xml"), _namesList, _namesMultiList);
+                LoadNamesList(Path.Combine(_dictionaryFolder, "names.xml"));
             }
-
-            LoadNamesList(GetLocalNamesFileName(), _namesList, _namesMultiList);
-
-            var userFile = GetLocalNamesUserFileName();
-            LoadNamesList(userFile, _namesList, _namesMultiList);
-            UnloadRemovedNames(userFile);
+            foreach (var name in _blackList)
+            {
+                if (_namesList.Contains(name))
+                    _namesList.Remove(name);
+                if (_namesMultiList.Contains(name))
+                    _namesMultiList.Remove(name);
+            }
         }
 
         public List<string> GetAllNames()
         {
-            var list = new List<string>();
-            foreach (var name in _namesList)
-            {
-                list.Add(name);
-            }
-            foreach (var name in _namesMultiList)
-            {
-                list.Add(name);
-            }
+            var list = new List<string>(_namesList.Count + _namesMultiList.Count);
+            list.AddRange(_namesList);
+            list.AddRange(_namesMultiList);
             return list;
         }
 
@@ -71,80 +65,73 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             return _namesMultiList;
         }
 
-        private void UnloadRemovedNames(string fileName)
-        {
-            if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
-                return;
-
-            var namesDoc = new XmlDocument();
-            namesDoc.Load(fileName);
-            if (namesDoc.DocumentElement == null)
-                return;
-
-            foreach (XmlNode node in namesDoc.DocumentElement.SelectNodes("removed_name"))
-            {
-                string s = node.InnerText.Trim();
-                if (s.Contains(' '))
-                {
-                    if (_namesMultiList.Contains(s))
-                        _namesMultiList.Remove(s);
-                }
-                else if (_namesList.Contains(s))
-                {
-                    _namesList.Remove(s);
-                }
-            }
-        }
-
+        /// <summary>
+        /// Returns two letters ISO language name (Neutral culture).
+        /// </summary>
         private string GetLocalNamesFileName()
         {
-            if (_languageName.Length == 2)
+            // Converts e.g en_US => en (Neutral culture).
+            string twoLetterISOLanguageName = _languageName;
+            if (_languageName.Length > 2)
             {
-                string[] files = Directory.GetFiles(_dictionaryFolder, _languageName + "_??_names_etc.xml");
-                if (files.Length > 0)
-                    return files[0];
+                twoLetterISOLanguageName = _languageName.Substring(0, 2);
             }
-            return Path.Combine(_dictionaryFolder, _languageName + "_names_etc.xml");
+            return Path.Combine(_dictionaryFolder, twoLetterISOLanguageName + "_names.xml");
         }
 
-        private string GetLocalNamesUserFileName()
+        private void LoadNamesList(string fileName)
         {
-            if (_languageName.Length == 2)
+            if (string.IsNullOrEmpty(fileName) ||
+                (!File.Exists(fileName) &&
+                 !fileName.StartsWith("http", StringComparison.InvariantCultureIgnoreCase) &&
+                 !fileName.StartsWith("\\", StringComparison.InvariantCultureIgnoreCase)))
             {
-                string[] files = Directory.GetFiles(_dictionaryFolder, _languageName + "_??_names_etc_user.xml");
-                if (files.Length > 0)
-                    return files[0];
-            }
-            return Path.Combine(_dictionaryFolder, _languageName + "_names_etc_user.xml");
-        }
-
-        private static void LoadNamesList(string fileName, HashSet<string> namesList, HashSet<string> namesMultiList)
-        {
-            if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
                 return;
+            }
 
-            var namesDoc = new XmlDocument();
-            namesDoc.Load(fileName);
-            if (namesDoc.DocumentElement == null)
-                return;
-
-            LoadNames(namesList, namesMultiList, namesDoc);
-        }
-
-        private static void LoadNames(HashSet<string> namesList, HashSet<string> namesMultiList, XmlDocument namesDoc)
-        {
-            foreach (XmlNode node in namesDoc.DocumentElement.SelectNodes("name"))
+            using (XmlReader reader = XmlReader.Create(fileName))
             {
-                string s = node.InnerText.Trim();
-                if (s.Contains(' ') && !namesMultiList.Contains(s))
+                reader.MoveToContent();
+                while (reader.Read())
                 {
-                    namesMultiList.Add(s);
-                }
-                else if (!namesList.Contains(s))
-                {
-                    namesList.Add(s);
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if (reader.Name == "blacklist")
+                        {
+                            while (reader.Read() && reader.NodeType != XmlNodeType.EndElement)
+                            {
+                                if (reader.Name == "name")
+                                {
+                                    string name = reader.ReadElementContentAsString().Trim();
+                                    if (name.Length > 0 && !_blackList.Contains(name))
+                                    {
+                                        _blackList.Add(name);
+                                    }
+                                }
+                            }
+                        }
+                        else if (reader.Name == "name")
+                        {
+                            string name = reader.ReadElementContentAsString().Trim();
+                            if (name.Length > 0)
+                            {
+                                if (name.Contains(' '))
+                                {
+                                    if (!_namesMultiList.Contains(name))
+                                    {
+                                        _namesMultiList.Add(name);
+                                    }
+                                }
+                                else if (!_namesList.Contains(name))
+                                {
+                                    _namesList.Add(name);
+                                }
+                            }
+                        }
+                    }
                 }
             }
+
         }
 
         public bool Remove(string name)
@@ -152,48 +139,49 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             name = name.Trim();
             if (name.Length > 1 && _namesList.Contains(name) || _namesMultiList.Contains(name))
             {
-                if (_namesList.Contains(name))
-                    _namesList.Remove(name);
-                if (_namesMultiList.Contains(name))
-                    _namesMultiList.Remove(name);
+                // Try removing name from both lists
+                _namesList.Remove(name);
+                _namesMultiList.Remove(name);
 
-                var userList = new HashSet<string>();
-                var fileName = GetLocalNamesUserFileName();
-                LoadNamesList(fileName, userList, userList);
-
-                var namesDoc = new XmlDocument();
+                var fileName = GetLocalNamesFileName();
+                var nameListXml = new XmlDocument();
                 if (File.Exists(fileName))
                 {
-                    namesDoc.Load(fileName);
+                    nameListXml.Load(fileName);
                 }
                 else
                 {
-                    namesDoc.LoadXml("<ignore_words />");
+                    nameListXml.LoadXml("<names><blacklist></blacklist></names>");
                 }
 
-                if (userList.Contains(name))
+                // Add removed name to blacklist
+                XmlNode xnode = nameListXml.CreateElement("name");
+                xnode.InnerText = name;
+                nameListXml.DocumentElement.SelectSingleNode("blacklist").AppendChild(xnode);
+                XmlNode nodeToRemove = null;
+
+                // Remove remove-name from name-list
+                foreach (XmlNode node in nameListXml.DocumentElement.SelectNodes("name"))
                 {
-                    userList.Remove(name);
-                    XmlNode nodeToRemove = null;
-                    foreach (XmlNode node in namesDoc.DocumentElement.SelectNodes("name"))
+                    if (node.InnerText.Equals(name, StringComparison.Ordinal))
                     {
-                        if (node.InnerText == name)
-                        {
-                            nodeToRemove = node;
-                            break;
-                        }
+                        nodeToRemove = node;
+                        break;
                     }
-                    if (nodeToRemove != null)
-                        namesDoc.DocumentElement.RemoveChild(nodeToRemove);
                 }
-                else
+                if (nodeToRemove != null)
                 {
-                    XmlNode node = namesDoc.CreateElement("removed_name");
-                    node.InnerText = name;
-                    namesDoc.DocumentElement.AppendChild(node);
+                    nameListXml.DocumentElement.RemoveChild(nodeToRemove);
                 }
-                namesDoc.Save(fileName);
-                return true;
+                try
+                {
+                    nameListXml.Save(fileName);
+                    return true;
+                }
+                catch
+                {
+                    System.Diagnostics.Debug.WriteLine("NamesList.RemoveRemove failed");
+                }
             }
             return false;
         }
@@ -201,7 +189,11 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
         public bool Add(string name)
         {
             name = name.RemoveControlCharacters().Trim();
-            if (name.Length > 1 && name.ContainsLetter())
+            if (name.Length == 0 || _blackList.Contains(name))
+            {
+                return false;
+            }
+            if (name.ContainsLetter())
             {
                 if (name.Contains(' '))
                 {
@@ -213,27 +205,32 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                     _namesList.Add(name);
                 }
 
-                var fileName = GetLocalNamesUserFileName();
-                var namesEtcDoc = new XmlDocument();
+                // <neutral>_names.xml e.g: en_names.xml
+                var fileName = GetLocalNamesFileName();
+                var nameListXml = new XmlDocument();
                 if (File.Exists(fileName))
-                    namesEtcDoc.Load(fileName);
+                {
+                    nameListXml.Load(fileName);
+                }
                 else
-                    namesEtcDoc.LoadXml("<ignore_words />");
+                {
+                    nameListXml.LoadXml("<names><blacklist></blacklist></names>");
+                }
 
-                XmlNode de = namesEtcDoc.DocumentElement;
+                XmlNode de = nameListXml.DocumentElement;
                 if (de != null)
                 {
-                    XmlNode node = namesEtcDoc.CreateElement("name");
+                    XmlNode node = nameListXml.CreateElement("name");
                     node.InnerText = name;
                     de.AppendChild(node);
-                    namesEtcDoc.Save(fileName);
+                    nameListXml.Save(fileName);
                 }
                 return true;
             }
             return false;
         }
 
-        public bool IsInNamesEtcMultiWordList(string text, string word)
+        public bool IsInNamesMultiWordList(string text, string word)
         {
             if (string.IsNullOrEmpty(text))
                 return false;
@@ -241,13 +238,15 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
             text = text.Replace(Environment.NewLine, " ");
             text = text.FixExtraSpaces();
 
-            foreach (string s in _namesMultiList)
+            if (_namesMultiList.Contains(word))
             {
-                if (s.Contains(word) && text.Contains(s))
+                return true;
+            }
+            foreach (string multiWordName in _namesMultiList)
+            {
+                if (text.Contains(multiWordName))
                 {
-                    if (s.StartsWith(word + " ", StringComparison.Ordinal) || s.EndsWith(" " + word, StringComparison.Ordinal) || s.Contains(" " + word + " "))
-                        return true;
-                    if (word == s)
+                    if (multiWordName.StartsWith(word + " ", StringComparison.Ordinal) || multiWordName.EndsWith(" " + word, StringComparison.Ordinal) || multiWordName.Contains(" " + word + " "))
                         return true;
                 }
             }

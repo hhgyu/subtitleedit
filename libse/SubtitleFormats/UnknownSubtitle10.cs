@@ -7,7 +7,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle10 : SubtitleFormat
     {
-
         public override string Extension
         {
             get { return ".txt"; }
@@ -88,11 +87,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         string start = line.Substring(indexStartTime);
                         string end = line.Substring(indexEndTime);
                         var paragraph = new Paragraph
-                                            {
-                                                Text = text,
-                                                StartTime = { TotalMilliseconds = GetMilliseconds(start) },
-                                                EndTime = { TotalMilliseconds = GetMilliseconds(end) }
-                                            };
+                        {
+                            Text = text,
+                            StartTime = { TotalMilliseconds = GetMilliseconds(start) },
+                            EndTime = { TotalMilliseconds = GetMilliseconds(end) }
+                        };
                         subtitle.Paragraphs.Add(paragraph);
                     }
                     catch (Exception exception)

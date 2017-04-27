@@ -39,12 +39,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         public override string ToText(Subtitle subtitle, string title)
         {
             var sb = new StringBuilder();
-            int index = 0;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 //00:00:54.08 00:00:58.06 - Saucers... - ... a dry lake bed.  (newline is //)
                 sb.AppendLine(string.Format("{0} {1} {2}", EncodeTimeCode(p.StartTime), EncodeTimeCode(p.EndTime), HtmlUtil.RemoveHtmlTags(p.Text).Replace(Environment.NewLine, "//")));
-                index++;
             }
             return sb.ToString();
         }
@@ -61,22 +59,19 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             _errorCount = 0;
             Paragraph p = null;
             subtitle.Paragraphs.Clear();
+            char[] splitChars = { ':', '.' };
             foreach (string line in lines)
             {
-                if (RegexTimeCodes.IsMatch(line))
+                var match = RegexTimeCodes.Match(line);
+                if (match.Success)
                 {
-                    string temp = line.Substring(0, RegexTimeCodes.Match(line).Length);
-                    string start = temp.Substring(0, 11);
-                    string end = temp.Substring(12, 11);
-
-                    string[] startParts = start.Split(new[] { ':', '.' }, StringSplitOptions.RemoveEmptyEntries);
-                    string[] endParts = end.Split(new[] { ':', '.' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (startParts.Length == 4 && endParts.Length == 4 && line.Length >= 23)
+                    string temp = line.Substring(0, match.Length);
+                    if (line.Length >= 23)
                     {
                         string text = line.Remove(0, 23).Trim();
                         if (!text.Contains(Environment.NewLine))
                             text = text.Replace("//", Environment.NewLine);
-                        p = new Paragraph(DecodeTimeCode(startParts), DecodeTimeCode(endParts), text);
+                        p = new Paragraph(DecodeTimeCodeFrames(temp.Substring(0, 11), splitChars), DecodeTimeCodeFrames(temp.Substring(12, 11), splitChars), text);
                         subtitle.Paragraphs.Add(p);
                     }
                 }
@@ -92,16 +87,5 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             subtitle.Renumber();
         }
-
-        private static TimeCode DecodeTimeCode(string[] parts)
-        {
-            string hour = parts[0];
-            string minutes = parts[1];
-            string seconds = parts[2];
-            string frames = parts[3];
-
-            return new TimeCode(int.Parse(hour), int.Parse(minutes), int.Parse(seconds), FramesToMillisecondsMax999(int.Parse(frames)));
-        }
-
     }
 }

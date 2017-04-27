@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -56,17 +55,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             return sb.ToString();
         }
 
-        private static TimeCode DecodeTimeCode(string timeCode)
-        {
-            string[] arr = timeCode.Split(new[] { ':', ';', ',' }, StringSplitOptions.RemoveEmptyEntries);
-            return new TimeCode(int.Parse(arr[0]), int.Parse(arr[1]), int.Parse(arr[2]), FramesToMillisecondsMax999(int.Parse(arr[3])));
-        }
-
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
         {
             _errorCount = 0;
             Paragraph p = null;
             var sb = new StringBuilder();
+            char[] splitChars = { ':', ';', ',' };
             foreach (string line in lines)
             {
                 string s = line.TrimEnd();
@@ -79,10 +73,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             p.Text = sb.ToString().Trim();
                             subtitle.Paragraphs.Add(p);
                         }
-                        sb = new StringBuilder();
+                        sb.Clear();
                         string[] arr = s.Split('\t');
                         if (arr.Length == 2)
-                            p = new Paragraph(DecodeTimeCode(arr[0]), DecodeTimeCode(arr[1]), string.Empty);
+                            p = new Paragraph(DecodeTimeCodeFrames(arr[0], splitChars), DecodeTimeCodeFrames(arr[1], splitChars), string.Empty);
                     }
                     catch
                     {

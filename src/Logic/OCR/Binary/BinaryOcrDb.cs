@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 
@@ -27,12 +28,26 @@ namespace Nikse.SubtitleEdit.Logic.Ocr.Binary
             using (Stream gz = new GZipStream(File.OpenWrite(FileName), CompressionMode.Compress))
             {
                 foreach (var bob in CompareImages)
+                {
+                    if (bob.ExpandCount > 0)
+                        System.Windows.Forms.MessageBox.Show("Ups, expand image in CompareImages!");
                     bob.Save(gz);
+                }
                 foreach (var bob in CompareImagesExpanded)
                 {
+                    if (bob.ExpandCount == 0)
+                        System.Windows.Forms.MessageBox.Show("Ups, not expanded image in CompareImagesExpanded!");
                     bob.Save(gz);
+                    if (bob.ExpandedList.Count != bob.ExpandCount - 1)
+                    {
+                        throw new Exception("BinaryOcrDb.Save: Expanded image should have " + (bob.ExpandCount - 1) + " sub images");
+                    }
                     foreach (var expandedBob in bob.ExpandedList)
+                    {
+                        if (expandedBob.Text != null)
+                            throw new Exception("BinaryOcrDb.Save: sub image should have null text");
                         expandedBob.Save(gz);
+                    }
                 }
             }
         }
@@ -64,7 +79,11 @@ namespace Nikse.SubtitleEdit.Logic.Ocr.Binary
                             {
                                 var expandedBob = new BinaryOcrBitmap(gz);
                                 if (expandedBob.LoadedOk)
+                                {
+                                    if (expandedBob.Text != null)
+                                        throw new Exception("BinaryOcrDb.LoadCompareImages: sub image should have null text");
                                     bob.ExpandedList.Add(expandedBob);
+                                }
                                 else
                                     break;
                             }
@@ -111,6 +130,11 @@ namespace Nikse.SubtitleEdit.Logic.Ocr.Binary
             int index;
             if (bob.ExpandCount > 0)
             {
+                if (bob.ExpandedList == null || bob.ExpandCount - 1 != bob.ExpandedList.Count)
+                    throw new Exception("BinaryOcrDb.Add: There should be " + (bob.ExpandCount - 1) + " sub image(s)");
+
+                if (bob.ExpandedList[0].Text != null)
+                    throw new Exception("BinaryOcrDb.Add: sub image should have null text");
                 index = FindExactMatchExpanded(bob);
                 if (index == -1 || CompareImagesExpanded[index].ExpandCount != bob.ExpandCount)
                 {
@@ -123,11 +147,13 @@ namespace Nikse.SubtitleEdit.Logic.Ocr.Binary
                     {
                         if (bob.ExpandedList[i].Hash != CompareImagesExpanded[index].ExpandedList[i].Hash)
                             allAlike = false;
+                        if (bob.ExpandedList[i].Text != null)
+                            throw new Exception("BinaryOcrDb.Add: sub image should have null text");
                     }
                     if (!allAlike)
-                        CompareImages.Add(bob);
+                        CompareImagesExpanded.Add(bob);
                     else
-                        System.Windows.Forms.MessageBox.Show("Expanded image already in db!");
+                        throw new Exception("BinaryOcrDb.Add: Expanded image already in db!");
                 }
             }
             else
@@ -136,7 +162,7 @@ namespace Nikse.SubtitleEdit.Logic.Ocr.Binary
                 if (index == -1)
                     CompareImages.Add(bob);
                 else
-                    System.Windows.Forms.MessageBox.Show("Image already in db!");
+                    throw new Exception("BinaryOcrDb.Add: Image already in db!");
             }
             return index;
         }

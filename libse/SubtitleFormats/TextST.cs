@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Core.TransportStream;
+using Nikse.SubtitleEdit.Core.VobSub;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
-using Nikse.SubtitleEdit.Core.BluRaySup;
-using Nikse.SubtitleEdit.Core.TransportStream;
-using Nikse.SubtitleEdit.Core.VobSub;
 using Helper = Nikse.SubtitleEdit.Core.TransportStream.Helper;
 
 namespace Nikse.SubtitleEdit.Core.SubtitleFormats
@@ -85,6 +85,34 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public class RegionStyle
         {
+            public RegionStyle()
+            {
+            }
+
+            public RegionStyle(RegionStyle regionStyle)
+            {
+                RegionStyleId = regionStyle.RegionStyleId;
+                RegionHorizontalPosition = regionStyle.RegionHorizontalPosition;
+                RegionVerticalPosition = regionStyle.RegionVerticalPosition;
+                RegionWidth = regionStyle.RegionWidth;
+                RegionHeight = regionStyle.RegionHeight;
+                RegionBgPaletteEntryIdRef = regionStyle.RegionBgPaletteEntryIdRef;
+                TextBoxHorizontalPosition = regionStyle.TextBoxHorizontalPosition;
+                TextBoxVerticalPosition = regionStyle.TextBoxVerticalPosition;
+                TextBoxWidth = regionStyle.TextBoxWidth;
+                TextBoxHeight = regionStyle.TextBoxHeight;
+                TextFlow = regionStyle.TextFlow;
+                TextHorizontalAlignment = regionStyle.TextHorizontalAlignment;
+                TextVerticalAlignment = regionStyle.TextVerticalAlignment;
+                LineSpace = regionStyle.LineSpace;
+                FontIdRef = regionStyle.FontIdRef;
+                FontStyle = regionStyle.FontStyle;
+                FontSize = regionStyle.FontSize;
+                FontPaletteEntryIdRef = regionStyle.FontPaletteEntryIdRef;
+                FontOutlinePaletteEntryIdRef = regionStyle.FontOutlinePaletteEntryIdRef;
+                FontOutlineThickness = regionStyle.FontOutlineThickness;
+            }
+
             public int RegionStyleId { get; set; }
             public int RegionHorizontalPosition { get; set; }
             public int RegionVerticalPosition { get; set; }
@@ -231,6 +259,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             public void WriteToStream(Stream stream, int numberOfSubtitles)
             {
+                NumberOfRegionStyles = RegionStyles.Count;
+                NumberOfUserStyles = UserStyles.Count;
+
                 byte[] regionStyle = MakeRegionStyle();
                 stream.Write(new byte[] { 0, 0, 1, 0xbf }, 0, 4); // MPEG-2 Private stream 2
                 var size = regionStyle.Length + 5;
@@ -390,7 +421,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
             }
         }
-
 
         public abstract class SubtitleRegionContent
         {
@@ -616,7 +646,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             italic = true;
                             if (content.Count > 0 && content[content.Count - 1] is SubtitleRegionContentChangeFontStyle)
                             {
-                                content.RemoveAt(content.Count - 1); // Remove last style tag (italic/bold will be  combined)
+                                content.RemoveAt(content.Count - 1); // Remove last style tag (italic/bold will be combined)
                             }
                             content.Add(new SubtitleRegionContentChangeFontStyle
                             {
@@ -642,7 +672,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             bold = true;
                             if (content.Count > 0 && content[content.Count - 1] is SubtitleRegionContentChangeFontStyle)
                             {
-                                content.RemoveAt(content.Count - 1); // Remove last style tag (italic/bold will be  combined)
+                                content.RemoveAt(content.Count - 1); // Remove last style tag (italic/bold will be combined)
                             }
                             content.Add(new SubtitleRegionContentChangeFontStyle
                             {
@@ -772,22 +802,28 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             var fontOutlineThickness = buffer[idx + 2];
                             switch (fontStyle)
                             {
-                                case 1: region.Texts.Add("<b>");
+                                case 1:
+                                    region.Texts.Add("<b>");
                                     endStyle = "</b>";
                                     break;
-                                case 2: region.Texts.Add("<i>");
+                                case 2:
+                                    region.Texts.Add("<i>");
                                     endStyle = "</i>";
                                     break;
-                                case 3: region.Texts.Add("<b><i>");
+                                case 3:
+                                    region.Texts.Add("<b><i>");
                                     endStyle = "</i></b>";
                                     break;
-                                case 5: region.Texts.Add("<b>");
+                                case 5:
+                                    region.Texts.Add("<b>");
                                     endStyle = "</b>";
                                     break;
-                                case 6: region.Texts.Add("<i>");
+                                case 6:
+                                    region.Texts.Add("<i>");
                                     endStyle = "</i>";
                                     break;
-                                case 7: region.Texts.Add("<b><i>");
+                                case 7:
+                                    region.Texts.Add("<b><i>");
                                     endStyle = "</i></b>";
                                     break;
                             }

@@ -15,12 +15,14 @@ namespace Nikse.SubtitleEdit.Forms
         private class TranslationInfo : IEquatable<TranslationInfo>
         {
             private readonly string _cultureName;
+
             public string CultureName
             {
                 get { return _cultureName; }
             }
 
             private readonly string _displayName;
+
             public string DisplayName
             {
                 get { return _displayName; }
@@ -41,7 +43,7 @@ namespace Nikse.SubtitleEdit.Forms
 
             public bool Equals(TranslationInfo ti)
             {
-                return (ti != null) ? CultureName.Equals(ti.CultureName, StringComparison.OrdinalIgnoreCase) : false;
+                return !ReferenceEquals(ti, null) && CultureName.Equals(ti.CultureName, StringComparison.OrdinalIgnoreCase);
             }
 
             public override bool Equals(Object obj)
@@ -82,6 +84,7 @@ namespace Nikse.SubtitleEdit.Forms
             if (currentLanguage == null)
             {
                 CurrentTranslation = new TranslationInfo(CultureInfo.CurrentUICulture.Name, CultureInfo.CurrentUICulture.NativeName);
+                Configuration.Settings.Language = defaultLanguage;
             }
             else
             {
@@ -138,11 +141,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 DialogResult = DialogResult.Cancel;
             }
-            else if (e.Shift && e.Control && e.Alt && e.KeyCode == Keys.L)
-            {
-                Configuration.Settings.Language.Save(Path.Combine(Configuration.BaseDirectory, "LanguageMaster.xml"));
-            }
-            else if (e.KeyCode == Keys.F1)
+            else if (e.KeyCode == UiUtil.HelpKeys)
             {
                 Utilities.ShowHelp("#translate");
                 e.SuppressKeyPress = true;

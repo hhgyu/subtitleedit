@@ -2,7 +2,7 @@
 <Language Name="English">
   <General>
     <Title>Subtitle Edit</Title>
-    <Version>3.4.10</Version>
+    <Version>3.5.2</Version>
     <TranslatedBy>Translated by Nikse</TranslatedBy>
     <CultureName>en-US</CultureName>
     <HelpFile />
@@ -21,10 +21,13 @@
     <OpenVideoFileTitle>Open video file...</OpenVideoFileTitle>
     <NoVideoLoaded>No video loaded</NoVideoLoaded>
     <VideoInformation>Video info</VideoInformation>
-    <PositionX>Position / duration: {0}</PositionX>
     <StartTime>Start time</StartTime>
     <EndTime>End time</EndTime>
     <Duration>Duration</Duration>
+    <CharsPerSec>Chars/sec</CharsPerSec>
+    <WordsPerMin>Words/min</WordsPerMin>
+    <Actor>Actor</Actor>
+    <Region>Region</Region>
     <NumberSymbol>#</NumberSymbol>
     <Number>Number</Number>
     <Text>Text</Text>
@@ -173,7 +176,6 @@ Note: Do check free disk space.</WaveFileMalformed>
     <PleaseChooseOutputFolder>Please choose output folder</PleaseChooseOutputFolder>
     <NotConverted>Failed</NotConverted>
     <Converted>Converted</Converted>
-    <ConvertedX>Converted ({0})</ConvertedX>
     <Settings>Settings</Settings>
     <SplitLongLines>Split long lines</SplitLongLines>
     <AutoBalance>Auto balance lines</AutoBalance>
@@ -352,6 +354,7 @@ Note: Do check free disk space.</WaveFileMalformed>
     <CodePageNumber>Code page number</CodePageNumber>
     <DiskFormatCode>Disk format code</DiskFormatCode>
     <DisplayStandardCode>Display standard code</DisplayStandardCode>
+    <ColorRequiresTeletext>Colors require teletext!</ColorRequiresTeletext>
     <CharacterCodeTable>Character table</CharacterCodeTable>
     <LanguageCode>Language code</LanguageCode>
     <OriginalProgramTitle>Original program title</OriginalProgramTitle>
@@ -371,6 +374,10 @@ Note: Do check free disk space.</WaveFileMalformed>
     <Import>Import...</Import>
     <TextAndTimingInformation>Text and timing information</TextAndTimingInformation>
     <JustificationCode>Justification code</JustificationCode>
+    <VerticalPosition>Vertical position</VerticalPosition>
+    <MarginTop>Margin top (for top aligned subtitles)</MarginTop>
+    <MarginBottom>Margin bottom (for bottom aligned subtitles)</MarginBottom>
+    <NewLineRows>Number of rows added by a new line</NewLineRows>
     <Teletext>Teletext</Teletext>
     <UseBox>Use box around text</UseBox>
     <DoubleHeight>Use double height for text</DoubleHeight>
@@ -635,8 +642,6 @@ Note: Do check free disk space.</WaveFileMalformed>
     <DescriptionLine1>Subtitle Edit's spell check is based on the NHunspell engine which</DescriptionLine1>
     <DescriptionLine2>uses the spell checking dictionaries from Open Office.</DescriptionLine2>
     <GetDictionariesHere>Get dictionaries here:</GetDictionariesHere>
-    <OpenOpenOfficeWiki>Open Office Wiki Dictionaries list</OpenOpenOfficeWiki>
-    <GetAllDictionaries>Get all dictionaries</GetAllDictionaries>
     <ChooseLanguageAndClickDownload>Choose your language and click download</ChooseLanguageAndClickDownload>
     <OpenDictionariesFolder>Open 'Dictionaries' folder</OpenDictionariesFolder>
     <Download>Download</Download>
@@ -691,6 +696,7 @@ Note: Do check free disk space.</WaveFileMalformed>
     <Frames>Frames</Frames>
     <Seconds>Seconds</Seconds>
     <Milliseconds>Milliseconds</Milliseconds>
+    <GetSceneChangesWithFfmpeg>Get scene changes with FFmpeg</GetSceneChangesWithFfmpeg>
   </ImportSceneChanges>
   <ImportText>
     <Title>Import plain text</Title>
@@ -729,6 +735,150 @@ Note: Do check free disk space.</WaveFileMalformed>
     <TotalNumberOfLinesX>Total number of lines: {0:#,###,###}</TotalNumberOfLinesX>
     <Note>Note: Files must already have correct time codes</Note>
   </JoinSubtitles>
+  <LanguageNames>
+    <NotSpecified>Not Specified</NotSpecified>
+    <UnknownCodeX>Unknown ({0})</UnknownCodeX>
+    <aaName>Afar</aaName>
+    <abName>Abkhazian</abName>
+    <afName>Afrikaans</afName>
+    <amName>Amharic</amName>
+    <arName>Arabic</arName>
+    <asName>Assamese</asName>
+    <ayName>Aymara</ayName>
+    <azName>Azerbaijani</azName>
+    <baName>Bashkir</baName>
+    <beName>Belarusian</beName>
+    <bgName>Bulgarian</bgName>
+    <bhName>Bihari</bhName>
+    <biName>Bislama</biName>
+    <bnName>Bengali</bnName>
+    <boName>Tibetan</boName>
+    <brName>Breton</brName>
+    <caName>Catalan</caName>
+    <coName>Corsican</coName>
+    <csName>Czech</csName>
+    <cyName>Welsh</cyName>
+    <daName>Danish</daName>
+    <deName>German</deName>
+    <dzName>Dzongkha</dzName>
+    <elName>Greek</elName>
+    <enName>English</enName>
+    <eoName>Esperanto</eoName>
+    <esName>Spanish</esName>
+    <etName>Estonian</etName>
+    <euName>Basque</euName>
+    <faName>Persian</faName>
+    <fiName>Finnish</fiName>
+    <fjName>Fijian</fjName>
+    <foName>Faroese</foName>
+    <frName>French</frName>
+    <fyName>Western Frisian</fyName>
+    <gaName>Irish</gaName>
+    <gdName>Scottish Gaelic</gdName>
+    <glName>Galician</glName>
+    <gnName>Guarani</gnName>
+    <guName>Gujarati</guName>
+    <haName>Hausa</haName>
+    <heName>Hebrew</heName>
+    <hiName>Hindi</hiName>
+    <hrName>Croatian</hrName>
+    <huName>Hungarian</huName>
+    <hyName>Armenian</hyName>
+    <iaName>Interlingua</iaName>
+    <idName>Indonesian</idName>
+    <ieName>Interlingue</ieName>
+    <ikName>Inupiaq</ikName>
+    <isName>Icelandic</isName>
+    <itName>Italian</itName>
+    <iuName>Inuktitut</iuName>
+    <jaName>Japanese</jaName>
+    <jvName>Javanese</jvName>
+    <kaName>Georgian</kaName>
+    <kkName>Kazakh</kkName>
+    <klName>Kalaallisut</klName>
+    <kmName>Khmer</kmName>
+    <knName>Kannada</knName>
+    <koName>Korean</koName>
+    <ksName>Kashmiri</ksName>
+    <kuName>Kurdish</kuName>
+    <kyName>Kyrgyz</kyName>
+    <laName>Latin</laName>
+    <lbName>Luxembourgish</lbName>
+    <lnName>Lingala</lnName>
+    <loName>Lao</loName>
+    <ltName>Lithuanian</ltName>
+    <lvName>Latvian</lvName>
+    <mgName>Malagasy</mgName>
+    <miName>Maori</miName>
+    <mkName>Macedonian</mkName>
+    <mlName>Malayalam</mlName>
+    <mnName>Mongolian</mnName>
+    <moName>Moldavian</moName>
+    <mrName>Marathi</mrName>
+    <msName>Malay</msName>
+    <mtName>Maltese</mtName>
+    <myName>Burmese</myName>
+    <naName>Nauru</naName>
+    <neName>Nepali</neName>
+    <nlName>Dutch</nlName>
+    <noName>Norwegian</noName>
+    <ocName>Occitan</ocName>
+    <omName>Oromo</omName>
+    <orName>Oriya</orName>
+    <paName>Punjabi</paName>
+    <plName>Polish</plName>
+    <psName>Pashto</psName>
+    <ptName>Portuguese</ptName>
+    <quName>Quechua</quName>
+    <rmName>Romansh</rmName>
+    <rnName>Rundi</rnName>
+    <roName>Romanian</roName>
+    <ruName>Russian</ruName>
+    <rwName>Kinyarwanda</rwName>
+    <saName>Sanskrit</saName>
+    <sdName>Sindhi</sdName>
+    <sgName>Sango</sgName>
+    <shName>Serbo-Croatian</shName>
+    <siName>Sinhala</siName>
+    <skName>Slovak</skName>
+    <slName>Slovenian</slName>
+    <smName>Samoan</smName>
+    <snName>Shona</snName>
+    <soName>Somali</soName>
+    <sqName>Albanian</sqName>
+    <srName>Serbian</srName>
+    <ssName>Swati</ssName>
+    <stName>Southern Sotho</stName>
+    <suName>Sundanese</suName>
+    <svName>Swedish</svName>
+    <swName>Swahili</swName>
+    <taName>Tamil</taName>
+    <teName>Telugu</teName>
+    <tgName>Tajik</tgName>
+    <thName>Thai</thName>
+    <tiName>Tigrinya</tiName>
+    <tkName>Turkmen</tkName>
+    <tlName>Tagalog</tlName>
+    <tnName>Tswana</tnName>
+    <toName>Tongan</toName>
+    <trName>Turkish</trName>
+    <tsName>Tsonga</tsName>
+    <ttName>Tatar</ttName>
+    <twName>Twi</twName>
+    <ugName>Uyghur</ugName>
+    <ukName>Ukrainian</ukName>
+    <urName>Urdu</urName>
+    <uzName>Uzbek</uzName>
+    <viName>Vietnamese</viName>
+    <voName>Volapük</voName>
+    <woName>Wolof</woName>
+    <xhName>Xhosa</xhName>
+    <yiName>Yiddish</yiName>
+    <yoName>Yoruba</yoName>
+    <zaName>Zhuang</zaName>
+    <zhName>Chinese</zhName>
+    <zuName>Zulu</zuName>
+  </LanguageNames>
   <Main>
     <Menu>
       <File>
@@ -848,6 +998,7 @@ Note: Do check free disk space.</WaveFileMalformed>
         <OpenDvd>Open DVD...</OpenDvd>
         <ChooseAudioTrack>Choose audio track</ChooseAudioTrack>
         <CloseVideo>Close video file</CloseVideo>
+        <SetVideoOffset>Set video offset...</SetVideoOffset>
         <ImportSceneChanges>Import scene changes...</ImportSceneChanges>
         <RemoveSceneChanges>Remove scene changes</RemoveSceneChanges>
         <WaveformBatchGenerate>Batch generate waveforms...</WaveformBatchGenerate>
@@ -906,18 +1057,23 @@ Note: Do check free disk space.</WaveFileMalformed>
         <Find>Find</Find>
         <Replace>Replace</Replace>
         <FixCommonErrors>Fix common errors</FixCommonErrors>
+        <RemoveTextForHi>Remove text for hearing impaired</RemoveTextForHi>
         <VisualSync>Visual sync</VisualSync>
         <SpellCheck>Spell check</SpellCheck>
+        <NetflixQualityCheck>Netflix quality check</NetflixQualityCheck>
         <Settings>Settings</Settings>
         <Help>Help</Help>
         <ShowHideWaveform>Show/hide waveform</ShowHideWaveform>
         <ShowHideVideo>Show/hide video</ShowHideVideo>
       </ToolBar>
       <ContextMenu>
+        <SizeAllColumnsToFit>Size all columns to fit</SizeAllColumnsToFit>
         <AdvancedSubStationAlphaSetStyle>Advanced Sub Station Alpha - set style</AdvancedSubStationAlphaSetStyle>
         <SubStationAlphaSetStyle>Sub Station Alpha - set style</SubStationAlphaSetStyle>
+        <SetActor>Set actor</SetActor>
         <SubStationAlphaStyles>Sub Station Alpha styles...</SubStationAlphaStyles>
         <AdvancedSubStationAlphaStyles>Advanced Sub Station Alpha styles...</AdvancedSubStationAlphaStyles>
+        <TimedTextSetRegion>Timed Text - set region</TimedTextSetRegion>
         <TimedTextSetStyle>Timed Text - set style</TimedTextSetStyle>
         <TimedTextStyles>Timed Text styles...</TimedTextStyles>
         <TimedTextSetLanguage>Timed Text - set language</TimedTextSetLanguage>
@@ -967,6 +1123,8 @@ Note: Do check free disk space.</WaveFileMalformed>
         <SaveSelectedLines>Save selected lines as...</SaveSelectedLines>
         <WebVTTSetNewVoice>Set new voice...</WebVTTSetNewVoice>
         <WebVTTRemoveVoices>Remove voices</WebVTTRemoveVoices>
+        <NewActor>New actor...</NewActor>
+        <RemoveActors>Remove actors</RemoveActors>
       </ContextMenu>
     </Menu>
     <Controls>
@@ -1042,7 +1200,6 @@ Note: Do check free disk space.</WaveFileMalformed>
     <BeforeVisualSync>Before visual sync</BeforeVisualSync>
     <VisualSyncPerformedOnSelectedLines>Visual sync performed on selected lines</VisualSyncPerformedOnSelectedLines>
     <VisualSyncPerformed>Visual sync performed</VisualSyncPerformed>
-    <ImportThisVobSubSubtitle>Import this VobSub subtitle?</ImportThisVobSubSubtitle>
     <FileXIsLargerThan10MB>File is larger than 10 MB: {0}</FileXIsLargerThan10MB>
     <ContinueAnyway>Continue anyway?</ContinueAnyway>
     <BeforeLoadOf>Before load of {0}</BeforeLoadOf>
@@ -1293,7 +1450,7 @@ Continue?</SubtitleAppendPrompt>
     <ErrorLoadTorrent>This file seems to be a BitTorrent file - not a subtitle file.</ErrorLoadTorrent>
     <ErrorLoadBinaryZeroes>Sorry, this file contains only binary zeroes!
 
-If you have edited this file with Subtitle Edit you might be alble to find a backup via the menu item File -&gt; Restore auto-backup...</ErrorLoadBinaryZeroes>
+If you have edited this file with Subtitle Edit you might be able to find a backup via the menu item File -&gt; Restore auto-backup...</ErrorLoadBinaryZeroes>
     <ErrorDirectoryDropNotAllowed>Directory drop are not supported here.</ErrorDirectoryDropNotAllowed>
     <NoSupportEncryptedVobSub>Encrypted VobSub content is not supported.</NoSupportEncryptedVobSub>
     <NoSupportHereBluRaySup>Blu-ray sup files are not supported here.</NoSupportHereBluRaySup>
@@ -1303,6 +1460,7 @@ If you have edited this file with Subtitle Edit you might be alble to find a bac
   </Main>
   <MatroskaSubtitleChooser>
     <Title>Choose subtitle from Matroska file</Title>
+    <TitleMp4>Choose subtitle from MP4 file</TitleMp4>
     <PleaseChoose>More than one subtitle found - please choose</PleaseChoose>
     <TrackXLanguageYTypeZ>Track {0} - language: {1} - type: {2}</TrackXLanguageYTypeZ>
   </MatroskaSubtitleChooser>
@@ -1368,7 +1526,7 @@ If you have edited this file with Subtitle Edit you might be alble to find a bac
     <CaseSensitive>Case sensitive</CaseSensitive>
     <RegularExpression>Regular expression</RegularExpression>
     <LinesFoundX>Lines found: {0}</LinesFoundX>
-    <Delete>Delete</Delete>
+    <Remove>Remove</Remove>
     <Add>&amp;Add</Add>
     <Update>&amp;Update</Update>
     <Enabled>Enabled</Enabled>
@@ -1381,6 +1539,12 @@ If you have edited this file with Subtitle Edit you might be alble to find a bac
     <Rules>Find and replace rules</Rules>
     <MoveToTop>Move to top</MoveToTop>
     <MoveToBottom>Move to bottom</MoveToBottom>
+    <MoveSelectedRulesToGroup>Move selected rules to group</MoveSelectedRulesToGroup>
+    <Groups>Groups</Groups>
+    <RulesForGroupX>Rules for group "{0}"</RulesForGroupX>
+    <GroupName>Group name</GroupName>
+    <RenameGroup>Rename group...</RenameGroup>
+    <NewGroup>New group...</NewGroup>
   </MultipleReplace>
   <NetworkChat>
     <Title>Chat</Title>
@@ -1527,6 +1691,7 @@ can edit in same subtitle file (collaboration)</Information>
     <Replace>Replace</Replace>
     <VisualSync>Visual sync</VisualSync>
     <SpellCheck>Spell check</SpellCheck>
+    <NetflixQualityCheck>Netflix quality check</NetflixQualityCheck>
     <SettingsName>Settings</SettingsName>
     <Help>Help</Help>
     <ShowFrameRate>Show frame rate in toolbar</ShowFrameRate>
@@ -1535,13 +1700,16 @@ can edit in same subtitle file (collaboration)</Information>
     <AutoDetectAnsiEncoding>Auto detect ANSI encoding</AutoDetectAnsiEncoding>
     <SubtitleLineMaximumLength>Single line max. length</SubtitleLineMaximumLength>
     <MaximumCharactersPerSecond>Max. chars/sec</MaximumCharactersPerSecond>
+    <MaximumWordssPerMinute>Max. words/min</MaximumWordssPerMinute>
     <AutoWrapWhileTyping>Auto-wrap while typing</AutoWrapWhileTyping>
     <DurationMinimumMilliseconds>Min. duration, milliseconds</DurationMinimumMilliseconds>
     <DurationMaximumMilliseconds>Max. duration, milliseconds</DurationMaximumMilliseconds>
     <MinimumGapMilliseconds>Min. gap between subtitles in ms</MinimumGapMilliseconds>
+    <MaximumLines>Max. number of lines</MaximumLines>
     <SubtitleFont>Subtitle font</SubtitleFont>
     <SubtitleFontSize>Subtitle font size</SubtitleFontSize>
     <SubtitleBold>Bold</SubtitleBold>
+    <VideoAutoOpen>Auto-open video file when opening subtitle</VideoAutoOpen>
     <SubtitleCenter>Center</SubtitleCenter>
     <SubtitleFontColor>Subtitle font color</SubtitleFontColor>
     <SubtitleBackgroundColor>Subtitle background color</SubtitleBackgroundColor>
@@ -1554,6 +1722,8 @@ can edit in same subtitle file (collaboration)</Information>
     <RemoveBlankLinesWhenOpening>Remove blank lines when opening a subtitle</RemoveBlankLinesWhenOpening>
     <ShowLineBreaksAs>Show line breaks in list view as</ShowLineBreaksAs>
     <MainListViewDoubleClickAction>Double-clicking line in main window list view will</MainListViewDoubleClickAction>
+    <MainListViewColumns>List view columns</MainListViewColumns>
+    <MainListViewColumnsInfo>Choose visible list view columns</MainListViewColumnsInfo>
     <MainListViewNothing>Nothing</MainListViewNothing>
     <MainListViewVideoGoToPositionAndPause>Go to video position and pause</MainListViewVideoGoToPositionAndPause>
     <MainListViewVideoGoToPositionAndPlay>Go to video position and play</MainListViewVideoGoToPositionAndPlay>
@@ -1566,6 +1736,10 @@ can edit in same subtitle file (collaboration)</Information>
     <AutoBackupEveryMinute>Every minute</AutoBackupEveryMinute>
     <AutoBackupEveryFiveMinutes>Every 5th minute</AutoBackupEveryFiveMinutes>
     <AutoBackupEveryFifteenMinutes>Every 15th minute</AutoBackupEveryFifteenMinutes>
+    <AutoBackupDeleteAfter>Delete after</AutoBackupDeleteAfter>
+    <AutoBackupDeleteAfterOneMonth>1 month</AutoBackupDeleteAfterOneMonth>
+    <AutoBackupDeleteAfterThreeMonths>3 months</AutoBackupDeleteAfterThreeMonths>
+    <AutoBackupDeleteAfterSixMonths>6 months</AutoBackupDeleteAfterSixMonths>
     <CheckForUpdates>Check for updates</CheckForUpdates>
     <AllowEditOfOriginalSubtitle>Allow edit of original subtitle</AllowEditOfOriginalSubtitle>
     <PromptDeleteLines>Prompt for delete lines</PromptDeleteLines>
@@ -1575,12 +1749,11 @@ can edit in same subtitle file (collaboration)</Information>
     <VideoEngine>Video engine</VideoEngine>
     <DirectShow>DirectShow</DirectShow>
     <DirectShowDescription>quartz.dll in system32 folder</DirectShowDescription>
-    <ManagedDirectX>Managed DirectX</ManagedDirectX>
-    <ManagedDirectXDescription>Microsoft.DirectX.AudioVideoPlayback - .NET Managed code from DirectX</ManagedDirectXDescription>
     <MpcHc>MPC-HC</MpcHc>
     <MpcHcDescription>Media Player Classic - Home Cinema</MpcHcDescription>
-    <MPlayer>MPlayer</MPlayer>
-    <MPlayerDescription>MPlayer2/Mplayer</MPlayerDescription>
+    <MpvPlayer>mpv</MpvPlayer>
+    <MpvPlayerDescription>https://mpv.io/ - free, open source, and cross-platform media player</MpvPlayerDescription>
+    <MpvHandlesPreviewText>mpv handles preview text</MpvHandlesPreviewText>
     <VlcMediaPlayer>VLC media player</VlcMediaPlayer>
     <VlcMediaPlayerDescription>libvlc.dll from VLC media player 1.1.0 or newer</VlcMediaPlayerDescription>
     <VlcBrowseToLabel>VLC path (only needed if you're using the portable version of VLC)</VlcBrowseToLabel>
@@ -1593,8 +1766,11 @@ can edit in same subtitle file (collaboration)</Information>
     <WaveformAppearance>Waveform appearance</WaveformAppearance>
     <WaveformGridColor>Grid color</WaveformGridColor>
     <WaveformShowGridLines>Show grid lines</WaveformShowGridLines>
+    <WaveformShowCps>Show chars/sec</WaveformShowCps>
+    <WaveformShowWpm>Show words/min</WaveformShowWpm>
     <ReverseMouseWheelScrollDirection>Reverse mouse wheel scroll direction</ReverseMouseWheelScrollDirection>
     <WaveformAllowOverlap>Allow overlap (when moving/resizing)</WaveformAllowOverlap>
+    <WaveformSetVideoPosMoveStartEnd>Set video position when moving start/end</WaveformSetVideoPosMoveStartEnd>
     <WaveformFocusMouseEnter>Set focus on mouse enter</WaveformFocusMouseEnter>
     <WaveformListViewFocusMouseEnter>Also set list view focus on mouse enter in list view</WaveformListViewFocusMouseEnter>
     <WaveformBorderHitMs1>Border marker hit must be within</WaveformBorderHitMs1>
@@ -1616,7 +1792,6 @@ can edit in same subtitle file (collaboration)</Information>
     <WaveformBrowseToFFmpeg>Browse to FFmpeg</WaveformBrowseToFFmpeg>
     <WaveformBrowseToVLC>Browse to VLC portable</WaveformBrowseToVLC>
     <SubStationAlphaStyle>(Advanced) Sub Station Alpha style</SubStationAlphaStyle>
-    <ChooseFont>Choose font</ChooseFont>
     <ChooseColor>Choose color</ChooseColor>
     <SsaOutline>Outline</SsaOutline>
     <SsaShadow>Shadow</SsaShadow>
@@ -1651,6 +1826,7 @@ can edit in same subtitle file (collaboration)</Information>
     <FirstPlusX>First + {0}</FirstPlusX>
     <LastMinusX>Last - {0}</LastMinusX>
     <FixCommonerrors>Fix common errors</FixCommonerrors>
+    <RemoveTextForHi>Remove text for HI</RemoveTextForHi>
     <MergeLinesShorterThan>Unbreak subtitles shorter than</MergeLinesShorterThan>
     <MusicSymbol>Music symbol</MusicSymbol>
     <MusicSymbolsToReplace>Music symbols to replace (separate by space)</MusicSymbolsToReplace>
@@ -1665,7 +1841,6 @@ can edit in same subtitle file (collaboration)</Information>
     <Key>Key</Key>
     <TextBox>Textbox</TextBox>
     <UpdateShortcut>Update</UpdateShortcut>
-    <ShortcutIsNotValid>Shortcut is not valid: {0}</ShortcutIsNotValid>
     <ToggleDockUndockOfVideoControls>Toggle dock/undock of video controls</ToggleDockUndockOfVideoControls>
     <CreateSetEndAddNewAndGoToNew>Set end, add new and go to new</CreateSetEndAddNewAndGoToNew>
     <AdjustViaEndAutoStartAndGoToNext>Adjust via end position and go to next</AdjustViaEndAutoStartAndGoToNext>
@@ -1678,12 +1853,16 @@ can edit in same subtitle file (collaboration)</Information>
     <AdjustSetStartTimeKeepDuration>Set start time, keep duration</AdjustSetStartTimeKeepDuration>
     <AdjustSetEndAndOffsetTheRest>Set end, offset the rest</AdjustSetEndAndOffsetTheRest>
     <AdjustSetEndAndOffsetTheRestAndGoToNext>Set end, offset the rest and go to next</AdjustSetEndAndOffsetTheRestAndGoToNext>
+    <AdjustExtendCurrentSubtitle>Extend current line to next subtitle or max duration</AdjustExtendCurrentSubtitle>
+    <RecalculateDurationOfCurrentSubtitle>Re-calculate duration of current subtitle</RecalculateDurationOfCurrentSubtitle>
     <MainCreateStartDownEndUp>Create new at key-down, set end time at key-up</MainCreateStartDownEndUp>
     <MergeDialog>Merge dialog (insert dashes)</MergeDialog>
     <GoToNext>Go to next line</GoToNext>
     <GoToPrevious>Go to previous line</GoToPrevious>
     <GoToCurrentSubtitleStart>Go to current line start</GoToCurrentSubtitleStart>
     <GoToCurrentSubtitleEnd>Go to current line end</GoToCurrentSubtitleEnd>
+    <GoToPreviousSubtitleAndFocusVideo>Go to previous line and set video position</GoToPreviousSubtitleAndFocusVideo>
+    <GoToNextSubtitleAndFocusVideo>Go to next line and set video position</GoToNextSubtitleAndFocusVideo>
     <ToggleFocus>Toggle focus between list view and subtitle text box</ToggleFocus>
     <ToggleDialogDashes>Toggle dialog dashes</ToggleDialogDashes>
     <Alignment>Alignment (selected lines)</Alignment>
@@ -1701,6 +1880,8 @@ can edit in same subtitle file (collaboration)</Information>
     <WaveformPlayNewSelectionEnd>Play end of selection</WaveformPlayNewSelectionEnd>
     <WaveformPlayFirstSelectedSubtitle>Play first selected subtitle</WaveformPlayFirstSelectedSubtitle>
     <WaveformFocusListView>Focus list view</WaveformFocusListView>
+    <WaveformGoToNextSceneChange>Go to next scene change</WaveformGoToNextSceneChange>
+    <WaveformToggleSceneChange>Toggle scene change</WaveformToggleSceneChange>
     <GoBack1Frame>One frame back</GoBack1Frame>
     <GoForward1Frame>One frame forward</GoForward1Frame>
     <GoBack100Milliseconds>100 ms back</GoBack100Milliseconds>
@@ -1709,6 +1890,8 @@ can edit in same subtitle file (collaboration)</Information>
     <GoForward500Milliseconds>500 ms forward</GoForward500Milliseconds>
     <GoBack1Second>One second back</GoBack1Second>
     <GoForward1Second>One second forward</GoForward1Second>
+    <GoBack5Seconds>Five seconds back</GoBack5Seconds>
+    <GoForward5Seconds>Five seconds forward</GoForward5Seconds>
     <TogglePlayPause>Toggle play/pause</TogglePlayPause>
     <Pause>Pause</Pause>
     <Fullscreen>Fullscreen</Fullscreen>
@@ -1723,7 +1906,7 @@ can edit in same subtitle file (collaboration)</Information>
     <SyntaxColorDurationIfTooSmall>Color duration if too short</SyntaxColorDurationIfTooSmall>
     <SyntaxColorDurationIfTooLarge>Color duration if too long</SyntaxColorDurationIfTooLarge>
     <SyntaxColorTextIfTooLong>Color text if too long</SyntaxColorTextIfTooLong>
-    <SyntaxColorTextMoreThanXLines>Color text if more than lines:</SyntaxColorTextMoreThanXLines>
+    <SyntaxColorTextMoreThanMaxLines>Color text if more than {0} lines</SyntaxColorTextMoreThanMaxLines>
     <SyntaxColorOverlap>Color time code overlap</SyntaxColorOverlap>
     <SyntaxErrorColor>Error color</SyntaxErrorColor>
     <GoToFirstSelectedLine>Go to first selected line</GoToFirstSelectedLine>
@@ -1733,6 +1916,8 @@ can edit in same subtitle file (collaboration)</Information>
     <ToggleTranslationMode>Toggle translation mode</ToggleTranslationMode>
     <SwitchOriginalAndTranslation>Switch original and translation</SwitchOriginalAndTranslation>
     <MergeOriginalAndTranslation>Merge original and translation</MergeOriginalAndTranslation>
+    <MergeWithNext>Merge with next</MergeWithNext>
+    <MergeWithPrevious>Merge with previous</MergeWithPrevious>
     <ShortcutIsAlreadyDefinedX>Shortcut already defined: {0}</ShortcutIsAlreadyDefinedX>
     <ToggleTranslationAndOriginalInPreviews>Toggle translation and original in video/audio preview</ToggleTranslationAndOriginalInPreviews>
     <ListViewColumnDelete>Column, delete text</ListViewColumnDelete>
@@ -1750,12 +1935,25 @@ can edit in same subtitle file (collaboration)</Information>
     <MainTextBoxUnbreak>Unbreak text</MainTextBoxUnbreak>
     <MainFileSaveAll>Save all</MainFileSaveAll>
     <Miscellaneous>Misc.</Miscellaneous>
+    <CpsIncludesSpace>Chars/sec (CPS) includes spaces</CpsIncludesSpace>
     <UseDoNotBreakAfterList>Use do-not-break-after list (for auto-br)</UseDoNotBreakAfterList>
+    <MicrosoftBingTranslator>Microsoft Bing Translator</MicrosoftBingTranslator>
+    <HowToSignUp>How to sign up</HowToSignUp>
+    <ClientId>Client ID</ClientId>
+    <ClientSecret>Client secret</ClientSecret>
   </Settings>
+  <SettingsMpv>
+    <Title>Settings for mpv</Title>
+    <DownloadMpv>Download mpv lib</DownloadMpv>
+    <DownloadMpvFailed>Unable to download mpv - please re-try later!</DownloadMpvFailed>
+    <DownloadMpvOk>The mpv lib was downloaded and is ready for use.</DownloadMpvOk>
+  </SettingsMpv>
   <SetVideoOffset>
     <Title>Set video offset</Title>
     <Description>Set video offset (subtitles should not follow real video time, but e.g. +10 hours)</Description>
     <RelativeToCurrentVideoPosition>Relative to current video position</RelativeToCurrentVideoPosition>
+    <KeepTimeCodes>Keep existing time codes (do not add video offset)</KeepTimeCodes>
+    <Reset>Reset</Reset>
   </SetVideoOffset>
   <ShowEarlierLater>
     <Title>Show selected lines earlier/later</Title>
@@ -1804,6 +2002,13 @@ can edit in same subtitle file (collaboration)</Information>
     <SpellCheckAborted>Spell check aborted</SpellCheckAborted>
     <UndoX>Undo: {0}</UndoX>
   </SpellCheck>
+  <NetflixQualityCheck>
+    <GlyphCheckReport>Invalid character {0} found at column {1}</GlyphCheckReport>
+    <WhiteSpaceCheckReport>Invalid white space found at column {0}.</WhiteSpaceCheckReport>
+    <ReportPrompt>Please see full report here: {0}.</ReportPrompt>
+    <FoundXIssues>Netflix quality check found {0} issues.</FoundXIssues>
+    <CheckOk>Netflix quality check OK :)</CheckOk>
+  </NetflixQualityCheck>
   <Split>
     <Title>Split</Title>
     <SplitOptions>Split options</SplitOptions>
@@ -1847,7 +2052,7 @@ can edit in same subtitle file (collaboration)</Information>
   <StartNumberingFrom>
     <Title>Renumber</Title>
     <StartFromNumber>Start from number:</StartFromNumber>
-    <PleaseEnterAValidNumber>Ups, please enter a number</PleaseEnterAValidNumber>
+    <PleaseEnterAValidNumber>Oops, please enter a valid number</PleaseEnterAValidNumber>
   </StartNumberingFrom>
   <Statistics>
     <Title>Statistics</Title>
@@ -1861,6 +2066,7 @@ can edit in same subtitle file (collaboration)</Information>
     <LengthInFormatXinCharactersY>Number of characters as {0}: {1:#,###,##0}</LengthInFormatXinCharactersY>
     <NumberOfCharactersInTextOnly>Number of characters in text only: {0:#,###,##0}</NumberOfCharactersInTextOnly>
     <TotalCharsPerSecond>Total characters/second: {0:0.0} seconds</TotalCharsPerSecond>
+    <TotalWords>Total words in subtitle: {0}</TotalWords>
     <NumberOfItalicTags>Number of italic tags: {0}</NumberOfItalicTags>
     <NumberOfBoldTags>Number of bold tags: {0}</NumberOfBoldTags>
     <NumberOfUnderlineTags>Number of underline tags: {0}</NumberOfUnderlineTags>
@@ -2029,7 +2235,7 @@ Keep changes?</KeepChangesMessage>
     <TransparentMinAlpha>Min. alpha value (0=transparent, 255=fully visible)</TransparentMinAlpha>
     <TransportStream>Transport stream</TransportStream>
     <TransportStreamGrayscale>Grayscale</TransportStreamGrayscale>
-    <TransportStreamGetColor>Use color (will include some splitting of lines)</TransportStreamGetColor>
+    <TransportStreamGetColor>Use color (splitting of lines may occur)</TransportStreamGetColor>
     <PromptForUnknownWords>Prompt for unknown words</PromptForUnknownWords>
     <TryToGuessUnkownWords>Try to guess unknown words</TryToGuessUnkownWords>
     <AutoBreakSubtitleIfMoreThanTwoLines>Auto break paragraph if more than two lines</AutoBreakSubtitleIfMoreThanTwoLines>
@@ -2087,6 +2293,17 @@ Keep changes?</KeepChangesMessage>
     <Title>Set un-italic factor</Title>
     <Description>Adjust value until text style is normal and not italic. Note that original image should be italic.</Description>
   </VobSubOcrSetItalicFactor>
+  <Watermark>
+    <Title>Watermark</Title>
+    <WatermarkX>Watermark: {0}</WatermarkX>
+    <GenerateWatermarkTitle>Generate watermark</GenerateWatermarkTitle>
+    <SpreadOverEntireSubtitle>Spread over entire subtitle</SpreadOverEntireSubtitle>
+    <CurrentLineOnlyX>Only on current line: {0}</CurrentLineOnlyX>
+    <Generate>Generate</Generate>
+    <Remove>Remove</Remove>
+    <BeforeWatermark>Before Watermark</BeforeWatermark>
+    <ErrorUnicodeEncodingOnly>Watermark only works with unicode file encoding.</ErrorUnicodeEncodingOnly>
+  </Watermark>
   <Waveform>
     <ClickToAddWaveform>Click to add waveform</ClickToAddWaveform>
     <ClickToAddWaveformAndSpectrogram>Click to add waveform/spectrogram</ClickToAddWaveformAndSpectrogram>
@@ -2105,8 +2322,12 @@ Keep changes?</KeepChangesMessage>
     <ShowWaveformAndSpectrogram>Show waveform and spectrogram</ShowWaveformAndSpectrogram>
     <ShowWaveformOnly>Show waveform only</ShowWaveformOnly>
     <ShowSpectrogramOnly>Show spectrogram only</ShowSpectrogramOnly>
+    <AddSceneChange>Add scene change</AddSceneChange>
+    <RemoveSceneChange>Remove scene change</RemoveSceneChange>
     <GuessTimeCodes>Guess time codes...</GuessTimeCodes>
     <SeekSilence>Seek silence...</SeekSilence>
+    <CharsSecX>CPS: {0:0.00}</CharsSecX>
+    <WordsMinX>WPM: {0:0.00}</WordsMinX>
   </Waveform>
   <WaveformGenerateTimeCodes>
     <Title>Guess time codes</Title>

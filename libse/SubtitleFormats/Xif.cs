@@ -105,7 +105,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     </ContentBlock>";
 
             var xml = new XmlDocument();
-            var lastTimeCode = new TimeCode(0);
+            var lastTimeCode = new TimeCode();
             if (subtitle.Paragraphs.Count > 0)
             {
                 lastTimeCode = subtitle.Paragraphs[subtitle.Paragraphs.Count - 1].StartTime;
@@ -118,7 +118,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             globalFileInfoNode.Attributes["ProgrammeTitle"].InnerText = title;
             globalFileInfoNode.Attributes["StopTime"].InnerText = lastTimeCode.ToHHMMSSFF();
             globalFileInfoNode.Attributes["NumberOfCaptions"].InnerText = subtitle.Paragraphs.Count.ToString(CultureInfo.InvariantCulture);
-
 
             var fileBodyNode = xml.DocumentElement.SelectSingleNode("FileBody");
             foreach (Paragraph p in subtitle.Paragraphs)
@@ -159,10 +158,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
 
                     var foregroundColorNode = xml.CreateElement("ForegroundColour");
-                     var attrColor = xml.CreateAttribute("Colour");
-                     attrColor.InnerText = "7";
-                     foregroundColorNode.Attributes.Append(attrColor);
-                     paragraphNode.AppendChild(foregroundColorNode);
+                    var attrColor = xml.CreateAttribute("Colour");
+                    attrColor.InnerText = "7";
+                    foregroundColorNode.Attributes.Append(attrColor);
+                    paragraphNode.AppendChild(foregroundColorNode);
 
                     var textNode = xml.CreateElement("Text");
                     textNode.InnerText = line;
@@ -188,13 +187,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 var xml = new XmlDocument { XmlResolver = null };
                 xml.LoadXml(xmlAsText);
-
                 foreach (XmlNode node in xml.DocumentElement.SelectNodes("FileBody/ContentBlock"))
                 {
                     try
                     {
-                        var timeCodeIn = DecodeTimeCode(node.SelectSingleNode("ThreadedObject/TimingObject/TimeIn").Attributes["value"].InnerText);
-                        var timeCodeOut = DecodeTimeCode(node.SelectSingleNode("ThreadedObject/TimingObject/TimeOut").Attributes["value"].InnerText);
+                        var timeCodeIn = DecodeTimeCodeFrames(node.SelectSingleNode("ThreadedObject/TimingObject/TimeIn").Attributes["value"].InnerText, SplitCharColon);
+                        var timeCodeOut = DecodeTimeCodeFrames(node.SelectSingleNode("ThreadedObject/TimingObject/TimeOut").Attributes["value"].InnerText, SplitCharColon);
                         sb.Clear();
                         foreach (XmlNode paragraphNode in node.SelectSingleNode("ThreadedObject/Content/SubtitleText/Paragraph").ChildNodes)
                         {
@@ -218,17 +216,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 _errorCount++;
             }
-        }
-
-        private static TimeCode DecodeTimeCode(string timeCode)
-        {
-            //00:00:07:12
-            var parts = timeCode.Split(':');
-            var hour = int.Parse(parts[0]);
-            var minutes = int.Parse(parts[1]);
-            var seconds = int.Parse(parts[2]);
-            var frames = int.Parse(parts[3]);
-            return new TimeCode(hour, minutes, seconds, FramesToMillisecondsMax999(frames));
         }
 
     }
