@@ -719,7 +719,7 @@ namespace Nikse.SubtitleEdit.Core
                 foreach (string dic in Directory.GetFiles(DictionaryFolder, "*.dic"))
                 {
                     string name = Path.GetFileNameWithoutExtension(dic);
-                    if (!name.StartsWith("hyph", StringComparison.Ordinal))
+                    if (name != null && !name.StartsWith("hyph", StringComparison.Ordinal))
                     {
                         try
                         {
@@ -732,6 +732,41 @@ namespace Nikse.SubtitleEdit.Core
                             name = "[" + name + "]";
                         }
                         list.Add(name);
+                    }
+                }
+            }
+            return list;
+        }
+
+        public static List<string> GetDictionaryLanguagesCultureNeutral()
+        {
+            var list = new List<string>();
+            if (Directory.Exists(DictionaryFolder))
+            {
+                foreach (string dic in Directory.GetFiles(DictionaryFolder, "*.dic"))
+                {
+                    string name = Path.GetFileNameWithoutExtension(dic);
+                    if (name != null && !name.StartsWith("hyph", StringComparison.Ordinal))
+                    {
+                        try
+                        {
+                            var ci = CultureInfo.GetCultureInfo(name.Replace('_', '-'));
+                            var displayName = ci.DisplayName;
+                            if (displayName.Contains("("))
+                            {
+                                displayName = displayName.Remove(displayName.IndexOf('(')).TrimEnd();
+                            }
+                            name = displayName + " [" + ci.TwoLetterISOLanguageName + "]";
+                        }
+                        catch (Exception exception)
+                        {
+                            System.Diagnostics.Debug.WriteLine(exception.Message);
+                            name = "[" + name + "]";
+                        }
+                        if (!list.Contains(name))
+                        {
+                            list.Add(name);
+                        }
                     }
                 }
             }
@@ -1143,6 +1178,7 @@ namespace Nikse.SubtitleEdit.Core
         }
 
         private static readonly Regex TwoOrMoreDigitsNumber = new Regex(@"\d\d+", RegexOptions.Compiled);
+        private const string PrePostStringsToReverse = @"-— !?.""،,():;[]+~";
 
         public static string ReverseStartAndEndingForRightToLeft(string s)
         {
@@ -1179,13 +1215,13 @@ namespace Nikse.SubtitleEdit.Core
                 pre.Clear();
                 post.Clear();
                 int i = 0;
-                while (i < s2.Length && !char.IsLetterOrDigit(s2[i]) && s2[i] != '{')
+                while (i < s2.Length && PrePostStringsToReverse.Contains(s2[i]) && s2[i] != '{')
                 {
                     pre.Append(s2[i]);
                     i++;
                 }
                 int j = s2.Length - 1;
-                while (j > i && !char.IsLetterOrDigit(s2[j]) && s2[j] != '}')
+                while (j > i && PrePostStringsToReverse.Contains(s2[j]) && s2[j] != '}')
                 {
                     post.Append(s2[j]);
                     j--;
@@ -1261,15 +1297,7 @@ namespace Nikse.SubtitleEdit.Core
             var lines = text.SplitToLines();
             foreach (string line in lines)
             {
-                string s = line.Trim();
-                for (int i = 0; i < s.Length; i++)
-                {
-                    if (s[i] == ')')
-                        s = s.Remove(i, 1).Insert(i, "(");
-                    else if (s[i] == '(')
-                        s = s.Remove(i, 1).Insert(i, ")");
-                }
-
+                string s = ReverseParenthesis(line.Trim());
                 bool numbersOn = false;
                 string numbers = string.Empty;
                 for (int i = 0; i < s.Length; i++)
@@ -1930,6 +1958,26 @@ namespace Nikse.SubtitleEdit.Core
                     text = text.Remove(idx, 1);
                 }
             }
+
+            // Fix spaces after quotes
+            // e.g: Foobar. " Foobar" => Foobar. "Foobar"
+            string preText = string.Empty;
+            if (text.LineStartsWithHtmlTag(true, true))
+            {
+                int endIdx = text.IndexOf('>') + 1;
+                preText = text.Substring(0, endIdx);
+                text = text.Substring(endIdx);
+            }
+            if (text.StartsWith('"'))
+            {
+                text = '"' + text.Substring(1).TrimStart();
+            }
+            text = preText + text;
+            text = text.Replace(". \" ", ". \"");
+            text = text.Replace("? \" ", "? \"");
+            text = text.Replace("! \" ", "! \"");
+            text = text.Replace(") \" ", ") \"");
+            text = text.Replace("> \" ", "> \"");
             return text;
         }
 

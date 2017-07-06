@@ -1687,6 +1687,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "FixCommonErrors/FixDialogsOneLineExample":
                     language.FixCommonErrors.FixDialogsOneLineExample = reader.Value;
                     break;
+                case "FixCommonErrors/SelectDefault":
+                    language.FixCommonErrors.SelectDefault = reader.Value;
+                    break;
                 case "GetDictionaries/Title":
                     language.GetDictionaries.Title = reader.Value;
                     break;
@@ -2866,11 +2869,11 @@ namespace Nikse.SubtitleEdit.Core
                 case "Main/NumberOfLinesReplacedX":
                     language.Main.NumberOfLinesReplacedX = reader.Value;
                     break;
-                case "Main/NameXAddedToNamesEtcList":
-                    language.Main.NameXAddedToNamesEtcList = reader.Value;
+                case "Main/NameXAddedToNameList":
+                    language.Main.NameXAddedToNameList = reader.Value;
                     break;
-                case "Main/NameXNotAddedToNamesEtcList":
-                    language.Main.NameXNotAddedToNamesEtcList = reader.Value;
+                case "Main/NameXNotAddedToNameList":
+                    language.Main.NameXNotAddedToNameList = reader.Value;
                     break;
                 case "Main/WordXAddedToUserDic":
                     language.Main.WordXAddedToUserDic = reader.Value;
@@ -3499,8 +3502,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "Main/Menu/SpellCheck/GetDictionaries":
                     language.Main.Menu.SpellCheck.GetDictionaries = reader.Value;
                     break;
-                case "Main/Menu/SpellCheck/AddToNamesEtcList":
-                    language.Main.Menu.SpellCheck.AddToNamesEtcList = reader.Value;
+                case "Main/Menu/SpellCheck/AddToNameList":
+                    language.Main.Menu.SpellCheck.AddToNameList = reader.Value;
                     break;
                 case "Main/Menu/Synchronization/Title":
                     language.Main.Menu.Synchronization.Title = reader.Value;
@@ -4852,8 +4855,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/NamesIgnoreLists":
                     language.Settings.NamesIgnoreLists = reader.Value;
                     break;
-                case "Settings/AddNameEtc":
-                    language.Settings.AddNameEtc = reader.Value;
+                case "Settings/AddName":
+                    language.Settings.AddName = reader.Value;
                     break;
                 case "Settings/AddWord":
                     language.Settings.AddWord = reader.Value;
@@ -4873,8 +4876,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/Location":
                     language.Settings.Location = reader.Value;
                     break;
-                case "Settings/UseOnlineNamesEtc":
-                    language.Settings.UseOnlineNamesEtc = reader.Value;
+                case "Settings/UseOnlineNames":
+                    language.Settings.UseOnlineNames = reader.Value;
                     break;
                 case "Settings/WordAddedX":
                     language.Settings.WordAddedX = reader.Value;
@@ -4888,8 +4891,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/RemoveX":
                     language.Settings.RemoveX = reader.Value;
                     break;
-                case "Settings/CannotUpdateNamesEtcOnline":
-                    language.Settings.CannotUpdateNamesEtcOnline = reader.Value;
+                case "Settings/CannotUpdateNamesOnline":
+                    language.Settings.CannotUpdateNamesOnline = reader.Value;
                     break;
                 case "Settings/ProxyServerSettings":
                     language.Settings.ProxyServerSettings = reader.Value;
@@ -5095,6 +5098,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/WaveformFocusListView":
                     language.Settings.WaveformFocusListView = reader.Value;
                     break;
+                case "Settings/WaveformGoToNextSubtitle":
+                    language.Settings.WaveformGoToNextSubtitle = reader.Value;
+                    break;
                 case "Settings/WaveformGoToNextSceneChange":
                     language.Settings.WaveformGoToNextSceneChange = reader.Value;
                     break;
@@ -5106,6 +5112,12 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Settings/GoForward1Frame":
                     language.Settings.GoForward1Frame = reader.Value;
+                    break;
+                case "Settings/GoBack1FrameWithPlay":
+                    language.Settings.GoBack1FrameWithPlay = reader.Value;
+                    break;
+                case "Settings/GoForward1FrameWithPlay":
+                    language.Settings.GoForward1FrameWithPlay = reader.Value;
                     break;
                 case "Settings/GoBack100Milliseconds":
                     language.Settings.GoBack100Milliseconds = reader.Value;
@@ -5272,6 +5284,9 @@ namespace Nikse.SubtitleEdit.Core
                 case "Settings/HowToSignUp":
                     language.Settings.HowToSignUp = reader.Value;
                     break;
+                case "Settings/GoogleTranslateUrl":
+                    language.Settings.GoogleTranslateUrl = reader.Value;
+                    break;
                 case "Settings/ClientId":
                     language.Settings.ClientId = reader.Value;
                     break;
@@ -5404,8 +5419,8 @@ namespace Nikse.SubtitleEdit.Core
                 case "SpellCheck/EditWordOnly":
                     language.SpellCheck.EditWordOnly = reader.Value;
                     break;
-                case "SpellCheck/AddXToNamesEtc":
-                    language.SpellCheck.AddXToNamesEtc = reader.Value;
+                case "SpellCheck/AddXToNames":
+                    language.SpellCheck.AddXToNames = reader.Value;
                     break;
                 case "SpellCheck/AutoFixNames":
                     language.SpellCheck.AutoFixNames = reader.Value;
@@ -6276,6 +6291,9 @@ namespace Nikse.SubtitleEdit.Core
                     break;
                 case "Waveform/SeekSilence":
                     language.Waveform.SeekSilence = reader.Value;
+                    break;
+                case "Waveform/InsertSubtitleHere":
+                    language.Waveform.InsertSubtitleHere = reader.Value;
                     break;
                 case "Waveform/CharsSecX":
                     language.Waveform.CharsSecX = reader.Value;

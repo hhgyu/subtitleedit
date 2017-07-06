@@ -11,11 +11,11 @@ namespace Nikse.SubtitleEdit.Forms
     public sealed partial class ChangeCasingNames : Form
     {
         private readonly HashSet<string> _usedNames = new HashSet<string>();
-        private int _noOfLinesChanged;
         private Subtitle _subtitle;
         private const string ExpectedEndChars = " ,.!?:;')]<-\"\r\n";
-        private NamesList _namesList;
-        private List<string> _namesListInclMulti;
+        private NameList _nameList;
+        private List<string> _nameListInclMulti;
+        private string _language;
 
         public ChangeCasingNames()
         {
@@ -47,10 +47,7 @@ namespace Nikse.SubtitleEdit.Forms
             UiUtil.FixLargeFonts(this, buttonOK);
         }
 
-        public int LinesChanged
-        {
-            get { return _noOfLinesChanged; }
-        }
+        public int LinesChanged { get; private set; }
 
         private void ChangeCasingNames_KeyDown(object sender, KeyEventArgs e)
         {
@@ -69,12 +66,12 @@ namespace Nikse.SubtitleEdit.Forms
         {
             _subtitle = subtitle;
 
-            string language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
-            if (string.IsNullOrEmpty(language))
-                language = "en_US";
+            _language = LanguageAutoDetect.AutoDetectGoogleLanguage(_subtitle);
+            if (string.IsNullOrEmpty(_language))
+                _language = "en_US";
 
-            _namesList = new NamesList(Configuration.DictionariesDirectory, language, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
-            _namesListInclMulti = _namesList.GetAllNames(); // Will contains both one word names and multi names
+            _nameList = new NameList(Configuration.DictionariesDirectory, _language, Configuration.Settings.WordLists.UseOnlineNames, Configuration.Settings.WordLists.NamesUrl);
+            _nameListInclMulti = _nameList.GetAllNames(); // Will contains both one word names and multi names
 
             FindAllNames();
             GeneratePreview();
@@ -125,9 +122,9 @@ namespace Nikse.SubtitleEdit.Forms
             foreach (string s in textBoxExtraNames.Text.Split(','))
             {
                 var name = s.Trim();
-                if (name.Length > 1 && !_namesListInclMulti.Contains(name))
+                if (name.Length > 1 && !_nameListInclMulti.Contains(name))
                 {
-                    _namesListInclMulti.Add(name);
+                    _nameListInclMulti.Add(name);
                 }
             }
         }
@@ -137,7 +134,7 @@ namespace Nikse.SubtitleEdit.Forms
             string text = HtmlUtil.RemoveHtmlTags(_subtitle.GetAllTexts());
             string textToLower = text.ToLower();
             listViewNames.BeginUpdate();
-            foreach (string name in _namesListInclMulti)
+            foreach (string name in _nameListInclMulti)
             {
                 int startIndex = textToLower.IndexOf(name.ToLower(), StringComparison.Ordinal);
                 if (startIndex >= 0)
@@ -160,9 +157,13 @@ namespace Nikse.SubtitleEdit.Forms
                             {
                                 if (!_usedNames.Contains(name))
                                 {
-                                    _usedNames.Add(name);
-                                    AddToListViewNames(name);
-                                    break; // break while
+                                    var isDont = _language.StartsWith("en", StringComparison.OrdinalIgnoreCase) && text.Substring(startIndex).StartsWith("don't", StringComparison.InvariantCultureIgnoreCase);
+                                    if (!isDont)
+                                    {
+                                        _usedNames.Add(name);
+                                        AddToListViewNames(name);
+                                        break; // break while
+                                    }
                                 }
                             }
                         }
@@ -234,7 +235,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 if (item.Checked)
                 {
-                    _noOfLinesChanged++;
+                    LinesChanged++;
                     var p = item.Tag as Paragraph;
                     if (p != null)
                         p.Text = item.SubItems[3].Text.Replace(Configuration.Settings.General.ListViewLineSeparatorString, Environment.NewLine);

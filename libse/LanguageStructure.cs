@@ -698,6 +698,7 @@
             public string FixOcrErrorExample { get; set; }
             public string FixSpaceBetweenNumbersExample { get; set; }
             public string FixDialogsOneLineExample { get; set; }
+            public string SelectDefault { get; set; }
         }
 
         public class GetDictionaries
@@ -1142,8 +1143,8 @@
             public string NumberOfWithRemovedLineBreakX { get; set; }
             public string BeforeMultipleReplace { get; set; }
             public string NumberOfLinesReplacedX { get; set; }
-            public string NameXAddedToNamesEtcList { get; set; }
-            public string NameXNotAddedToNamesEtcList { get; set; }
+            public string NameXAddedToNameList { get; set; }
+            public string NameXNotAddedToNameList { get; set; }
             public string WordXAddedToUserDic { get; set; }
             public string WordXNotAddedToUserDic { get; set; }
             public string OcrReplacePairXAdded { get; set; }
@@ -1370,7 +1371,7 @@
                     public string FindDoubleWords { get; set; }
                     public string FindDoubleLines { get; set; }
                     public string GetDictionaries { get; set; }
-                    public string AddToNamesEtcList { get; set; }
+                    public string AddToNameList { get; set; }
                 }
                 public class SynchronizationkMenu
                 {
@@ -1964,19 +1965,19 @@
             public string Testing123 { get; set; }
             public string Language { get; set; }
             public string NamesIgnoreLists { get; set; }
-            public string AddNameEtc { get; set; }
+            public string AddName { get; set; }
             public string AddWord { get; set; }
             public string Remove { get; set; }
             public string AddPair { get; set; }
             public string UserWordList { get; set; }
             public string OcrFixList { get; set; }
             public string Location { get; set; }
-            public string UseOnlineNamesEtc { get; set; }
+            public string UseOnlineNames { get; set; }
             public string WordAddedX { get; set; }
             public string WordAlreadyExists { get; set; }
             public string WordNotFound { get; set; }
             public string RemoveX { get; set; }
-            public string CannotUpdateNamesEtcOnline { get; set; }
+            public string CannotUpdateNamesOnline { get; set; }
             public string ProxyServerSettings { get; set; }
             public string ProxyAddress { get; set; }
             public string ProxyAuthentication { get; set; }
@@ -2045,10 +2046,13 @@
             public string WaveformPlayNewSelectionEnd { get; set; }
             public string WaveformPlayFirstSelectedSubtitle { get; set; }
             public string WaveformFocusListView { get; set; }
+            public string WaveformGoToNextSubtitle { get; set; }
             public string WaveformGoToNextSceneChange { get; set; }
             public string WaveformToggleSceneChange { get; set; }
             public string GoBack1Frame { get; set; }
             public string GoForward1Frame { get; set; }
+            public string GoBack1FrameWithPlay { get; set; }
+            public string GoForward1FrameWithPlay { get; set; }
             public string GoBack100Milliseconds { get; set; }
             public string GoForward100Milliseconds { get; set; }
             public string GoBack500Milliseconds { get; set; }
@@ -2104,6 +2108,7 @@
             public string UseDoNotBreakAfterList { get; set; }
             public string MicrosoftBingTranslator { get; set; }
             public string HowToSignUp { get; set; }
+            public string GoogleTranslateUrl { get; set; }
             public string ClientId { get; set; }
             public string ClientSecret { get; set; }
         }
@@ -2167,7 +2172,7 @@
             public string SpellCheckProgress { get; set; }
             public string EditWholeText { get; set; }
             public string EditWordOnly { get; set; }
-            public string AddXToNamesEtc { get; set; }
+            public string AddXToNames { get; set; }
             public string AutoFixNames { get; set; }
             public string CheckOneLetterWords { get; set; }
             public string TreatINQuoteAsING { get; set; }
@@ -2540,6 +2545,7 @@
             public string RemoveSceneChange { get; set; }
             public string GuessTimeCodes { get; set; }
             public string SeekSilence { get; set; }
+            public string InsertSubtitleHere { get; set; }
             public string CharsSecX { get; set; }
             public string WordsMinX { get; set; }
         }

@@ -2,10 +2,10 @@
 <Language Name="dansk">
   <General>
     <Title>Subtitle Edit</Title>
-    <Version>3.5.2</Version>
+    <Version>3.5.3</Version>
     <TranslatedBy>Oversat til dansk af Nikse (mailto:nikse.dk@gmail.com)</TranslatedBy>
     <CultureName>da-DK</CultureName>
-    <HelpFile></HelpFile>
+    <HelpFile />
     <Ok>&amp;OK</Ok>
     <Cancel>&amp;Fortryd</Cancel>
     <Apply>Anvend</Apply>
@@ -27,6 +27,7 @@
     <CharsPerSec>Tegn/sek</CharsPerSec>
     <WordsPerMin>Ord/min</WordsPerMin>
     <Actor>Taler</Actor>
+    <Region>Region</Region>
     <NumberSymbol>#</NumberSymbol>
     <Number>Antal</Number>
     <Text>Tekst</Text>
@@ -1011,7 +1012,7 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
         <FindDoubleWords>Find dobbelt ord</FindDoubleWords>
         <FindDoubleLines>Find dobbelte linjer</FindDoubleLines>
         <GetDictionaries>Hent ordbøger...</GetDictionaries>
-        <AddToNamesEtcList>Tilføj ord til navne mv. liste</AddToNamesEtcList>
+        <AddToNameList>Tilføj ord til navne mv. liste</AddToNameList>
       </SpellCheck>
       <Synchronization>
         <Title>Synkronisering</Title>
@@ -1069,6 +1070,7 @@ Bemærk: Kontroller ledig diskplads.</WaveFileMalformed>
         <SetActor>Vælg taler</SetActor>
         <SubStationAlphaStyles>Sub Station Alpha stilarter...</SubStationAlphaStyles>
         <AdvancedSubStationAlphaStyles>Advanced Sub Station Alpha stilarter...</AdvancedSubStationAlphaStyles>
+        <TimedTextSetRegion>Timed Text - Sæt region</TimedTextSetRegion>
         <TimedTextSetStyle>Timed Text - sæt style</TimedTextSetStyle>
         <TimedTextStyles>Timed Text styles...</TimedTextStyles>
         <TimedTextSetLanguage>Timed Text - vælg sprog</TimedTextSetLanguage>
@@ -1364,8 +1366,8 @@ Fortsæt?</SubtitleAppendPrompt>
     <NumberOfWithRemovedLineBreakX>Antallet af linjer med fjernet linjeskift: {0}</NumberOfWithRemovedLineBreakX>
     <BeforeMultipleReplace>Før multi søg og erstat</BeforeMultipleReplace>
     <NumberOfLinesReplacedX>Antal linjer hvor tekst er erstattet: {0}</NumberOfLinesReplacedX>
-    <NameXAddedToNamesEtcList>Navnet '{0}' blev tilføjet til navne mv, liste</NameXAddedToNamesEtcList>
-    <NameXNotAddedToNamesEtcList>Navnet '{0}' blev ikke tilføjet til navne mv. liste</NameXNotAddedToNamesEtcList>
+    <NameXAddedToNameList>Navnet '{0}' blev tilføjet til navne mv, liste</NameXAddedToNameList>
+    <NameXNotAddedToNameList>Navnet '{0}' blev ikke tilføjet til navne mv. liste</NameXNotAddedToNameList>
     <WordXAddedToUserDic>Ordet '{0}' blev tilføjet til brugerordbog</WordXAddedToUserDic>
     <WordXNotAddedToUserDic>Ordet '{0}' blev IKKE tilføjet til brugerordbogen</WordXNotAddedToUserDic>
     <OcrReplacePairXAdded>'{0} -&gt; {1}' blev tilføjet til OCR erstat listen</OcrReplacePairXAdded>
@@ -1792,19 +1794,19 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <Testing123>Dette er en test 123...</Testing123>
     <Language>Sprog</Language>
     <NamesIgnoreLists>Navne/ignorer list</NamesIgnoreLists>
-    <AddNameEtc>Tilføj navn</AddNameEtc>
+    <AddName>Tilføj navn</AddName>
     <AddWord>Tilføj ord</AddWord>
     <Remove>Fjern</Remove>
     <AddPair>Tilføj par</AddPair>
     <UserWordList>Bruger ordliste</UserWordList>
     <OcrFixList>OCR fix liste</OcrFixList>
     <Location>Placering</Location>
-    <UseOnlineNamesEtc>Brug online navne etc xml-fil</UseOnlineNamesEtc>
+    <UseOnlineNames>Brug online navne etc xml-fil</UseOnlineNames>
     <WordAddedX>Ordet tilføjet: {0}</WordAddedX>
     <WordAlreadyExists>Ordet eksisterer allerede!</WordAlreadyExists>
     <WordNotFound>Ordet blev ikke fundet</WordNotFound>
     <RemoveX>Fjern {0}?</RemoveX>
-    <CannotUpdateNamesEtcOnline>Kan ikke opdatere NamesEtc.xml online!</CannotUpdateNamesEtcOnline>
+    <CannotUpdateNamesOnline>Kan ikke opdatere NamesEtc.xml online!</CannotUpdateNamesOnline>
     <ProxyServerSettings>Proxyserver indstillinger</ProxyServerSettings>
     <ProxyAddress>Proxy-adresse</ProxyAddress>
     <ProxyAuthentication>Autentifikation</ProxyAuthentication>
@@ -1873,6 +1875,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <WaveformPlayNewSelectionEnd>Afspil slutningen af markering</WaveformPlayNewSelectionEnd>
     <WaveformPlayFirstSelectedSubtitle>Spil første valgte undertekst</WaveformPlayFirstSelectedSubtitle>
     <WaveformFocusListView>Fokuser listevisning</WaveformFocusListView>
+    <WaveformGoToNextSubtitle>Gå til næste undertekst (fra video position)</WaveformGoToNextSubtitle>
     <WaveformGoToNextSceneChange>Gå til næste sceneskift</WaveformGoToNextSceneChange>
     <WaveformToggleSceneChange>Toggle sceneskift</WaveformToggleSceneChange>
     <GoBack1Frame>En frame tilbage</GoBack1Frame>
@@ -1987,7 +1990,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <SpellCheckProgress>Stavekontrol [{0}] - {1}</SpellCheckProgress>
     <EditWholeText>Rediger hele teksten</EditWholeText>
     <EditWordOnly>Rediger kun ord</EditWordOnly>
-    <AddXToNamesEtc>Tilføj '{0}' til navne mv. liste</AddXToNamesEtc>
+    <AddXToNames>Tilføj '{0}' til navne mv. liste</AddXToNames>
     <AutoFixNames>Auto fix navne, hvor kun små/store bogstaver udgør forskellen</AutoFixNames>
     <CheckOneLetterWords>Spørg ved enkeltbogstaver</CheckOneLetterWords>
     <TreatINQuoteAsING>Accepter ord der slutter med i' som ing (kun på engelsk)</TreatINQuoteAsING>
@@ -2318,6 +2321,7 @@ kan redigere i samme undertekst fil (fælles online projekt)</Information>
     <RemoveSceneChange>Fjern sceneskift</RemoveSceneChange>
     <GuessTimeCodes>Gæt tidskoder...</GuessTimeCodes>
     <SeekSilence>Søg tavshed...</SeekSilence>
+    <InsertSubtitleHere>Indsæt undertekst her...</InsertSubtitleHere>
     <CharsSecX>Tegn/sec: {0:0.00}</CharsSecX>
     <WordsMinX>Ord/min: {0:0.00}</WordsMinX>
   </Waveform>

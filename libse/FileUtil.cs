@@ -148,8 +148,16 @@ namespace Nikse.SubtitleEdit.Core
                 if (count != buffer.Length)
                     return false;
 
-                return (buffer[0] == 0x47 && buffer[188] == 0x47) || // 47hex (71 dec or 'G') == TS sync byte
-                       (buffer[0] == 0x54 && buffer[1] == 0x46 && buffer[2] == 0x72 && buffer[3760] == 0x47); // Topfield REC TS file
+                // allow for some random bytes in the beginning
+                for (int i = 0; i < 255; i++)
+                {
+                    if (buffer[i] == Packet.SynchronizationByte && buffer[i + 188] == Packet.SynchronizationByte && buffer[i + 188 * 2] == Packet.SynchronizationByte)
+                    {
+                        return true;
+                    }
+                }
+
+                return buffer[0] == 0x54 && buffer[1] == 0x46 && buffer[2] == 0x72 && buffer[3760] == Packet.SynchronizationByte; // Topfield REC TS file
             }
         }
 
@@ -300,5 +308,50 @@ namespace Nikse.SubtitleEdit.Core
                 return false;
             return ((File.GetAttributes(path) & FileAttributes.Directory) == FileAttributes.Directory);
         }
+
+        public static bool IsPlainText(string fileName)
+        {
+            var fileInfo = new FileInfo(fileName);
+            if (fileInfo.Length < 20)
+                return false; // too short to be plain text
+            if (fileInfo.Length > 5000000)
+                return false; // too large to be plain text
+
+            var enc = LanguageAutoDetect.GetEncodingFromFile(fileName);
+            var s = File.ReadAllText(fileName, enc);
+
+            int numberCount = 0;
+            int binaryCount = 0;
+            int letterCount = 0;
+
+            for (int i = 0; i < s.Length; i++)
+            {
+                char ch = s[i];
+                if (char.IsLetter(ch) || " -,.!?[]()\r\n".Contains(ch))
+                {
+                    letterCount++;
+                }
+                else if (char.IsControl(ch) && ch != '\t')
+                {
+                    binaryCount++;
+                }
+                else if ("0123456789".Contains(ch))
+                {
+                    numberCount++;
+                }
+            }
+            if (binaryCount > 0)
+            {
+                return false;
+            }
+            if (s.Length < 100)
+            {
+                return numberCount < 5 && letterCount > 20;
+            }
+            var numberThreshold = (s.Length * 0.002) + 1;
+            var letterThreshold = s.Length * 0.8;
+            return numberCount < numberThreshold && letterCount > letterThreshold;
+        }
+
     }
 }

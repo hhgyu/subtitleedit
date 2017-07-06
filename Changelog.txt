@@ -1,11 +1,48 @@
 ﻿Subtitle Edit Changelog
 
+3.5.4 (xth August 2017) BETA
+* NEW:
+   * New subtitle format JacoSub - thx ivandrofly
+   * New subtitle format Lamda Cap (basic support) - thx Chie
+   * New shortcuts for frame forward/back with play
+* IMPROVED:
+   * Update Russian translation - thx Elheym
+   * Update Brazilian translation - thx Igor
+   * Update Basque translation - thx Xabier 
+   * Update Korean translaton - thx domddol
+   * Improve language auto detect
+   * Add semicolon as possible shortcut key - thx Allan
+   * Add 60 fps to export settings for several formats
+   * Google translate can now use google.cn (for Chinese ppl)
+   * Export margins can now be percentage or pixels
+   * Add more subtitle formats to command line + batch convert
+   * If input file is unknown + plain text, "Import plain text" will open
+   * ASS allows decimals for outline/shadow - thx Ninelpienel
+* FIXED:
+   * Fix missing space in format WebVTT
+   * Fix support for combined Arabic characters in PAC - thx Zehelein
+   * mpv frame stepping now updates position - thx Flitskikker
+   * Fix issue with TTML and namespace - thx PannenkoekenNL
+   * Fix possible crash in "Statistics" - thx Masih
+   * Fix for Arabic spell check word split
+   * Fix for reverse RTL start/end
+   * Add to name to language list is now culture neutral
+   * Maintain cursor position during unbreak/break
+   * Fix for "disable auto open" of video files - thx Barneyk
+   * Fix for rare large font issue - thx Camille
+   * Fix for PAC language auto-detect - thx SirEllert
+   * Remove colon now leaves first letter in uppercase - thx aucforum
+   * Fix ASS font tag with space - thx OmarSi
+   * Fix possible crash in expand ocr match - thx Zoltán
 
-3.5.3 (xth May 2017) BETA
+
+3.5.3 (12th May 2017)
 * NEW:
    * New Netflix quality checker - thx askolesov/pavel-belenko
    * Added optional list view column "Actor" for ASS/SSA - thx william
    * Added new subtitle format - thx Merwyn
+   * Added new subtitle format - thx Philippe
+   * Added new subtitle fomrat - thx Eddy
 * IMPROVED:
    * Updated Chinese translation - thx Leon
    * Updated French translation - thx JM GBT
@@ -22,6 +59,10 @@
    * In "Change casing" it's now possible to add extra names
    * Export image margins are now percentage - thx aaaxx/gorgorias
    * Added "Clear shortcut" button to settings - thx Simon
+   * "Import plain text" now rembembers options - thx Leon
+   * "Insert subtitle here..." added to waveform context menu
+   * Added waveform shortcut for go to next sub - thx GeorgeM
+   * Drag'n'drop of subtitles now allows up to 10 MB - thx Silvena
 * FIXED:
    * Fixed crash in "Add to user dictionary" in OCR - thx alfix0
    * Fixed original file name bug in "Undo" - thx darnn
@@ -45,6 +86,11 @@
    * Fixed new ASS/SSA style with space in name - thx hello_hello
    * Fixed issue with empty time code in format "TT draft 2006-10" - thx Georg-J
    * Fixed styling inside "span" in format TTML - thx Johan
+   * Fixed hashtag character in "PAC" format - thx Nuri
+   * Fix for "go to next" shortcut in translate mode - thx Alex
+   * Fixed crash in "Binary image compare" OCR with empty image
+   * Some minor fixes for spell check "change whole word" - thx N/A
+   * + Many minor fixes from ivandrofly
 
 
 3.5.2 (3rd March 2017)

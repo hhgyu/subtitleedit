@@ -498,7 +498,11 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
             if (fontTag.Contains(tag))
             {
                 int fontStart = fontTag.IndexOf(tag, StringComparison.Ordinal);
-                int fontEnd = fontTag.IndexOfAny(new[] { '"', '\'', ' ', '>' }, fontStart + tag.Length);
+
+                int fontEnd = fontTag.IndexOfAny(new[] { '"', '\'' }, fontStart + tag.Length);
+                if (fontEnd < 0)
+                    fontEnd = fontTag.IndexOfAny(new[] { ' ', '>' }, fontStart + tag.Length);
+
                 if (fontEnd > 0)
                 {
                     string subTag = fontTag.Substring(fontStart + tag.Length, fontEnd - (fontStart + tag.Length));
@@ -1569,14 +1573,14 @@ Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text
                             }
                             else if (i == outlineIndex)
                             {
-                                int number;
-                                if (int.TryParse(f, out number))
+                                decimal number;
+                                if (decimal.TryParse(f, out number))
                                     style.OutlineWidth = number;
                             }
                             else if (i == shadowIndex)
                             {
-                                int number;
-                                if (int.TryParse(f, out number))
+                                decimal number;
+                                if (decimal.TryParse(f, out number))
                                     style.ShadowWidth = number;
                             }
                             else if (i == alignmentIndex)
