@@ -9,22 +9,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     /// </summary>
     public class ItunesTimedText : TimedText10
     {
-        public override string Extension
-        {
-            get { return ".itt"; }
-        }
+        public override string Extension => ".itt";
 
         public new const string NameOfFormat = "iTunes Timed Text";
 
-        public override string Name
-        {
-            get { return NameOfFormat; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => NameOfFormat;
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -68,20 +57,20 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         try
                         {
                             var ssaStyle = AdvancedSubStationAlpha.GetSsaStyle(styleName, subtitle.Header);
-                            if (ssaStyle != null)
-                            {
-                                string fontStyle = "normal";
-                                if (ssaStyle.Italic)
-                                    fontStyle = "italic";
-                                string fontWeight = "normal";
-                                if (ssaStyle.Bold)
-                                    fontWeight = "bold";
-                                AddStyleToXml(x, styleHead, xnsmgr, ssaStyle.Name, ssaStyle.FontName, fontWeight, fontStyle, Utilities.ColorToHex(ssaStyle.Primary), ssaStyle.FontSize.ToString());
-                                convertedFromSubStationAlpha = true;
-                            }
+                            
+                            string fontStyle = "normal";
+                            if (ssaStyle.Italic)
+                                fontStyle = "italic";
+                            string fontWeight = "normal";
+                            if (ssaStyle.Bold)
+                                fontWeight = "bold";
+                            AddStyleToXml(x, styleHead, xnsmgr, ssaStyle.Name, ssaStyle.FontName, fontWeight, fontStyle, Utilities.ColorToHex(ssaStyle.Primary), ssaStyle.FontSize.ToString());
+                            convertedFromSubStationAlpha = true;
+                            
                         }
                         catch
                         {
+                            // ignored
                         }
                     }
                     subtitle.Header = x.OuterXml; // save new xml with styles in header

@@ -36,20 +36,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public int Version { get; set; }
 
-        public override string Extension
-        {
-            get { return ".xml"; }
-        }
+        public override string Extension => ".xml";
 
-        public override string Name
-        {
-            get { return "D-Cinema SMPTE 2010"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "D-Cinema SMPTE 2010";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -205,7 +194,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     string text = Utilities.RemoveSsaTags(p.Text);
 
                     var lines = text.SplitToLines();
-                    int vPos = 1 + lines.Length * 7;
+                    int vPos = 1 + lines.Count * 7;
                     int vPosFactor = (int)Math.Round(fontSize / 7.4);
                     if (alignVTop)
                     {
@@ -213,11 +202,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
                     else if (alignVCenter)
                     {
-                        vPos = (int)Math.Round((lines.Length * vPosFactor * -1) / 2.0);
+                        vPos = (int)Math.Round((lines.Count * vPosFactor * -1) / 2.0);
                     }
                     else
                     {
-                        vPos = (lines.Length * vPosFactor) - vPosFactor + Configuration.Settings.SubtitleSettings.DCinemaBottomMargin; // Bottom margin is normally 8
+                        vPos = (lines.Count * vPosFactor) - vPosFactor + Configuration.Settings.SubtitleSettings.DCinemaBottomMargin; // Bottom margin is normally 8
                     }
 
                     bool isItalic = false;
@@ -311,7 +300,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                     c = c.TrimStart('#').ToUpper().PadLeft(8, 'F');
                                 fontColors.Push(c);
                                 fontNo++;
-                                i += endOfFont - i;
+                                i = endOfFont;
                             }
                             else if (fontNo > 0 && line.Substring(i).StartsWith("</font>", StringComparison.Ordinal))
                             {
@@ -665,16 +654,16 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                             innerInnerNode.Attributes["Italic"].InnerText.Equals("yes", StringComparison.OrdinalIgnoreCase))
                                         {
                                             if (innerInnerNode.Attributes["Color"] != null)
-                                                pText.Append("<i><font color=\"" + GetColorStringFromDCinema(innerInnerNode.Attributes["Color"].Value) + "\">" + innerInnerNode.InnerText + "</font><i>");
+                                                pText.Append("<i><font color=\"" + DCinemaInterop.GetColorStringFromDCinema(innerInnerNode.Attributes["Color"].Value) + "\">" + innerInnerNode.InnerText + "</font><i>");
                                             else
                                                 pText.Append("<i>" + innerInnerNode.InnerText + "</i>");
                                         }
                                         else if (innerInnerNode.Name == "Font" && innerInnerNode.Attributes["Color"] != null)
                                         {
                                             if (innerInnerNode.Attributes["Italic"] != null && innerInnerNode.Attributes["Italic"].InnerText.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                                                pText.Append("<i><font color=\"" + GetColorStringFromDCinema(innerInnerNode.Attributes["Color"].Value) + "\">" + innerInnerNode.InnerText + "</font><i>");
+                                                pText.Append("<i><font color=\"" + DCinemaInterop.GetColorStringFromDCinema(innerInnerNode.Attributes["Color"].Value) + "\">" + innerInnerNode.InnerText + "</font><i>");
                                             else
-                                                pText.Append("<font color=\"" + GetColorStringFromDCinema(innerInnerNode.Attributes["Color"].Value) + "\">" + innerInnerNode.InnerText + "</font>");
+                                                pText.Append("<font color=\"" + DCinemaInterop.GetColorStringFromDCinema(innerInnerNode.Attributes["Color"].Value) + "\">" + innerInnerNode.InnerText + "</font>");
                                         }
                                         else
                                         {
@@ -717,34 +706,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             subtitle.Renumber();
         }
 
-        private static string GetColorStringFromDCinema(string p)
-        {
-            string s = p.ToLower().Trim();
-            if (s.Replace("#", string.Empty).
-                Replace("0", string.Empty).
-                Replace("1", string.Empty).
-                Replace("2", string.Empty).
-                Replace("3", string.Empty).
-                Replace("4", string.Empty).
-                Replace("5", string.Empty).
-                Replace("6", string.Empty).
-                Replace("7", string.Empty).
-                Replace("8", string.Empty).
-                Replace("9", string.Empty).
-                Replace("a", string.Empty).
-                Replace("b", string.Empty).
-                Replace("c", string.Empty).
-                Replace("d", string.Empty).
-                Replace("e", string.Empty).
-                Replace("f", string.Empty).Length == 0)
-            {
-                if (s.StartsWith('#'))
-                    return s;
-                return "#" + s;
-            }
-            return p;
-        }
-
         private TimeCode GetTimeCode(string s)
         {
             var parts = s.Split(new[] { ':', '.', ',' });
@@ -766,7 +727,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private string ConvertToTimeString(TimeCode time)
         {
-            return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", time.Hours, time.Minutes, time.Seconds, MsToFramesMaxFrameRate(time.Milliseconds, _frameRate));
+            return $"{time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}:{MsToFramesMaxFrameRate(time.Milliseconds, _frameRate):00}";
         }
 
     }

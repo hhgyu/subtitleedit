@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,10 +11,10 @@ namespace Nikse.SubtitleEdit.Core
 {
     public class Subtitle
     {
+        public const int MaxFileSize = 1024 * 1024 * 20; // 20 MB
+
         private List<Paragraph> _paragraphs;
         private readonly List<HistoryItem> _history;
-        private SubtitleFormat _format;
-        private bool _wasLoadedWithFrameNumbers;
         public string Header { get; set; } = string.Empty;
         public string Footer { get; set; } = string.Empty;
 
@@ -21,18 +22,9 @@ namespace Nikse.SubtitleEdit.Core
 
         public const int MaximumHistoryItems = 100;
 
-        public SubtitleFormat OriginalFormat
-        {
-            get
-            {
-                return _format;
-            }
-        }
+        public SubtitleFormat OriginalFormat { get; private set; }
 
-        public List<HistoryItem> HistoryItems
-        {
-            get { return _history; }
-        }
+        public List<HistoryItem> HistoryItems => _history;
 
         public Subtitle()
         {
@@ -45,6 +37,13 @@ namespace Nikse.SubtitleEdit.Core
             : this()
         {
             _history = historyItems;
+        }
+
+        public Subtitle(List<Paragraph> paragraphs, List<HistoryItem> historyItems)
+                   : this()
+        {
+            _history = historyItems;
+            _paragraphs = paragraphs;
         }
 
         /// <summary>
@@ -62,7 +61,7 @@ namespace Nikse.SubtitleEdit.Core
             {
                 _paragraphs.Add(new Paragraph(p, generateNewId));
             }
-            _wasLoadedWithFrameNumbers = subtitle.WasLoadedWithFrameNumbers;
+            WasLoadedWithFrameNumbers = subtitle.WasLoadedWithFrameNumbers;
             Header = subtitle.Header;
             Footer = subtitle.Footer;
             FileName = subtitle.FileName;
@@ -73,13 +72,7 @@ namespace Nikse.SubtitleEdit.Core
             _paragraphs = paragraphs;
         }
 
-        public List<Paragraph> Paragraphs
-        {
-            get
-            {
-                return _paragraphs;
-            }
-        }
+        public List<Paragraph> Paragraphs => _paragraphs;
 
         /// <summary>
         /// Get the paragraph of index, null if out of bounds
@@ -105,7 +98,7 @@ namespace Nikse.SubtitleEdit.Core
             if (format != null && format.IsMine(lines, fileName))
             {
                 format.LoadSubtitle(this, lines, fileName);
-                _format = format;
+                OriginalFormat = format;
                 return format;
             }
             foreach (SubtitleFormat subtitleFormat in SubtitleFormat.AllSubtitleFormats)
@@ -113,7 +106,7 @@ namespace Nikse.SubtitleEdit.Core
                 if (subtitleFormat.IsMine(lines, fileName))
                 {
                     subtitleFormat.LoadSubtitle(this, lines, fileName);
-                    _format = subtitleFormat;
+                    OriginalFormat = subtitleFormat;
                     return subtitleFormat;
                 }
             }
@@ -168,7 +161,7 @@ namespace Nikse.SubtitleEdit.Core
             }
 
             encoding = sr.CurrentEncoding;
-            var lines = sr.ReadToEnd().SplitToLines().ToList();
+            var lines = sr.ReadToEnd().SplitToLines();
             sr.Close();
 
             foreach (SubtitleFormat subtitleFormat in SubtitleFormat.AllSubtitleFormats)
@@ -179,9 +172,9 @@ namespace Nikse.SubtitleEdit.Core
                     subtitleFormat.BatchMode = batchMode;
                     subtitleFormat.BatchSourceFrameRate = sourceFrameRate;
                     subtitleFormat.LoadSubtitle(this, lines, fileName);
-                    _format = subtitleFormat;
-                    _wasLoadedWithFrameNumbers = _format.IsFrameBased;
-                    if (_wasLoadedWithFrameNumbers)
+                    OriginalFormat = subtitleFormat;
+                    WasLoadedWithFrameNumbers = OriginalFormat.IsFrameBased;
+                    if (WasLoadedWithFrameNumbers)
                         CalculateTimeCodesFromFrameNumbers(Configuration.Settings.General.CurrentFrameRate);
                     return subtitleFormat;
                 }
@@ -202,13 +195,7 @@ namespace Nikse.SubtitleEdit.Core
             _history.Add(new HistoryItem(_history.Count, this, description, FileName, fileModified, subtitleFormat.FriendlyName, original, originalSubtitleFileName, lineNumber, linePosition, linePositionAlternate));
         }
 
-        public bool CanUndo
-        {
-            get
-            {
-                return _history.Count > 0;
-            }
-        }
+        public bool CanUndo => _history.Count > 0;
 
         public string UndoHistory(int index, out string subtitleFormatFriendlyName, out DateTime fileModified, out Subtitle originalSubtitle, out string originalSubtitleFileName)
         {
@@ -221,6 +208,7 @@ namespace Nikse.SubtitleEdit.Core
             fileModified = _history[index].FileModified;
             originalSubtitle = new Subtitle(_history[index].OriginalSubtitle);
             originalSubtitleFileName = _history[index].OriginalSubtitleFileName;
+            Header = _history[index].Subtitle.Header;
 
             return FileName;
         }
@@ -252,7 +240,7 @@ namespace Nikse.SubtitleEdit.Core
         /// <returns>True if times could be calculated</returns>
         public bool CalculateTimeCodesFromFrameNumbers(double frameRate)
         {
-            if (_format == null || _format.IsTimeBased)
+            if (OriginalFormat == null || OriginalFormat.IsTimeBased)
                 return false;
 
             foreach (Paragraph p in Paragraphs)
@@ -269,7 +257,7 @@ namespace Nikse.SubtitleEdit.Core
         /// <returns></returns>
         public bool CalculateFrameNumbersFromTimeCodes(double frameRate)
         {
-            if (_format == null || _format.IsFrameBased)
+            if (OriginalFormat == null || OriginalFormat.IsFrameBased)
                 return false;
 
             foreach (Paragraph p in Paragraphs)
@@ -311,17 +299,7 @@ namespace Nikse.SubtitleEdit.Core
             }
         }
 
-        public bool WasLoadedWithFrameNumbers
-        {
-            get
-            {
-                return _wasLoadedWithFrameNumbers;
-            }
-            set
-            {
-                _wasLoadedWithFrameNumbers = value;
-            }
-        }
+        public bool WasLoadedWithFrameNumbers { get; set; }
 
         public void AdjustDisplayTimeUsingPercent(double percent, List<int> selectedIndexes)
         {
@@ -334,10 +312,11 @@ namespace Nikse.SubtitleEdit.Core
                         nextStartMilliseconds = _paragraphs[i + 1].StartTime.TotalMilliseconds;
 
                     double newEndMilliseconds = _paragraphs[i].EndTime.TotalMilliseconds;
-                    newEndMilliseconds = _paragraphs[i].StartTime.TotalMilliseconds + (((newEndMilliseconds - _paragraphs[i].StartTime.TotalMilliseconds) * percent) / 100);
+                    newEndMilliseconds = _paragraphs[i].StartTime.TotalMilliseconds + (((newEndMilliseconds - _paragraphs[i].StartTime.TotalMilliseconds) * percent) / 100.0);
                     if (newEndMilliseconds > nextStartMilliseconds)
-                        newEndMilliseconds = nextStartMilliseconds - 1;
-                    _paragraphs[i].EndTime.TotalMilliseconds = newEndMilliseconds;
+                        newEndMilliseconds = nextStartMilliseconds - Configuration.Settings.General.MinimumMillisecondsBetweenLines;
+                    if (percent > 100 && newEndMilliseconds > _paragraphs[i].EndTime.TotalMilliseconds || percent < 100)
+                        _paragraphs[i].EndTime.TotalMilliseconds = newEndMilliseconds;
                 }
             }
         }
@@ -354,7 +333,7 @@ namespace Nikse.SubtitleEdit.Core
 
                     double newEndMilliseconds = _paragraphs[i].EndTime.TotalMilliseconds + (seconds * TimeCode.BaseUnit);
                     if (newEndMilliseconds > nextStartMilliseconds)
-                        newEndMilliseconds = nextStartMilliseconds - 1;
+                        newEndMilliseconds = nextStartMilliseconds - Configuration.Settings.General.MinimumMillisecondsBetweenLines;
 
                     if (seconds < 0)
                     {
@@ -363,7 +342,7 @@ namespace Nikse.SubtitleEdit.Core
                         else
                             _paragraphs[i].EndTime.TotalMilliseconds = newEndMilliseconds;
                     }
-                    else
+                    else if (newEndMilliseconds > _paragraphs[i].EndTime.TotalMilliseconds)
                     {
                         _paragraphs[i].EndTime.TotalMilliseconds = newEndMilliseconds;
                     }
@@ -479,7 +458,7 @@ namespace Nikse.SubtitleEdit.Core
                 for (int i = _paragraphs.Count - 1; i >= 0; i--)
                 {
                     Paragraph p = _paragraphs[i];
-                    if (string.IsNullOrWhiteSpace(p.Text))
+                    if (string.IsNullOrWhiteSpace(p.Text.RemoveControlCharacters()))
                         _paragraphs.RemoveAt(i);
                 }
                 if (count != _paragraphs.Count)
@@ -528,37 +507,40 @@ namespace Nikse.SubtitleEdit.Core
             switch (sortCriteria)
             {
                 case SubtitleSortCriteria.Number:
-                    _paragraphs.Sort((p1, p2) => p1.Number.CompareTo(p2.Number));
+                    _paragraphs = _paragraphs.OrderBy(p => p.Number).ThenBy(p => p.StartTime.TotalMilliseconds).ToList();
                     break;
                 case SubtitleSortCriteria.StartTime:
-                    _paragraphs.Sort((p1, p2) => p1.StartTime.TotalMilliseconds.CompareTo(p2.StartTime.TotalMilliseconds));
+                    _paragraphs = _paragraphs.OrderBy(p => p.StartTime.TotalMilliseconds).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.EndTime:
-                    _paragraphs.Sort((p1, p2) => p1.EndTime.TotalMilliseconds.CompareTo(p2.EndTime.TotalMilliseconds));
+                    _paragraphs = _paragraphs.OrderBy(p => p.EndTime.TotalMilliseconds).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.Duration:
-                    _paragraphs.Sort((p1, p2) => p1.Duration.TotalMilliseconds.CompareTo(p2.Duration.TotalMilliseconds));
+                    _paragraphs = _paragraphs.OrderBy(p => p.Duration.TotalMilliseconds).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.Text:
-                    _paragraphs.Sort((p1, p2) => string.Compare(p1.Text, p2.Text, StringComparison.Ordinal));
+                    _paragraphs = _paragraphs.OrderBy(p => p.Text, StringComparer.Ordinal).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.TextMaxLineLength:
-                    _paragraphs.Sort((p1, p2) => Utilities.GetMaxLineLength(p1.Text).CompareTo(Utilities.GetMaxLineLength(p2.Text)));
+                    _paragraphs = _paragraphs.OrderBy(p => Utilities.GetMaxLineLength(p.Text)).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.TextTotalLength:
-                    _paragraphs.Sort((p1, p2) => p1.Text.Length.CompareTo(p2.Text.Length));
+                    _paragraphs = _paragraphs.OrderBy(p => p.Text.Length).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.TextNumberOfLines:
-                    _paragraphs.Sort((p1, p2) => p1.NumberOfLines.CompareTo(p2.NumberOfLines));
+                    _paragraphs = _paragraphs.OrderBy(p => p.NumberOfLines).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.TextCharactersPerSeconds:
-                    _paragraphs.Sort((p1, p2) => Utilities.GetCharactersPerSecond(p1).CompareTo(Utilities.GetCharactersPerSecond(p2)));
+                    _paragraphs = _paragraphs.OrderBy(Utilities.GetCharactersPerSecond).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.WordsPerMinute:
-                    _paragraphs.Sort((p1, p2) => p1.WordsPerMinute.CompareTo(p2.WordsPerMinute));
+                    _paragraphs = _paragraphs.OrderBy(p => p.WordsPerMinute).ThenBy(p => p.Number).ToList();
                     break;
                 case SubtitleSortCriteria.Style:
-                    _paragraphs.Sort((p1, p2) => string.Compare(p1.Extra, p2.Extra, StringComparison.Ordinal));
+                    _paragraphs = _paragraphs.OrderBy(p => p.Extra, StringComparer.Ordinal).ThenBy(p => p.Number).ToList();
+                    break;
+                case SubtitleSortCriteria.Actor:
+                    _paragraphs = _paragraphs.OrderBy(p => p.Actor, StringComparer.Ordinal).ThenBy(p => p.Number).ToList();
                     break;
             }
         }
@@ -577,20 +559,34 @@ namespace Nikse.SubtitleEdit.Core
             Paragraphs.Add(newParagraph);
         }
 
+        public Paragraph GetFirstParagrapOrDefaultByTime(double milliseconds)
+        {
+            foreach (var p in Paragraphs)
+            {
+                if (p.StartTime.TotalMilliseconds < milliseconds && milliseconds < p.EndTime.TotalMilliseconds)
+                {
+                    return p;
+                }
+            }
+            return null;
+        }
+
         /// <summary>
-        /// Fast hash code for subtitle (only includes start + end + text)
+        /// Fast hash code for subtitle - includes pre (encoding atm) + number + start + end + text.
         /// </summary>
         /// <returns>Hash value that can be used for quick compare</returns>
-        public string GetFastHashCode()
+        public string GetFastHashCode(string pre)
         {
             var sb = new StringBuilder(Paragraphs.Count * 50);
+            sb.Append(pre);
             if (Header != null)
                 sb.Append(Header.Trim());
             for (int i = 0; i < Paragraphs.Count; i++)
             {
                 var p = Paragraphs[i];
-                sb.Append(p.StartTime.TotalMilliseconds.GetHashCode());
-                sb.Append(p.EndTime.TotalMilliseconds.GetHashCode());
+                sb.Append(p.Number.ToString(CultureInfo.InvariantCulture));
+                sb.Append((p.StartTime.TotalMilliseconds + Configuration.Settings.General.CurrentVideoOffsetInMs).GetHashCode());
+                sb.Append((p.EndTime.TotalMilliseconds + Configuration.Settings.General.CurrentVideoOffsetInMs).GetHashCode());
                 sb.Append(p.Text);
             }
             return sb.ToString().TrimEnd();
@@ -609,5 +605,20 @@ namespace Nikse.SubtitleEdit.Core
             }
             return sb.ToString();
         }
+
+        public SubtitleFormat LoadBinaryFormatsformats(SubtitleFormat[] formats, string fileName)
+        {
+            var list = new List<string>(File.ReadAllLines(fileName, LanguageAutoDetect.GetEncodingFromFile(fileName)));
+            foreach (var subtitleFormat in formats)
+            {
+                if (subtitleFormat.IsMine(list, fileName))
+                {
+                    subtitleFormat.LoadSubtitle(this, list, fileName);
+                    return subtitleFormat;
+                }
+            }
+            return null;
+        }
+
     }
 }

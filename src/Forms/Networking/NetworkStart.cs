@@ -14,7 +14,10 @@ namespace Nikse.SubtitleEdit.Forms
 
         public NetworkStart()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
+
             labelStatus.Text = string.Empty;
             Text = Configuration.Settings.Language.NetworkStart.Title;
             labelInfo.Text = Configuration.Settings.Language.NetworkStart.Information;
@@ -33,7 +36,7 @@ namespace Nikse.SubtitleEdit.Forms
 
             textBoxSessionKey.Text = Configuration.Settings.NetworkSettings.SessionKey;
             if (textBoxSessionKey.Text.Trim().Length < 2)
-                textBoxSessionKey.Text = Guid.NewGuid().ToString().Replace("-", string.Empty);
+                textBoxSessionKey.Text = Guid.NewGuid().ToString().RemoveChar('-');
 
             comboBoxWebServiceUrl.Text = Configuration.Settings.NetworkSettings.WebServiceUrl;
             textBoxUserName.Text = Configuration.Settings.NetworkSettings.UserName;

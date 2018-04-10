@@ -37,7 +37,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public DvdSubRip(IntPtr taskbarFormHandle, string initialFileName)
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             _taskbarFormHandle = taskbarFormHandle;
             _initialFileName = initialFileName;
             labelStatus.Text = string.Empty;
@@ -479,8 +481,7 @@ namespace Nikse.SubtitleEdit.Forms
             var files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string fileName in files)
             {
-                string ext = Path.GetExtension(fileName).ToLower();
-                if (ext == ".vob")
+                if (fileName.EndsWith(".vob", StringComparison.InvariantCultureIgnoreCase))
                     listBoxVobFiles.Items.Add(fileName);
             }
             buttonStartRipping.Enabled = listBoxVobFiles.Items.Count > 0;
@@ -528,7 +529,7 @@ namespace Nikse.SubtitleEdit.Forms
             else if (_initialFileName.EndsWith(".vob", StringComparison.InvariantCultureIgnoreCase))
             {
                 listBoxVobFiles.Items.Add(_initialFileName);
-                buttonStartRipping.Enabled = listBoxVobFiles.Items.Count > 0;
+                buttonStartRipping.Enabled = true;
             }
             _initialFileName = null;
         }

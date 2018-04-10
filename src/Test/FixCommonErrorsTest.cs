@@ -156,6 +156,28 @@ namespace Test
         }
 
         [TestMethod]
+        public void FixShortLinesWithDash()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "Any progress" + Environment.NewLine + "on the e-mail?");
+                new FixShortLines().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "Any progress on the e-mail?");
+            }
+        }
+
+        [TestMethod]
+        public void FixShortLinesWithDash2()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "- Any progress" + Environment.NewLine + "- None.");
+                new FixShortLines().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "- Any progress" + Environment.NewLine + "- None.");
+            }
+        }
+
+        [TestMethod]
         public void FixShortLinesDialog()
         {
             using (var target = GetFixCommonErrorsLib())
@@ -468,6 +490,17 @@ namespace Test
             }
         }
 
+        [TestMethod]
+        public void FixHyphensWithQuotes()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "\"Into The Woods.\"" + Environment.NewLine + "- \"Sweeney Todd.\"");
+                new FixHyphensAdd().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "- \"Into The Woods.\"" + Environment.NewLine + "- \"Sweeney Todd.\"");
+            }
+        }
+
         #endregion Fix Hyphens (add dash)
 
         #region Fix OCR errors
@@ -484,6 +517,7 @@ namespace Test
         }
 
         [TestMethod]
+        [TestCategory("Local")]
         public void FixCommonOcrErrorsSlashIsL() // requires hardcoded rules enabled
         {
             using (var target = GetFixCommonErrorsLib())
@@ -576,6 +610,17 @@ namespace Test
                 var ofe = new Nikse.SubtitleEdit.Logic.Ocr.OcrFixEngine("eng", "us_en", form);
                 var res = ofe.FixOcrErrorsViaHardcodedRules(input, "Previous line.", new HashSet<string>());
                 Assert.AreEqual(res, input);
+            }
+        }
+
+        [TestMethod]
+        public void FixCommonOcrErrorsStartEllipsis()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "…but never could.");
+                target.FixOcrErrorsViaReplaceList("eng");
+                Assert.AreEqual("…but never could.", target.Subtitle.Paragraphs[0].Text);
             }
         }
 
@@ -801,7 +846,142 @@ namespace Test
                 Assert.AreEqual(_subtitle.Paragraphs[0].Text, "MARCUS: tycker det är bra.");
             }
         }
-        
+
+        [TestMethod]
+        public void FixMissingSpacesMusicSymbolsFirst()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string input = "♪Dream, little one ♪";
+                const string expected = "♪ Dream, little one ♪";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicSymbolsLast()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string input = "♪ Dream, little one♪";
+                const string expected = "♪ Dream, little one ♪";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicSymbolsItalicFirst()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string input = "<i>♪Dream, little one ♪</i>";
+                const string expected = "<i>♪ Dream, little one ♪</i>";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicSymbolsItalicLast()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string input = "<i>♪ Dream, little one♪</i>";
+                const string expected = "<i>♪ Dream, little one ♪</i>";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicTwoLines()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                string input = "♪ Dream, little one♪" + Environment.NewLine +
+                               "♪ Dream, little one♪";
+                string expected = "♪ Dream, little one ♪" + Environment.NewLine +
+                                  "♪ Dream, little one ♪";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicTwoLinesItalic()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                string input = "<i>♪Dream, little one♪</i>" + Environment.NewLine +
+                               "<i>♪Dream, little one♪</i>";
+                string expected = "<i>♪ Dream, little one ♪</i>" + Environment.NewLine +
+                                  "<i>♪ Dream, little one ♪</i>";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicDoNotChange()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                string input = "♪♫ Dream, little one ♫♪";
+                string expected = input;
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicDoNotChange2()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                string input = "♪♪ ! ♪♪" + Environment.NewLine +
+                               "♪";
+                string expected = input;
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesMusicHashtags()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string input = "#Dream, little one#";
+                const string expected = "# Dream, little one #";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixMissingSpacesDontRemoveHashTag()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string input = "#Dream";
+                const string expected = "#Dream";
+                InitializeFixCommonErrorsLine(target, input);
+                new FixMissingSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
         #endregion Fix missing spaces
 
         #region Fix unneeded spaces
@@ -873,6 +1053,28 @@ namespace Test
                 InitializeFixCommonErrorsLine(target, "Foo \t\tbar.");
                 new FixUnneededSpaces().Fix(_subtitle, new EmptyFixCallback());
                 Assert.AreEqual(_subtitle.Paragraphs[0].Text, expected);
+            }
+        }
+
+        [TestMethod]
+        public void FixUnneededSpaces7()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "<i>\"pescado. \"</i>");
+                new FixUnneededSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "<i>\"pescado.\"</i>");
+            }
+        }
+
+        [TestMethod]
+        public void FixUnneededSpaces8()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "<i>\" pescado.\"</i>");
+                new FixUnneededSpaces().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "<i>\"pescado.\"</i>");
             }
         }
 
@@ -1471,7 +1673,7 @@ namespace Test
             var lines3 = input3.SplitToLines();
             var lines4 = input4.SplitToLines();
 
-            for (int i = 0; i < lines1.Length; i++)
+            for (int i = 0; i < lines1.Count; i++)
             {
                 lines1[i] = Helper.FixDoubleGreaterThanHelper(lines1[i]);
                 lines2[i] = Helper.FixDoubleGreaterThanHelper(lines2[i]);
@@ -1516,6 +1718,39 @@ namespace Test
             }
         }
 
+        [TestMethod]
+        public void FixUppercaseIInsideWords3()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "<i>FIight DU 720 from StockhoIm...</i>");
+                new FixUppercaseIInsideWords().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "<i>Flight DU 720 from Stockholm...</i>");
+            }
+        }
+
+        [TestMethod]
+        public void FixUppercaseIInsideWords4()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "<i>FIight DU 720 from BraziI...</i>");
+                new FixUppercaseIInsideWords().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "<i>Flight DU 720 from Brazil...</i>");
+            }
+        }
+
+        [TestMethod]
+        public void FixUppercaseIInsideWords5()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                InitializeFixCommonErrorsLine(target, "<i>FIight DU 720 from McIvan BraziI...</i>");
+                new FixUppercaseIInsideWords().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(_subtitle.Paragraphs[0].Text, "<i>Flight DU 720 from McIvan Brazil...</i>");
+            }
+        }
+
         #endregion Fix uppercase I inside words
 
         #region Fix dialogs on one line
@@ -1551,10 +1786,10 @@ namespace Test
         public void FixDialogsOnOneLine4()
         {
             string source = "- Haiman, say: \"I love you.\" - So," + Environment.NewLine + "what are you up to? Another question!";
-            string target = "- Haiman, say: \"I love you.\"" + Environment.NewLine + "- So, what are you up to? Another question!"; 
+            string target = "- Haiman, say: \"I love you.\"" + Environment.NewLine + "- So, what are you up to? Another question!";
             string result = Helper.FixDialogsOnOneLine(source, "en");
             Assert.AreEqual(result, target);
-        }        
+        }
 
         #endregion Fix dialogs on one line
 
@@ -1667,6 +1902,32 @@ namespace Test
                 Configuration.Settings.Tools.MusicSymbol = "♫";
                 new FixMusicNotation().Fix(_subtitle, new EmptyFixCallback());
                 Assert.AreEqual(string.Format("{0} Hello world. {0}", Configuration.Settings.Tools.MusicSymbol), _subtitle.Paragraphs[0].Text);
+            }
+        }
+
+        [TestMethod]
+        public void FixMusicNotationNoHashtags()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string s = "Lär mig #människor";
+                InitializeFixCommonErrorsLine(target, s);
+                Configuration.Settings.Tools.MusicSymbol = "♫";
+                new FixMusicNotation().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(s, _subtitle.Paragraphs[0].Text);
+            }
+        }
+
+        [TestMethod]
+        public void FixMusicNotationNoHashtagsMultiple()
+        {
+            using (var target = GetFixCommonErrorsLib())
+            {
+                const string s = "Lär mig #människor, #metoo, #timesup";
+                InitializeFixCommonErrorsLine(target, s);
+                Configuration.Settings.Tools.MusicSymbol = "♫";
+                new FixMusicNotation().Fix(_subtitle, new EmptyFixCallback());
+                Assert.AreEqual(s, _subtitle.Paragraphs[0].Text);
             }
         }
 
@@ -1839,7 +2100,7 @@ namespace Test
             s.Paragraphs.Add(p);
             new FixDanishLetterI().Fix(s, new EmptyFixCallback());
             Assert.AreEqual(ExpectedOuput, p.Text);
-        }        
+        }
 
         #endregion
     }

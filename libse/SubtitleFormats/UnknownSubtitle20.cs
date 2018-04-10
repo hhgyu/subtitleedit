@@ -11,27 +11,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static readonly Regex RegexTimeCode1Empty = new Regex(@"^     \d\d:\d\d:\d\d:\d\d     \d\d\d\d$", RegexOptions.Compiled);
         private static readonly Regex RegexTimeCode2 = new Regex(@"^     \d\d:\d\d:\d\d:\d\d     \d\d\d\-\d\d          ", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".C"; }
-        }
+        public override string Extension => ".C";
 
-        public override string Name
-        {
-            get { return "Unknown 20"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 20";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -42,10 +24,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 string line1 = string.Empty;
                 string line2 = string.Empty;
-                string[] lines = p.Text.SplitToLines();
-                if (lines.Length > 2)
+                var lines = p.Text.SplitToLines();
+                if (lines.Count > 2)
                     lines = Utilities.AutoBreakLine(p.Text).SplitToLines();
-                if (lines.Length == 1)
+                if (lines.Count == 1)
                 {
                     line2 = lines[0];
                 }

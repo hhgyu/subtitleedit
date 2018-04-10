@@ -2,7 +2,6 @@
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
@@ -22,7 +21,9 @@ namespace Nikse.SubtitleEdit.Forms.Styles
         public SubStationAlphaStylesBatchConvert(Subtitle subtitle, SubtitleFormat format)
             : base(subtitle)
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             comboBoxWrapStyle.SelectedIndex = 2;
             comboBoxCollision.SelectedIndex = 0;
@@ -144,7 +145,7 @@ namespace Nikse.SubtitleEdit.Forms.Styles
                     }
                     sb.AppendLine(line);
                 }
-                else if (s.Replace(" ", string.Empty).StartsWith("style:", StringComparison.Ordinal))
+                else if (s.RemoveChar(' ').StartsWith("style:", StringComparison.Ordinal))
                 {
                     if (line.Length > 10)
                     {
@@ -199,9 +200,7 @@ namespace Nikse.SubtitleEdit.Forms.Styles
                 format = new AdvancedSubStationAlpha();
             var sub = new Subtitle();
             string text = format.ToText(sub, string.Empty);
-            var lines = new List<string>();
-            foreach (string line in text.SplitToLines())
-                lines.Add(line);
+            var lines = text.SplitToLines();
             format.LoadSubtitle(sub, lines, string.Empty);
             _header = sub.Header;
         }
@@ -366,13 +365,14 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             }
         }
 
-        private void comboBoxFontName_SelectedValueChanged(object sender, EventArgs e)
+        private void comboBoxFontName_TextChanged(object sender, EventArgs e)
         {
-            if (_doUpdate)
+            var text = comboBoxFontName.Text;
+            if (_doUpdate && !string.IsNullOrEmpty(text))
             {
                 string name = CurrentStyleName;
-                SetSsaStyle(name, "fontname", comboBoxFontName.SelectedItem.ToString());
-                GeneratePreviewAndUpdateRawHeader();
+                SetSsaStyle(name, "fontname", text);
+                GeneratePreview();
             }
         }
 
@@ -677,20 +677,12 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             _header = sb.ToString().Trim();
         }
 
-        private void numericUpDownVideoWidth_ValueChanged(object sender, EventArgs e)
+        private void NumericUpDownVideoWidthOrHeightValueChanged(object sender, EventArgs e)
         {
             UpdatePropertiesTag("PlayResX", numericUpDownVideoWidth.Value.ToString(CultureInfo.InvariantCulture), numericUpDownVideoWidth.Value == 0);
             UpdatePropertiesTag("PlayResY", numericUpDownVideoHeight.Value.ToString(CultureInfo.InvariantCulture), numericUpDownVideoHeight.Value == 0);
             UpdateRawHeader();
         }
-
-        private void numericUpDownVideoHeight_ValueChanged(object sender, EventArgs e)
-        {
-            UpdatePropertiesTag("PlayResX", numericUpDownVideoWidth.Value.ToString(CultureInfo.InvariantCulture), numericUpDownVideoWidth.Value == 0);
-            UpdatePropertiesTag("PlayResY", numericUpDownVideoHeight.Value.ToString(CultureInfo.InvariantCulture), numericUpDownVideoHeight.Value == 0);
-            UpdateRawHeader();
-        }
-
         private void comboBoxCollision_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (comboBoxCollision.SelectedIndex == 0)
@@ -804,8 +796,16 @@ namespace Nikse.SubtitleEdit.Forms.Styles
             else
                 panelOutlineColor.BackColor = style.Outline;
             panelBackColor.BackColor = style.Background;
-            numericUpDownOutline.Value = style.OutlineWidth;
-            numericUpDownShadowWidth.Value = style.ShadowWidth;
+
+            if (style.OutlineWidth >= 0 && style.OutlineWidth <= numericUpDownOutline.Maximum)
+                numericUpDownOutline.Value = style.OutlineWidth;
+            else
+                numericUpDownOutline.Value = 2;
+
+            if (style.ShadowWidth >= 0 && style.ShadowWidth <= numericUpDownShadowWidth.Maximum)
+                numericUpDownShadowWidth.Value = style.ShadowWidth;
+            else
+                numericUpDownShadowWidth.Value = 1;
 
             if (_isSubStationAlpha)
             {

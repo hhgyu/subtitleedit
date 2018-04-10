@@ -17,27 +17,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             Text
         }
 
-        public override string Extension
-        {
-            get { return ".titl"; }
-        }
+        public override string Extension => ".titl";
 
-        public override string Name
-        {
-            get { return "Unknown 6"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 6";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -59,13 +41,13 @@ SRPSKI
                 string firstLine = string.Empty;
                 string secondLine = string.Empty;
                 var lines = p.Text.SplitToLines();
-                if (lines.Length > 2)
+                if (lines.Count > 2)
                 {
                     lines = Utilities.AutoBreakLine(p.Text).SplitToLines();
                 }
-                if (lines.Length > 0)
-                    firstLine = lines[0];
-                if (lines.Length > 1)
+                firstLine = lines[0];
+                
+                if (lines.Count > 1)
                     secondLine = lines[1];
 
                 sb.AppendLine(string.Format(" {0}          {1} " + Environment.NewLine +

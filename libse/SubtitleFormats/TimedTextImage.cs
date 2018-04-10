@@ -8,20 +8,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class TimedTextImage : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".xml"; }
-        }
+        public override string Extension => ".xml";
 
-        public override string Name
-        {
-            get { return "Timed Text Image"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "Timed Text Image";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -107,6 +96,10 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         else if (attr.Name.EndsWith("duration", StringComparison.Ordinal))
                             dur = attr.InnerText;
                     }
+
+                    if (start == null)
+                        continue;
+
                     string text = pText.ToString();
                     text = text.Replace(Environment.NewLine + "</i>", "</i>" + Environment.NewLine);
                     text = text.Replace("<i></i>", string.Empty).Trim();
@@ -118,7 +111,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             couldBeFrames = false;
                         }
 
-                        if (couldBeMillisecondsWithMissingLastDigit && (end.Length != 11 || start == null || start.Length != 11 || end.Substring(8, 1) != "." | start.Substring(8, 1) != "."))
+                        if (couldBeMillisecondsWithMissingLastDigit && (end.Length != 11 || start == null || start.Length != 11 || end.Substring(8, 1) != "." || start.Substring(8, 1) != "."))
                         {
                             couldBeMillisecondsWithMissingLastDigit = false;
                         }
@@ -132,6 +125,19 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         }
                         else
                         {
+                            if (!couldBeFrames)
+                            {
+                                if (end.Length == 11 && end[8] == '.') // 00:05:36.92
+                                    end += "0";
+                                else if (end.Length == 10 && end[8] == '.') // 00:05:36.9
+                                    end += "00";
+                                if (start.Length == 11 && start[8] == '.') // 00:05:36.92
+                                    start += "0";
+                                else if (start.Length == 10 && start[8] == '.') // 00:05:36.9
+                                    start += "00";
+                                couldBeMillisecondsWithMissingLastDigit = false;
+                            }
+
                             if (start.Length == 8 && start[2] == ':' && start[5] == ':' &&
                                 end.Length == 8 && end[2] == ':' && end[5] == ':')
                             {

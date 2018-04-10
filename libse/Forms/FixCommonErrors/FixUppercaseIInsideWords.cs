@@ -17,25 +17,40 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
             {
                 Paragraph p = subtitle.Paragraphs[i];
                 string oldText = p.Text;
+                var st = new StrippableText(p.Text);
 
-                Match match = ReAfterLowercaseLetter.Match(p.Text);
+                Match match = ReAfterLowercaseLetter.Match(st.StrippedText);
                 while (match.Success)
                 {
-                    if (!(match.Index > 1 && p.Text.Substring(match.Index - 1, 2) == "Mc") // irish names, McDonalds etc.
-                        && p.Text[match.Index + 1] == 'I'
+                    if (!(match.Index > 1 && st.StrippedText.Substring(match.Index - 1, 2) == "Mc") // irish names, McDonalds etc.
+                        && st.StrippedText[match.Index + 1] == 'I'
                         && callbacks.AllowFix(p, fixAction))
                     {
-                        p.Text = p.Text.Substring(0, match.Index + 1) + "l";
-                        if (match.Index + 2 < oldText.Length)
-                            p.Text += oldText.Substring(match.Index + 2);
+                        string word = GetWholeWord(st.StrippedText, match.Index);
+                        if (!callbacks.IsName(word))
+                        {
+                            var old = st.StrippedText;
+                            st.StrippedText = st.StrippedText.Substring(0, match.Index + 1) + "l";
+                            if (match.Index + 2 < old.Length)
+                                st.StrippedText += old.Substring(match.Index + 2);
+                            p.Text = st.MergedString;
 
-                        uppercaseIsInsideLowercaseWords++;
-                        callbacks.AddFixToListView(p, fixAction, oldText, p.Text);
+                            st = new StrippableText(p.Text);
+                            uppercaseIsInsideLowercaseWords++;
+                            callbacks.AddFixToListView(p, fixAction, oldText, p.Text);
+                            match = ReAfterLowercaseLetter.Match(st.StrippedText, match.Index);
+                        }
+                        else
+                        {
+                            match = match.NextMatch();
+                        }
                     }
-                    match = match.NextMatch();
+                    else
+                    {
+                        match = match.NextMatch();
+                    }
                 }
 
-                var st = new StrippableText(p.Text);
                 match = ReBeforeLowercaseLetter.Match(st.StrippedText);
                 while (match.Success)
                 {
@@ -110,10 +125,18 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
                                     }
                                     else
                                     {
-                                        st.StrippedText = st.StrippedText.Remove(match.Index, 1).Insert(match.Index, "l");
-                                        p.Text = st.MergedString;
-                                        uppercaseIsInsideLowercaseWords++;
-                                        callbacks.AddFixToListView(p, fixAction, oldText, p.Text);
+                                        var ok = true;
+
+                                        if (match.Index >= 2 && st.StrippedText.Substring(match.Index - 2, 2) == "Mc")
+                                            ok = false;
+
+                                        if (ok)
+                                        {
+                                            st.StrippedText = st.StrippedText.Remove(match.Index, 1).Insert(match.Index, "l");
+                                            p.Text = st.MergedString;
+                                            uppercaseIsInsideLowercaseWords++;
+                                            callbacks.AddFixToListView(p, fixAction, oldText, p.Text);
+                                        }
                                     }
                                 }
                             }
@@ -128,12 +151,18 @@ namespace Nikse.SubtitleEdit.Core.Forms.FixCommonErrors
         private static string GetWholeWord(string text, int index)
         {
             int start = index;
-            while (start > 0 && !(Environment.NewLine + @" ,.!?""'=()/-").Contains(text[start - 1]))
+            while (start > 0 && !(Environment.NewLine + @" ,.!?""'=()[]/-¿¡«»“”>—").Contains(text[start - 1]) ||
+                   start > 1 && text[start - 1] == '\'' && char.IsLetter(text[start - 2]))
+            {
                 start--;
+            }
 
             int end = index;
-            while (end + 1 < text.Length && !(Environment.NewLine + @" ,.!?""'=()/-").Contains(text[end + 1]))
+            while (end + 1 < text.Length && !(Environment.NewLine + @" ,.!?:;""'=()[]/-«»“”<—").Contains(text[end + 1]) ||
+                   end + 2 < text.Length && text[end + 1] == '\'' && char.IsLetter(text[end + 2]))
+            {
                 end++;
+            }
 
             return text.Substring(start, end - start + 1);
         }

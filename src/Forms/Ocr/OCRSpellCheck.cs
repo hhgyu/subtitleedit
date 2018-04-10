@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms.Ocr
 {
@@ -23,8 +23,20 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
             SkipWholeText,
             SkipOnce,
             UseSuggestion,
+            InspectCompareMatches,
         }
 
+        public bool IsBinaryImageCompare
+        {
+            get
+            {
+                return buttonEditImageDb.Visible;
+            }
+            set
+            {
+                buttonEditImageDb.Visible = value;
+            }
+        }
         public Action ActionResult { get; private set; }
         public string Word { get; private set; }
         public string Paragraph { get; private set; }
@@ -34,8 +46,9 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
 
         public OcrSpellCheck()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
-
+            UiUtil.FixFonts(this);
             Text = Configuration.Settings.Language.SpellCheck.Title;
             buttonAddToDictionary.Text = Configuration.Settings.Language.SpellCheck.AddToUserDictionary;
             buttonChange.Text = Configuration.Settings.Language.SpellCheck.Change;
@@ -88,10 +101,10 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
         {
             if (word != null && richTextBoxParagraph.Text.Contains(word))
             {
-                const string expectedWordBoundaryChars = " <>-\"”„“«»[]'‘`´¶()♪¿¡.…—!?,:;/\r\n";
+                const string expectedWordBoundaryChars = " <>-\"”„“«»[]'‘`´¶()♪¿¡.…—!?,:;/\r\n؛،؟";
                 for (int i = 0; i < richTextBoxParagraph.Text.Length; i++)
                 {
-                    if (richTextBoxParagraph.Text.Substring(i).StartsWith(word))
+                    if (richTextBoxParagraph.Text.Substring(i).StartsWith(word, StringComparison.Ordinal))
                     {
                         bool startOk = i == 0;
                         if (!startOk)
@@ -226,8 +239,7 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
             Word = s;
             if (s.Length == 0 || s.Contains(' '))
             {
-                // TODO: Localize!
-                MessageBox.Show("Word should be one single word");
+                MessageBox.Show(Configuration.Settings.Language.SpellCheck.SpacesNotAllowed);
                 ActionResult = Action.SkipOnce;
                 return;
             }
@@ -279,5 +291,10 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
             }
         }
 
+        private void buttonEditImageDb_Click(object sender, EventArgs e)
+        {
+            ActionResult = Action.InspectCompareMatches;
+            DialogResult = DialogResult.OK;
+        }
     }
 }

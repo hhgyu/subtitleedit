@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace Nikse.SubtitleEdit.Core
 {
-    public static class SubtitleEditRegex
+    public static class RegexUtils
     {
         // Others classes may want to use this regex.
         public static readonly Regex LittleIRegex = new Regex(@"\bi\b", RegexOptions.Compiled);
@@ -21,21 +22,14 @@ namespace Nikse.SubtitleEdit.Core
             public static readonly Regex RegExIStand = new Regex(@"\bistand\b", RegexOptions.Compiled);
             public static readonly Regex RegExIOevrigt = new Regex(@"\biøvrigt\b", RegexOptions.Compiled);
 
-            // TODO: Change to IReadOnlyCollection when changed to (.NET 4.5).
-            private static readonly IList<Regex> _regexList;
+            private static readonly IList<Regex> RegexList;
 
-            public static IEnumerable<Regex> DanishCompiledRegexList
-            {
-                get
-                {
-                    return _regexList;
-                }
-            }
+            public static IEnumerable<Regex> DanishCompiledRegexList => RegexList;
 
             static DanishLetterI()
             {
                 // Not a complete list, more phrases will come.
-                _regexList = new[]
+                RegexList = new[]
                 {
                     RegexFactory(@"\b, er i alle\b"),
                     RegexFactory(@", i (?:ved nok|ved, |ved.|ikke blev)\b"),
@@ -166,5 +160,94 @@ namespace Nikse.SubtitleEdit.Core
             /// </summary>
             private static string ExpandWhiteSpace(string pattern) => pattern.Replace(" ", "[ \r\n]+");
         }
+
+        public static bool IsValidRegex(string testPattern)
+        {
+            if (string.IsNullOrEmpty(testPattern))
+            {
+                return false;
+            }
+            try
+            {
+                Regex.Match(string.Empty, testPattern);
+                return true;
+            }
+            catch (ArgumentException) // invalid pattern e.g: [
+            {
+                return false;
+            }
+        }
+
+        public static Regex MakeWordSearchRegex(string word)
+        {
+            string s = word.Replace("\\", "\\\\");
+            s = s.Replace("*", "\\*");
+            s = s.Replace(".", "\\.");
+            s = s.Replace("?", "\\?");
+            return new Regex(@"\b" + s + @"\b", RegexOptions.Compiled);
+        }
+
+        public static Regex MakeWordSearchRegexWithNumbers(string word)
+        {
+            string s = word.Replace("\\", "\\\\");
+            s = s.Replace("*", "\\*");
+            s = s.Replace(".", "\\.");
+            s = s.Replace("?", "\\?");
+            return new Regex(@"[\b ,\.\?\!]" + s + @"[\b !\.,\r\n\?]", RegexOptions.Compiled);
+        }
+
+        public static string GetRegExGroup(string pattern)
+        {
+            var start = pattern.IndexOf("(?<", StringComparison.Ordinal);
+            if (start < 0)
+                return null;
+            start += 3;
+            var end = pattern.IndexOf('>', start);
+            if (end <= start)
+                return null;
+            return pattern.Substring(start, end - start);
+        }
+
+        /// <summary>
+        /// Changes "\\r\\n" and "\\n" to "\n", which hopefully makes it simpler for 
+        /// the user who can use both "\\n" and "\\r\\n" for new line.
+        /// </summary>
+        public static string FixNewLine(string pattern)
+        {
+            if (string.IsNullOrEmpty(pattern))
+                return pattern;
+
+            return pattern.Replace("\\r\\n", Environment.NewLine).Replace("\\n", Environment.NewLine);
+        }
+
+        /// <summary>
+        /// Performs replace on regular expression. Line breaks are converted to just "\n" during the replace 
+        /// and line breaks are returned as Environment.NewLine.
+        /// </summary>
+        /// <param name="regularExpression">Regular expression to perform replace on</param>
+        /// <param name="text">Text perform replace on</param>
+        /// <param name="replaceWith">Pattern to replace with (new lines should be "\n")</param>
+        /// <returns>Input string with regular expression replace applied</returns>
+        public static string ReplaceNewLineSafe(Regex regularExpression, string text, string replaceWith)
+        {
+            return ReplaceNewLineSafe(regularExpression, text, replaceWith, int.MaxValue, 0);
+        }
+
+        /// <summary>
+        /// Performs replace on regular expression. Line breaks are converted to just "\n" during the replace 
+        /// and line breaks are returned as Environment.NewLine.
+        /// </summary>
+        /// <param name="regularExpression">Regular expression to perform replace on</param>
+        /// <param name="text">Text perform replace on</param>
+        /// <param name="replaceWith">Pattern to replace with (new lines should be "\n")</param>
+        /// <param name="count">Maximum number of times replacement can occur</param>
+        /// <param name="startIndex">Starting index of replace operation</param>
+        /// <returns>Input string with regular expression replace applied</returns>
+        public static string ReplaceNewLineSafe(Regex regularExpression, string text, string replaceWith, int count, int startIndex)
+        {
+            text = regularExpression.Replace(string.Join(Environment.NewLine, text.SplitToLines()), replaceWith, count, startIndex);
+            return string.Join(Environment.NewLine, text.SplitToLines());
+        }
+
     }
 }

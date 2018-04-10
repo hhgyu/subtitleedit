@@ -16,8 +16,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override string Name => NameOfFormat;
 
-        public override bool IsTimeBased => true;
-
         public static void Save(string fileName, Subtitle subtitle)
         {
         }
@@ -84,10 +82,8 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     buffer[i + TextBufferSize] == 0xff)
                 {
                     var text = ReadText(buffer, i);
-                    if (text != null)
-                    {
-                        texts.Add(text);
-                    }
+                    texts.Add(text);
+                    
                     i += TextBufferSize;
                 }
                 else

@@ -53,7 +53,7 @@ IF /I "%BUILDTYPE%" == "Clean" GOTO END
 
 ECHO.
 ECHO ILRepack...
-"packages\ILRepack.2.0.13\tools\ILRepack.exe" /parallel /internalize /targetplatform:v4 /out:"bin\Release\SubtitleEdit.exe" "bin\Release\SubtitleEdit.exe" "bin\Release\libse.dll" "bin\Release\zlib.net.dll" "bin\Release\NHunspell.dll" "DLLs\Interop.QuartzTypeLib.dll"
+"packages\ILRepack.2.0.15\tools\ILRepack.exe" /parallel /internalize /targetplatform:v4 /out:"bin\Release\SubtitleEdit.exe" "bin\Release\SubtitleEdit.exe" "bin\Release\libse.dll" "bin\Release\zlib.net.dll" "bin\Release\NHunspell.dll" "DLLs\Interop.QuartzTypeLib.dll"
 ECHO.
 ECHO.
 POPD
@@ -91,9 +91,9 @@ PUSHD "src\bin\Release"
 IF EXIST "temp_zip"                                RD /S /Q "temp_zip"
 IF NOT EXIST "temp_zip"                            MD "temp_zip"
 IF NOT EXIST "temp_zip\Languages"                  MD "temp_zip\Languages"
-IF NOT EXIST "temp_zip\Tesseract"                  MD "temp_zip\Tesseract"
-IF NOT EXIST "temp_zip\Tesseract\tessdata"         MD "temp_zip\Tesseract\tessdata"
-IF NOT EXIST "temp_zip\Tesseract\tessdata\configs" MD "temp_zip\Tesseract\tessdata\configs"
+IF NOT EXIST "temp_zip\Tesseract4"                  MD "temp_zip\Tesseract4"
+IF NOT EXIST "temp_zip\Tesseract4\tessdata"         MD "temp_zip\Tesseract4\tessdata"
+IF NOT EXIST "temp_zip\Tesseract4\tessdata\configs" MD "temp_zip\Tesseract4\tessdata\configs"
 
 COPY /Y /V "..\..\..\LICENSE.txt"                        "temp_zip\"
 COPY /Y /V "..\..\..\Changelog.txt"                      "temp_zip\"
@@ -101,11 +101,10 @@ COPY /Y /V "Hunspellx86.dll"                             "temp_zip\"
 COPY /Y /V "Hunspellx64.dll"                             "temp_zip\"
 COPY /Y /V "SubtitleEdit.exe"                            "temp_zip\"
 COPY /Y /V "Languages\*.xml"                             "temp_zip\Languages\"
-COPY /Y /V "..\..\..\Tesseract\msvcp90.dll"              "temp_zip\Tesseract\"
-COPY /Y /V "..\..\..\Tesseract\msvcr90.dll"              "temp_zip\Tesseract\"
-COPY /Y /V "..\..\..\Tesseract\tesseract.exe"            "temp_zip\Tesseract\"
-COPY /Y /V "..\..\..\Tesseract\tessdata\configs\hocr"    "temp_zip\Tesseract\tessdata\configs\"
-COPY /Y /V "..\..\..\Tesseract\tessdata\*.traineddata"   "temp_zip\Tesseract\tessdata\"
+COPY /Y /V "..\..\..\Tesseract4\tesseract.exe"            "temp_zip\Tesseract4\"
+COPY /Y /V "..\..\..\Tesseract4\*.dll"            "temp_zip\Tesseract4\"
+COPY /Y /V "..\..\..\Tesseract4\tessdata\configs\hocr"    "temp_zip\Tesseract4\tessdata\configs\"
+COPY /Y /V "..\..\..\Tesseract4\tessdata\*.traineddata"   "temp_zip\Tesseract4\tessdata\"
 
 PUSHD "temp_zip"
 START "" /B /WAIT "%SEVENZIP%" a -tzip -mx=9 "SE%VERSION%.zip" * >NUL

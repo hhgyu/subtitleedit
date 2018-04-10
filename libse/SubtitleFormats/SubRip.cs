@@ -27,33 +27,16 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static readonly Regex RegexTimeCodes = new Regex(@"^-?\d+:-?\d+:-?\d+[:,]-?\d+\s*-->\s*-?\d+:-?\d+:-?\d+[:,]-?\d+$", RegexOptions.Compiled);
         private static readonly Regex RegexTimeCodes2 = new Regex(@"^\d+:\d+:\d+,\d+\s*-->\s*\d+:\d+:\d+,\d+$", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".srt"; }
-        }
+        public override string Extension => ".srt";
 
         public const string NameOfFormat = "SubRip";
 
-        public override string Name
-        {
-            get { return NameOfFormat; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => NameOfFormat;
 
         public override bool IsMine(List<string> lines, string fileName)
         {
             if (lines.Count > 0 && lines[0].StartsWith("WEBVTT", StringComparison.OrdinalIgnoreCase))
                 return false;
-
-            // JacobSub
-            if (!string.IsNullOrEmpty(fileName) && fileName.EndsWith(".jss", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
 
             var subtitle = new Subtitle();
             LoadSubtitle(subtitle, lines, fileName);
@@ -68,7 +51,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var sb = new StringBuilder();
             foreach (Paragraph p in subtitle.Paragraphs)
             {
-                //string s = p.Text.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine).Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
                 sb.AppendFormat(paragraphWriteFormat, p.Number, p.StartTime, p.EndTime, p.Text);
             }
             return sb.ToString().Trim() + Environment.NewLine + Environment.NewLine;
@@ -242,7 +224,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 line = line.Substring(0, 29);
 
             // removes all extra spaces
-            line = line.Replace(" ", string.Empty).Replace("-->", defaultSeparator).Trim();
+            line = line.RemoveChar(' ').Replace("-->", defaultSeparator).Trim();
 
             // Fix a few more cases of wrong time codes, seen this: 00.00.02,000 --> 00.00.04,000
             line = line.Replace('.', ':');
@@ -253,7 +235,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
             if (RegexTimeCodes.IsMatch(line) || RegexTimeCodes2.IsMatch(line))
             {
-                string[] parts = line.Replace("-->", ":").Replace(" ", string.Empty).Split(':', ',');
+                string[] parts = line.Replace("-->", ":").RemoveChar(' ').Split(':', ',');
                 try
                 {
                     int startHours = int.Parse(parts[0]);

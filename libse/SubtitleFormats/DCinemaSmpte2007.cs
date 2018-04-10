@@ -36,20 +36,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public int Version { get; set; }
 
-        public override string Extension
-        {
-            get { return ".xml"; }
-        }
+        public override string Extension => ".xml";
 
-        public override string Name
-        {
-            get { return "D-Cinema SMPTE 2007"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "D-Cinema SMPTE 2007";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -205,7 +194,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     string text = Utilities.RemoveSsaTags(p.Text);
 
                     var lines = text.SplitToLines();
-                    int vPos = 1 + lines.Length * 7;
+                    int vPos = 1 + lines.Count * 7;
                     int vPosFactor = (int)Math.Round(fontSize / 7.4);
                     if (alignVTop)
                     {
@@ -213,11 +202,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
                     else if (alignVCenter)
                     {
-                        vPos = (int)Math.Round((lines.Length * vPosFactor * -1) / 2.0);
+                        vPos = (int)Math.Round((lines.Count * vPosFactor * -1) / 2.0);
                     }
                     else
                     {
-                        vPos = (lines.Length * vPosFactor) - vPosFactor + Configuration.Settings.SubtitleSettings.DCinemaBottomMargin; // Bottom margin is normally 8
+                        vPos = (lines.Count * vPosFactor) - vPosFactor + Configuration.Settings.SubtitleSettings.DCinemaBottomMargin; // Bottom margin is normally 8
                     }
 
                     bool isItalic = false;
@@ -311,7 +300,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                     c = c.TrimStart('#').ToUpper().PadLeft(8, 'F');
                                 fontColors.Push(c);
                                 fontNo++;
-                                i += endOfFont - i;
+                                i = endOfFont;
                             }
                             else if (fontNo > 0 && line.Substring(i).StartsWith("</font>"))
                             {
@@ -729,7 +718,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private string ConvertToTimeString(TimeCode time)
         {
-            return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", time.Hours, time.Minutes, time.Seconds, DCinemaSmpte2010.MsToFramesMaxFrameRate(time.Milliseconds, _frameRate));
+            return $"{time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}:{DCinemaSmpte2010.MsToFramesMaxFrameRate(time.Milliseconds, _frameRate):00}";
         }
 
     }

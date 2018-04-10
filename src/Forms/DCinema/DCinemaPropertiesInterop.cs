@@ -10,7 +10,9 @@ namespace Nikse.SubtitleEdit.Forms.DCinema
     {
         public DCinemaPropertiesInterop()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             var l = Configuration.Settings.Language.DCinemaProperties;
             Text = l.Title;
@@ -93,7 +95,7 @@ namespace Nikse.SubtitleEdit.Forms.DCinema
 
         private void buttonGenerateID_Click(object sender, EventArgs e)
         {
-            string hex = Guid.NewGuid().ToString().Replace("-", string.Empty);
+            string hex = Guid.NewGuid().ToString().RemoveChar('-');
             textBoxSubtitleID.Text = hex.Insert(8, "-").Insert(13, "-").Insert(18, "-").Insert(23, "-");
         }
 

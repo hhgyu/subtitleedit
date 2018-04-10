@@ -19,8 +19,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override string Name => NameOfFormat;
 
-        public override bool IsTimeBased => true;
-
         public static string TtmlNamespace = "http://www.w3.org/ns/ttml";
         public static string TtmlParameterNamespace = "http://www.w3.org/ns/ttml#parameter";
         public static string TtmlStylingNamespace = "http://www.w3.org/ns/ttml#styling";
@@ -207,7 +205,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 xml.LoadXml(subtitle.Header);
                 XmlNode bodyNode = xml.DocumentElement.SelectSingleNode("//ttml:body", nsmgr);
-                XmlNode divNode = bodyNode.SelectSingleNode("ttml:div", nsmgr);
+                XmlNode divNode = null;
+                if (bodyNode != null)
+                    divNode = bodyNode.SelectSingleNode("ttml:div", nsmgr);
                 if (divNode == null)
                     divNode = xml.DocumentElement.SelectSingleNode("//ttml:body", nsmgr).FirstChild;
                 if (divNode != null)
@@ -252,7 +252,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 div = xml.DocumentElement.SelectSingleNode("//ttml:body", nsmgr).FirstChild;
 
             if (div == null)
-            {                
+            {
                 div = xml.CreateElement("div");
                 body.AppendChild(div);
             }
@@ -290,7 +290,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     bool firstParagraph = true;
                     foreach (Paragraph p in subtitle.Paragraphs)
                     {
-                        if (p.Language.Equals(language, StringComparison.OrdinalIgnoreCase))
+                        if (p.Language != null && p.Language.Equals(language, StringComparison.OrdinalIgnoreCase))
                         {
                             if (p.NewSection && !firstParagraph)
                             {
@@ -661,12 +661,23 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     var frameRateMultiplier = xml.DocumentElement.Attributes["ttp:frameRateMultiplier"];
                     if (frameRateMultiplier != null)
                     {
-                        var arr = frameRateMultiplier.InnerText.Split();
-                        if (arr.Length == 2 && Utilities.IsInteger(arr[0]) && Utilities.IsInteger(arr[1]) && int.Parse(arr[1]) > 0)
+                        if (frameRateMultiplier.InnerText == "999 1000" && Math.Abs(fr - 30) < 0.01)
                         {
-                            fr = double.Parse(arr[0]) / double.Parse(arr[1]);
-                            if (fr > 20 && fr < 100)
-                                Configuration.Settings.General.CurrentFrameRate = fr;
+                            Configuration.Settings.General.CurrentFrameRate = 29.97;
+                        }
+                        else if (frameRateMultiplier.InnerText == "999 1000" && Math.Abs(fr - 24) < 0.01)
+                        {
+                            Configuration.Settings.General.CurrentFrameRate = 23.976;
+                        }
+                        else
+                        {
+                            var arr = frameRateMultiplier.InnerText.Split();
+                            if (arr.Length == 2 && Utilities.IsInteger(arr[0]) && Utilities.IsInteger(arr[1]) && int.Parse(arr[1]) > 0)
+                            {
+                                fr = double.Parse(arr[0]) / double.Parse(arr[1]);
+                                if (fr > 20 && fr < 100)
+                                    Configuration.Settings.General.CurrentFrameRate = fr;
+                            }
                         }
                     }
                 }
@@ -783,7 +794,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                 break;
                             }
                         }
-                        
+
                         if (!regionCorrespondToTag)
                         {
                             if (topRegions.Contains(region))
@@ -999,7 +1010,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                                         {
                                             fontFamily = styleNode.Attributes["tts:fontFamily"].Value;
                                         }
-                                        if (styleNode.Attributes["tts:color"] != null && styleNode.Attributes["tts:color"].Value != "white")
+                                        if (styleNode.Attributes["tts:color"] != null)
                                         {
                                             color = styleNode.Attributes["tts:color"].Value;
                                         }
@@ -1037,7 +1048,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         color = child.Attributes["tts:color"].Value;
                     }
-                    
+
 
                     // Applying styles
                     if (isItalic)
@@ -1120,12 +1131,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 return new TimeCode(ts.TotalMilliseconds);
             }
 
-            var parts = s.Split(':', '.', ',');
+            var parts = s.Split(':', '.', ',', ';');
             if (s.Length == 12 && s[2] == ':' && s[5] == ':' && s[8] == '.') // 00:01:39.946
             {
                 Configuration.Settings.SubtitleSettings.TimedText10TimeCodeFormatSource = "hh:mm:ss.ms";
             }
-            else if (s.Length == 12 && s[2] == ':' && s[5] == ':' && s[8] == ',') // 00:01:39.946
+            else if (s.Length == 12 && s[2] == ':' && s[5] == ':' && s[8] == ',') // 00:01:39,946
             {
                 Configuration.Settings.SubtitleSettings.TimedText10TimeCodeFormatSource = "hh:mm:ss,ms";
             }
@@ -1140,7 +1151,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 Configuration.Settings.SubtitleSettings.TimedText10TimeCodeFormatSource = "frames";
                 return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), FramesToMillisecondsMax999(int.Parse(parts[3])));
             }
-            return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), int.Parse(parts[3]));
+            return new TimeCode(int.Parse(parts[0]), int.Parse(parts[1]), int.Parse(parts[2]), parts.Length > 3 ? int.Parse(parts[3]) : 0);
         }
 
         public override List<string> AlternateExtensions => new List<string> { ".itt", ".dfxp", ".ttml" };
@@ -1169,7 +1180,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
             }
             return list;
-        }      
+        }
 
         public static List<string> GetRegionsFromHeader(string xmlAsString)
         {
@@ -1210,43 +1221,14 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     bool top = false;
                     foreach (XmlNode styleNode in node.ChildNodes)
                     {
-                        if (styleNode.Attributes != null)
-                        {
-                            var origin = string.Empty;
-                            if (styleNode.Attributes["tts:origin"] != null)
-                                origin = styleNode.Attributes["tts:origin"].Value;
-                            else if (styleNode.Attributes["origin"] != null)
-                                origin = styleNode.Attributes["origin"].Value;
-                            var arr = origin.Split(' ');
-                            if (arr.Length == 2 && arr[0].EndsWith("%", StringComparison.Ordinal) && arr[1].EndsWith("%", StringComparison.Ordinal))
-                            {
-                                var n1 = Convert.ToDouble(arr[0].TrimEnd('%'), CultureInfo.InvariantCulture);
-                                var n2 = Convert.ToDouble(arr[1].TrimEnd('%'), CultureInfo.InvariantCulture);
-                                if (Math.Abs(n1 - 10) < 2 && Math.Abs(n2 - 10) < 5)
-                                {
-                                    top = true;
-                                }
-                            }
-                        }                        
+                        top = GetIfTopAligned(styleNode);
+                        if (top)
+                            break;
                     }
 
                     if (!top && node.Attributes != null)
                     {
-                        var origin = string.Empty;
-                        if (node.Attributes["tts:origin"] != null)
-                            origin = node.Attributes["tts:origin"].Value;
-                        else if (node.Attributes["origin"] != null)
-                            origin = node.Attributes["origin"].Value;
-                        var arr = origin.Split(' ');
-                        if (arr.Length == 2 && arr[0].EndsWith("%", StringComparison.Ordinal) && arr[1].EndsWith("%", StringComparison.Ordinal))
-                        {
-                            var n1 = Convert.ToDouble(arr[0].TrimEnd('%'), CultureInfo.InvariantCulture);
-                            var n2 = Convert.ToDouble(arr[1].TrimEnd('%'), CultureInfo.InvariantCulture);
-                            if (Math.Abs(n1 - 10) < 2 && Math.Abs(n2 - 10) < 5)
-                            {
-                                top = true;
-                            }
-                        }
+                        top = GetIfTopAligned(node);
                     }
 
                     if (top)
@@ -1262,6 +1244,49 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
             }
             return list;
+        }
+
+        private static bool GetIfTopAligned(XmlNode styleNode)
+        {
+            if (styleNode?.Attributes == null)
+                return false;
+
+            var origin = string.Empty;
+            if (styleNode.Attributes["tts:origin"] != null)
+                origin = styleNode.Attributes["tts:origin"].Value;
+            else if (styleNode.Attributes["origin"] != null)
+                origin = styleNode.Attributes["origin"].Value;
+            var originArr = origin.Split(' ');
+
+            var extent = string.Empty;
+            if (styleNode.Attributes["tts:extent"] != null)
+                extent = styleNode.Attributes["tts:extent"].Value;
+            else if (styleNode.Attributes["extent"] != null)
+                extent = styleNode.Attributes["extent"].Value;
+            var extentArr = extent.Split(' ');
+
+            var displayAlign = string.Empty;
+            if (styleNode.Attributes["tts:displayAlign"] != null)
+                displayAlign = styleNode.Attributes["tts:displayAlign"].Value;
+            else if (styleNode.Attributes["displayAlign"] != null)
+                displayAlign = styleNode.Attributes["displayAlign"].Value;
+
+            if (originArr.Length == 2 && originArr[0].EndsWith("%", StringComparison.Ordinal) && originArr[1].EndsWith("%", StringComparison.Ordinal) &&
+                extentArr.Length == 2 && extentArr[0].EndsWith("%", StringComparison.Ordinal) && extentArr[1].EndsWith("%", StringComparison.Ordinal) &&
+                !string.IsNullOrEmpty(displayAlign))
+            {
+                var yPos = Convert.ToDouble(originArr[1].TrimEnd('%'), CultureInfo.InvariantCulture);
+                var yExtent = Convert.ToDouble(extentArr[1].TrimEnd('%'), CultureInfo.InvariantCulture);
+                if (yPos <= 15 && yExtent < 40)
+                {
+                    return true;
+                }
+                else if (yPos <= 25 && displayAlign == "before") // before = top align
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public static List<string> GetUsedLanguages(Subtitle subtitle)

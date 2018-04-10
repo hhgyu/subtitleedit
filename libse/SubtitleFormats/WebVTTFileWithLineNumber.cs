@@ -14,27 +14,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static readonly Regex RegexTimeCodesMiddle = new Regex(@"^-?\d+:-?\d+\.-?\d+\s*-->\s*-?\d+:-?\d+:-?\d+\.-?\d+", RegexOptions.Compiled);
         private static readonly Regex RegexTimeCodesShort = new Regex(@"^-?\d+:-?\d+\.-?\d+\s*-->\s*-?\d+:-?\d+\.-?\d+", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".vtt"; }
-        }
+        public override string Extension => ".vtt";
 
-        public override string Name
-        {
-            get { return "WebVTT File with#"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "WebVTT File with#";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -73,16 +55,22 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         {
             _errorCount = 0;
             Paragraph p = null;
-            bool textDone = true;
             string positionInfo = string.Empty;
-            foreach (string line in lines)
+            bool hadEmptyLine = false;
+            int numbers = 0;
+            for (var index = 0; index < lines.Count; index++)
             {
+                string line = lines[index];
+                string next = string.Empty;
+                if (index < lines.Count - 1)
+                    next = lines[index + 1];
                 string s = line;
                 bool isTimeCode = line.Contains("-->");
                 if (isTimeCode && RegexTimeCodesMiddle.IsMatch(s))
                 {
                     s = "00:" + s; // start is without hours, end is with hours
                 }
+
                 if (isTimeCode && RegexTimeCodesShort.IsMatch(s))
                 {
                     s = "00:" + s.Replace("--> ", "--> 00:");
@@ -90,18 +78,20 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                 if (isTimeCode && RegexTimeCodes.IsMatch(s))
                 {
-                    textDone = false;
                     if (p != null)
                     {
+                        p.Text = p.Text.TrimEnd();
                         subtitle.Paragraphs.Add(p);
-                        p = null;
                     }
+
                     try
                     {
-                        string[] parts = s.Replace("-->", "@").Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
-                        p = new Paragraph();
-                        p.StartTime = GetTimeCodeFromString(parts[0]);
-                        p.EndTime = GetTimeCodeFromString(parts[1]);
+                        var parts = s.Replace("-->", "@").Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
+                        p = new Paragraph
+                        {
+                            StartTime = WebVTT.GetTimeCodeFromString(parts[0]),
+                            EndTime = WebVTT.GetTimeCodeFromString(parts[1])
+                        };
                         positionInfo = WebVTT.GetPositionInfo(s);
                     }
                     catch (Exception exception)
@@ -110,46 +100,49 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         _errorCount++;
                         p = null;
                     }
+                    hadEmptyLine = false;
                 }
                 else if (subtitle.Paragraphs.Count == 0 && line.Trim() == "WEBVTT FILE")
                 {
                     subtitle.Header = "WEBVTT FILE";
                 }
-                else if (p != null && !string.IsNullOrWhiteSpace(line))
+                else if (p != null && hadEmptyLine && Utilities.IsInteger(line) &&
+                         (RegexTimeCodesMiddle.IsMatch(next) ||
+                          RegexTimeCodesShort.IsMatch(next) ||
+                          RegexTimeCodes.IsMatch(next)))
+                {
+                    numbers++;
+                }
+                else if (p != null)
                 {
                     string text = positionInfo + line.Trim();
-                    if (!textDone)
-                        p.Text = (p.Text + Environment.NewLine + text).Trim();
+                    if (string.IsNullOrEmpty(text))
+                        hadEmptyLine = true;
+                    if (string.IsNullOrEmpty(p.Text))
+                        p.Text = text + Environment.NewLine;
+                    else
+                        p.Text += text + Environment.NewLine;
                     positionInfo = string.Empty;
                 }
-                else if (line.Length == 0)
-                {
-                    textDone = true;
-                }
             }
+
             if (subtitle.Header == null && subtitle.Header != "WEBVTT FILE")
             {
                 subtitle.Paragraphs.Clear();
                 _errorCount++;
             }
             if (p != null)
+            {
+                p.Text = p.Text.TrimEnd();
                 subtitle.Paragraphs.Add(p);
+            }
+
             subtitle.Renumber();
         }
 
         public override void RemoveNativeFormatting(Subtitle subtitle, SubtitleFormat newFormat)
         {
             new WebVTT().RemoveNativeFormatting(subtitle, newFormat);
-        }
-
-        private static TimeCode GetTimeCodeFromString(string time)
-        {
-            // hh:mm:ss.mmm
-            string[] timeCode = time.Trim().Split(':', '.', ' ');
-            return new TimeCode(int.Parse(timeCode[0]),
-                                int.Parse(timeCode[1]),
-                                int.Parse(timeCode[2]),
-                                int.Parse(timeCode[3]));
         }
 
     }

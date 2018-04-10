@@ -12,20 +12,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         //01:00:10:03,01:00:15:25,"I thought I should let my sister-in-law know.", ""
         private static readonly Regex CsvLine = new Regex(@"^\d\d:\d\d:\d\d:\d\d" + Separator + @"\d\d:\d\d:\d\d:\d\d" + Separator, RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".csv"; }
-        }
+        public override string Extension => ".csv";
 
-        public override string Name
-        {
-            get { return "Csv3"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "Csv3";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -67,16 +56,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 var arr = p.Text.Trim().SplitToLines();
-                if (arr.Length > 3)
+                if (arr.Count > 3)
                 {
                     string s = Utilities.AutoBreakLine(p.Text);
                     arr = s.Trim().SplitToLines();
                 }
                 string line1 = string.Empty;
                 string line2 = string.Empty;
-                if (arr.Length > 0)
-                    line1 = arr[0];
-                if (arr.Length > 1)
+                line1 = arr[0];
+                if (arr.Count > 1)
                     line2 = arr[1];
                 line1 = line1.Replace("\"", "\"\"");
                 line2 = line2.Replace("\"", "\"\"");
@@ -87,7 +75,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string EncodeTimeCode(TimeCode time)
         {
-            return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", time.Hours, time.Minutes, time.Seconds, MillisecondsToFramesMaxFrameRate(time.Milliseconds));
+            return $"{time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}:{MillisecondsToFramesMaxFrameRate(time.Milliseconds):00}";
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
@@ -139,7 +127,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             for (int i = 0; i < csv.Length; i++)
             {
                 var s = csv[i];
-                if (s == '"' && csv.Substring(i).StartsWith("\"\""))
+                if (s == '"' && csv.Substring(i).StartsWith("\"\"", StringComparison.Ordinal))
                 {
                     sb.Append('"');
                 }
@@ -149,7 +137,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         isBreak = false;
                     }
-                    else if (i == 0 || i == csv.Length - 1 || sb.ToString().EndsWith(Environment.NewLine))
+                    else if (i == 0 || i == csv.Length - 1 || sb.ToString().EndsWith(Environment.NewLine, StringComparison.Ordinal))
                     {
                         sb.Append('"');
                     }

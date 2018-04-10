@@ -19,7 +19,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public ChangeCasingNames()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             labelXLinesSelected.Text = string.Empty;
             Text = Configuration.Settings.Language.ChangeCasingNames.Title;
             groupBoxNames.Text = string.Empty;
@@ -112,8 +114,8 @@ namespace Nikse.SubtitleEdit.Forms
         {
             var item = new ListViewItem(string.Empty) { Tag = p, Checked = true };
             item.SubItems.Add(p.Number.ToString(CultureInfo.InvariantCulture));
-            item.SubItems.Add(p.Text.Replace(Environment.NewLine, Configuration.Settings.General.ListViewLineSeparatorString));
-            item.SubItems.Add(newText.Replace(Environment.NewLine, Configuration.Settings.General.ListViewLineSeparatorString));
+            item.SubItems.Add(UiUtil.GetListViewTextFromString(p.Text));
+            item.SubItems.Add(UiUtil.GetListViewTextFromString(newText));
             listViewFixes.Items.Add(item);
         }
 
@@ -142,10 +144,7 @@ namespace Nikse.SubtitleEdit.Forms
                     while (startIndex >= 0 && startIndex < text.Length &&
                            textToLower.Substring(startIndex).Contains(name.ToLower()) && name.Length > 1 && name != name.ToLower())
                     {
-                        bool startOk = (startIndex == 0) || (text[startIndex - 1] == ' ') || (text[startIndex - 1] == '-') ||
-                                       (text[startIndex - 1] == '"') || (text[startIndex - 1] == '\'') || (text[startIndex - 1] == '>') ||
-                                       (Environment.NewLine.EndsWith(text[startIndex - 1].ToString(CultureInfo.InvariantCulture), StringComparison.Ordinal));
-
+                        bool startOk = startIndex == 0 || "([ --'>\r\n¿¡\"”“„".Contains(text[startIndex - 1]);
                         if (startOk)
                         {
                             int end = startIndex + name.Length;
@@ -189,7 +188,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 item.Selected = false;
 
-                string text = item.SubItems[2].Text.Replace(Configuration.Settings.General.ListViewLineSeparatorString, Environment.NewLine);
+                string text = UiUtil.GetStringFromListViewText(item.SubItems[2].Text);
 
                 string lower = text.ToLower();
                 if (lower.Contains(name.ToLower()) && name.Length > 1 && name != name.ToLower())
@@ -197,7 +196,7 @@ namespace Nikse.SubtitleEdit.Forms
                     int start = lower.IndexOf(name.ToLower(), StringComparison.Ordinal);
                     if (start >= 0)
                     {
-                        bool startOk = (start == 0) || (lower[start - 1] == ' ') || (lower[start - 1] == '-') || (lower[start - 1] == '"') ||
+                        bool startOk = start == 0 || lower[start - 1] == ' ' || lower[start - 1] == '-' || lower[start - 1] == '"' ||
                                        lower[start - 1] == '\'' || lower[start - 1] == '>' || Environment.NewLine.EndsWith(lower[start - 1]);
 
                         if (startOk)
@@ -238,7 +237,7 @@ namespace Nikse.SubtitleEdit.Forms
                     LinesChanged++;
                     var p = item.Tag as Paragraph;
                     if (p != null)
-                        p.Text = item.SubItems[3].Text.Replace(Configuration.Settings.General.ListViewLineSeparatorString, Environment.NewLine);
+                        p.Text = UiUtil.GetStringFromListViewText(item.SubItems[3].Text);
                 }
             }
         }

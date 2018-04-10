@@ -26,27 +26,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static readonly Regex RegexTimeCodes = new Regex(@"^\d\d\.\d\d\.\d\d\.\d\d-\d\d\.\d\d\.\d\d\.\d\d$", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".txt"; }
-        }
+        public override string Extension => ".txt";
 
-        public override string Name
-        {
-            get { return "Unknown 50"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 50";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -64,12 +46,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 if (p.Text.Contains("<i>"))
                 {
                     if (Utilities.CountTagInText(p.Text, "<i>") == 1 && Utilities.CountTagInText(p.Text, "</i>") == 1 &&
-                        p.Text.StartsWith("<i>") && p.Text.StartsWith("<i>"))
+                        p.Text.StartsWith("<i>", StringComparison.OrdinalIgnoreCase) && 
+                        p.Text.EndsWith("</i>", StringComparison.OrdinalIgnoreCase))
                     {
                         text = "||" + text.Replace(Environment.NewLine, "||" + Environment.NewLine + "||") + "||";
                     }
                     else if (Utilities.CountTagInText(p.Text, "<i>") == 2 && Utilities.CountTagInText(p.Text, "</i>") == 2 &&
-                        p.Text.StartsWith("<i>") && p.Text.StartsWith("<i>") && p.Text.Contains("</i>" + Environment.NewLine + "<i>"))
+                             p.Text.StartsWith("<i>", StringComparison.OrdinalIgnoreCase) && 
+                             p.Text.EndsWith("</i>", StringComparison.OrdinalIgnoreCase) && 
+                             p.Text.Contains("</i>" + Environment.NewLine + "<i>"))
                     {
                         text = "||" + text.Replace(Environment.NewLine, "||" + Environment.NewLine + "||") + "||";
                     }
@@ -85,7 +70,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string FormatTime(TimeCode timeCode)
         {
-            return string.Format("{0:00}.{1:00}.{2:00}.{3:00}", timeCode.Hours, timeCode.Minutes, timeCode.Seconds, MillisecondsToFramesMaxFrameRate(timeCode.Milliseconds));
+            return $"{timeCode.Hours:00}.{timeCode.Minutes:00}.{timeCode.Seconds:00}.{MillisecondsToFramesMaxFrameRate(timeCode.Milliseconds):00}";
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)

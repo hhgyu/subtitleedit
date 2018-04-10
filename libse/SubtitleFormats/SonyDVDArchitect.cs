@@ -9,27 +9,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         private static readonly Regex Regex = new Regex(@"^\d\d:\d\d:\d\d:\d\d[ ]+-[ ]+\d\d:\d\d:\d\d:\d\d", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".sub"; }
-        }
+        public override string Extension => ".sub";
 
-        public override string Name
-        {
-            get { return "Sony DVDArchitect"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Sony DVDArchitect";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -70,7 +52,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 {
                     string s = line.Substring(0, match.Length);
                     s = s.Replace(" - ", ":");
-                    s = s.Replace(" ", string.Empty);
+                    s = s.RemoveChar(' ');
                     string[] parts = s.Split(':');
                     if (parts.Length == 8)
                     {

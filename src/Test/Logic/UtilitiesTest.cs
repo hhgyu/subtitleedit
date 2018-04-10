@@ -55,6 +55,33 @@ namespace Test.Logic
         }
 
         [TestMethod]
+        public void AutoBreakLine5DoNoBreakAtArabicDialogue()
+        {
+            Configuration.Settings.General.SubtitleLineMaximumLength = 43;
+            string s1 = "!دعه -" + Environment.NewLine + "!دعه أنت -";
+            string s2 = Utilities.AutoBreakLine(s1, "ar");
+            Assert.AreEqual(s1, s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine5DoNoBreakAtTwoMusicTaggedLines()
+        {
+            Configuration.Settings.General.SubtitleLineMaximumLength = 43;
+            string s1 = "♪ Yo ♪" + Environment.NewLine + "♪ Yo yo ♪";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual(s1, s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine5DoNoBreakAtOneMusicTaggedLine()
+        {
+            Configuration.Settings.General.SubtitleLineMaximumLength = 43;
+            string s1 = "♪ Yo ♪" + Environment.NewLine + "Hallo.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual(s1, s2);
+        }
+
+        [TestMethod]
         public void AutoBreakLine5DoNoBreakAtPeriod()
         {
             Configuration.Settings.General.SubtitleLineMaximumLength = 43;
@@ -470,19 +497,19 @@ namespace Test.Logic
         [TestMethod]
         public void IsValidRegexOk1()
         {
-            Assert.IsTrue(Utilities.IsValidRegex(@"^(?![\s\S])"));
+            Assert.IsTrue(RegexUtils.IsValidRegex(@"^(?![\s\S])"));
         }
 
         [TestMethod]
         public void IsValidRegexOk2()
         {
-            Assert.IsTrue(Utilities.IsValidRegex(@"\d+"));
+            Assert.IsTrue(RegexUtils.IsValidRegex(@"\d+"));
         }
 
         [TestMethod]
         public void IsValidRegexBad1()
         {
-            Assert.IsFalse(Utilities.IsValidRegex(@"[\s\S(\()()(()\)"));
+            Assert.IsFalse(RegexUtils.IsValidRegex(@"[\s\S(\()()(()\)"));
         }
 
         [TestMethod]
@@ -531,7 +558,28 @@ namespace Test.Logic
         public void ReverseStartAndEndingForRightToLeft6()
         {
             Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head." + Environment.NewLine + "~So do I?" + Environment.NewLine + "+I do too!"),
-                                                                          ".I have a big head-" + Environment.NewLine + "?So do I~" + Environment.NewLine + "!I do too+");
+                ".I have a big head-" + Environment.NewLine + "?So do I~" + Environment.NewLine + "!I do too+");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft7HtmlTags()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("<i>-I have a big head.</i>" + Environment.NewLine + "<font color='red'>~So do I?</font>" + Environment.NewLine + "+I do too!"),
+                "<i>.I have a big head-</i>" + Environment.NewLine + "<font color='red'>?So do I~</font>" + Environment.NewLine + "!I do too+");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft8BoldTag()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("<b>-I have a big head.</b>" + Environment.NewLine + "<font color='red'>~So do I?</font>" + Environment.NewLine + "+I do too!"),
+                "<b>.I have a big head-</b>" + Environment.NewLine + "<font color='red'>?So do I~</font>" + Environment.NewLine + "!I do too+");
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeft9Alignment()
+        {
+            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("{\an8}Hello" + Environment.NewLine + "Hi."),
+                "{\an8}Hello" + Environment.NewLine + ".Hi");
         }
 
     }

@@ -1,4 +1,6 @@
-﻿using Nikse.SubtitleEdit.Core;
+﻿using Nikse.SubtitleEdit.Controls;
+using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
@@ -9,8 +11,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using Nikse.SubtitleEdit.Controls;
-using Nikse.SubtitleEdit.Core.SubtitleFormats;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -55,11 +55,6 @@ namespace Nikse.SubtitleEdit.Forms
 
         private Encoding _screenScrapingEncoding;
 
-        public Encoding ScreenScrapingEncoding
-        {
-            get { return _screenScrapingEncoding; }
-        }
-
         private string _targetTwoLetterIsoLanguageName;
 
         public class ComboBoxItem
@@ -82,17 +77,13 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        public Subtitle TranslatedSubtitle
-        {
-            get
-            {
-                return _translatedSubtitle;
-            }
-        }
+        public Subtitle TranslatedSubtitle => _translatedSubtitle;
 
         public GoogleTranslate()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             Text = Configuration.Settings.Language.GoogleTranslate.Title;
             labelFrom.Text = Configuration.Settings.Language.GoogleTranslate.From;
@@ -210,11 +201,11 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 string from = (comboBoxFrom.SelectedItem as ComboBoxItem).Value;
                 string to = _targetTwoLetterIsoLanguageName;
-                if (!string.IsNullOrEmpty(Configuration.Settings.Tools.MicrosoftBingClientId) && !string.IsNullOrEmpty(Configuration.Settings.Tools.MicrosoftBingClientSecret))
+                if (!string.IsNullOrEmpty(Configuration.Settings.Tools.MicrosoftTranslatorApiKey))
                 {
                     try
                     {
-                        _bingAccessToken = GetBingAccesstoken(Configuration.Settings.Tools.MicrosoftBingClientId, Configuration.Settings.Tools.MicrosoftBingClientSecret);
+                        _bingAccessToken = GetBingAccesstoken(Configuration.Settings.Tools.MicrosoftTranslatorApiKey);
                     }
                     catch (Exception exception)
                     {
@@ -310,7 +301,7 @@ namespace Nikse.SubtitleEdit.Forms
             }
 
             var lines = text.SplitToLines();
-            if (Configuration.Settings.Tools.TranslateAutoSplit && lines.Length == 2 && !string.IsNullOrEmpty(lines[0]) && (Utilities.AllLettersAndNumbers + ",").Contains(lines[0].Substring(lines[0].Length-1)))
+            if (Configuration.Settings.Tools.TranslateAutoSplit && lines.Count == 2 && !string.IsNullOrEmpty(lines[0]) && (Utilities.AllLettersAndNumbers + ",").Contains(lines[0].Substring(lines[0].Length - 1)))
             {
                 _autoSplit[i] = true;
                 text = Utilities.RemoveLineBreaks(text);
@@ -551,7 +542,7 @@ namespace Nikse.SubtitleEdit.Forms
                     while (startIndex > 0)
                     {
                         startIndex = result.IndexOf('>', startIndex);
-                        while (startIndex > 0 && result.Substring(startIndex-3, 4) =="<br>")
+                        while (startIndex > 0 && result.Substring(startIndex - 3, 4) == "<br>")
                             startIndex = result.IndexOf('>', startIndex + 1);
                         if (startIndex > 0)
                         {
@@ -581,6 +572,12 @@ namespace Nikse.SubtitleEdit.Forms
             res = res.Replace("<br/>", Environment.NewLine);
             res = res.Replace("<br />", Environment.NewLine);
             res = res.Replace("<br>", Environment.NewLine);
+            res = res.Replace("</ font>", "</font>");
+            res = res.Replace("</ font >", "</font>");
+            res = res.Replace("<font color = \"# ", "<font color=\"#");
+            res = res.Replace("<font color = ", "<font color=");
+            res = res.Replace("</ b >", "</b>");
+            res = res.Replace("</ b>", "</b>");
             res = res.Replace("  ", " ").Trim();
             res = res.Replace(Environment.NewLine + Environment.NewLine, Environment.NewLine);
             res = res.Replace(Environment.NewLine + " ", Environment.NewLine);
@@ -615,22 +612,28 @@ namespace Nikse.SubtitleEdit.Forms
         {
             return new Dictionary<string, string>
             {
+                {"af", "Afrikaans"},
                 {"ar", "Arabic"},
+                {"bn", "Bangla"},
                 { "bs-Latn", "Bosnian (Latin)"},
                 { "bg", "Bulgarian"},
+                { "yue", "Cantonese (Traditional)"},
                 { "ca", "Catalan"},
                 { "zh-CHS", "Chinese Simplified"},
                 { "zh-CHT", "Chinese Traditional"},
                 { "hr", "Croatian"},
                 { "cs", "Czech"},
                 { "da", "Danish"},
+                { "nl", "Dutch"},
                 { "en", "English"},
                 { "et", "Estonian"},
+                { "fj", "Fijian"},
+                { "fil", "Filipino"},
                 { "fi", "Finnish"},
                 { "fr", "French"},
                 { "de", "German"},
                 { "el", "Greek"},
-                { "ht", " Haitian Creole"},
+                { "ht", "Haitian Creole"},
                 { "he", "Hebrew"},
                 { "hi", "Hindi"},
                 { "mww", "Hmong Daw"},
@@ -653,13 +656,16 @@ namespace Nikse.SubtitleEdit.Forms
                 { "otq", "Querétaro Otomi"},
                 { "ro", "Romanian"},
                 { "ru", "Russian"},
+                { "sm", "Samoan"},
                 { "sr-Cyrl", "Serbian (Cyrillic)"},
                 { "sr-Latn", "Serbian (Latin)"},
                 { "sk", "Slovak"},
                 { "sl", "Slovenian"},
                 { "es", "Spanish"},
                 { "sv", "Swedish"},
+                { "ty", "Tahitian"},
                 { "th", "Thai"},
+                { "to", "Tongan"},
                 { "tr", "Turkish"},
                 { "uk", "Ukrainian"},
                 { "ur", "Urdu"},
@@ -673,27 +679,26 @@ namespace Nikse.SubtitleEdit.Forms
         {
             comboBox.Items.Add(new ComboBoxItem("AFRIKAANS", "af"));
             comboBox.Items.Add(new ComboBoxItem("ALBANIAN", "sq"));
-            comboBox.Items.Add(new ComboBoxItem("AMHARIC" , "am"));
+            comboBox.Items.Add(new ComboBoxItem("AMHARIC", "am"));
             comboBox.Items.Add(new ComboBoxItem("ARABIC", "ar"));
             comboBox.Items.Add(new ComboBoxItem("ARMENIAN", "hy"));
             comboBox.Items.Add(new ComboBoxItem("AZERBAIJANI", "az"));
             comboBox.Items.Add(new ComboBoxItem("BASQUE", "eu"));
             comboBox.Items.Add(new ComboBoxItem("BELARUSIAN", "be"));
             comboBox.Items.Add(new ComboBoxItem("BENGALI", "bn"));
-            // comboBox.Items.Add(new ComboBoxItem("BIHARI" , "bh"));
             comboBox.Items.Add(new ComboBoxItem("BOSNIAN", "bs"));
             comboBox.Items.Add(new ComboBoxItem("BULGARIAN", "bg"));
-            comboBox.Items.Add(new ComboBoxItem("BURMESE" , "my"));
+            comboBox.Items.Add(new ComboBoxItem("BURMESE", "my"));
             comboBox.Items.Add(new ComboBoxItem("CATALAN", "ca"));
             comboBox.Items.Add(new ComboBoxItem("CEBUANO", "ceb"));
-            // comboBox.Items.Add(new ComboBoxItem("CHEROKEE" , "chr"));
+            comboBox.Items.Add(new ComboBoxItem("CHICHEWA", "ny"));
             comboBox.Items.Add(new ComboBoxItem("CHINESE", "zh"));
             comboBox.Items.Add(new ComboBoxItem("CHINESE_SIMPLIFIED", "zh-CN"));
             comboBox.Items.Add(new ComboBoxItem("CHINESE_TRADITIONAL", "zh-TW"));
+            comboBox.Items.Add(new ComboBoxItem("CORSICAN", "co"));
             comboBox.Items.Add(new ComboBoxItem("CROATIAN", "hr"));
             comboBox.Items.Add(new ComboBoxItem("CZECH", "cs"));
             comboBox.Items.Add(new ComboBoxItem("DANISH", "da"));
-            // comboBox.Items.Add(new ComboBoxItem("DHIVEHI" , "dv"));
             comboBox.Items.Add(new ComboBoxItem("DUTCH", "nl"));
             comboBox.Items.Add(new ComboBoxItem("ENGLISH", "en"));
             comboBox.Items.Add(new ComboBoxItem("ESPERANTO", "eo"));
@@ -701,14 +706,15 @@ namespace Nikse.SubtitleEdit.Forms
             comboBox.Items.Add(new ComboBoxItem("FILIPINO", "tl"));
             comboBox.Items.Add(new ComboBoxItem("FINNISH", "fi"));
             comboBox.Items.Add(new ComboBoxItem("FRENCH", "fr"));
+            comboBox.Items.Add(new ComboBoxItem("FRISIAN", "fy"));
             comboBox.Items.Add(new ComboBoxItem("GALICIAN", "gl"));
             comboBox.Items.Add(new ComboBoxItem("GEORGIAN", "ka"));
             comboBox.Items.Add(new ComboBoxItem("GERMAN", "de"));
             comboBox.Items.Add(new ComboBoxItem("GREEK", "el"));
-            // comboBox.Items.Add(new ComboBoxItem("GUARANI" , "gn"));
             comboBox.Items.Add(new ComboBoxItem("GUJARATI", "gu"));
             comboBox.Items.Add(new ComboBoxItem("HAITIAN CREOLE", "ht"));
             comboBox.Items.Add(new ComboBoxItem("HAUSA", "ha"));
+            comboBox.Items.Add(new ComboBoxItem("HAWAIIAN", "haw"));
             comboBox.Items.Add(new ComboBoxItem("HEBREW", "iw"));
             comboBox.Items.Add(new ComboBoxItem("HINDI", "hi"));
             comboBox.Items.Add(new ComboBoxItem("HMOUNG", "hmn"));
@@ -717,12 +723,11 @@ namespace Nikse.SubtitleEdit.Forms
             comboBox.Items.Add(new ComboBoxItem("IGBO", "ig"));
             comboBox.Items.Add(new ComboBoxItem("INDONESIAN", "id"));
             comboBox.Items.Add(new ComboBoxItem("IRISH", "ga"));
-            // comboBox.Items.Add(new ComboBoxItem("INUKTITUT" , "iu"));
             comboBox.Items.Add(new ComboBoxItem("ITALIAN", "it"));
             comboBox.Items.Add(new ComboBoxItem("JAPANESE", "ja"));
             comboBox.Items.Add(new ComboBoxItem("JAVANESE", "jw"));
             comboBox.Items.Add(new ComboBoxItem("KANNADA", "kn"));
-            comboBox.Items.Add(new ComboBoxItem("KAZAKH" , "kk"));
+            comboBox.Items.Add(new ComboBoxItem("KAZAKH", "kk"));
             comboBox.Items.Add(new ComboBoxItem("KHMER", "km"));
             comboBox.Items.Add(new ComboBoxItem("KOREAN", "ko"));
             comboBox.Items.Add(new ComboBoxItem("KURDISH", "ku"));
@@ -731,17 +736,19 @@ namespace Nikse.SubtitleEdit.Forms
             comboBox.Items.Add(new ComboBoxItem("LATIN", "la"));
             comboBox.Items.Add(new ComboBoxItem("LATVIAN", "lv"));
             comboBox.Items.Add(new ComboBoxItem("LITHUANIAN", "lt"));
+            comboBox.Items.Add(new ComboBoxItem("LUXEMBOURGISH", "lb"));
             comboBox.Items.Add(new ComboBoxItem("MACEDONIAN", "mk"));
             comboBox.Items.Add(new ComboBoxItem("MALAY", "ms"));
+            comboBox.Items.Add(new ComboBoxItem("MALAGASY", "mg"));
             comboBox.Items.Add(new ComboBoxItem("MALAYALAM", "ml"));
             comboBox.Items.Add(new ComboBoxItem("MALTESE", "mt"));
             comboBox.Items.Add(new ComboBoxItem("MAORI", "mi"));
             comboBox.Items.Add(new ComboBoxItem("MARATHI", "mr"));
             comboBox.Items.Add(new ComboBoxItem("MONGOLIAN", "mn"));
+            comboBox.Items.Add(new ComboBoxItem("MYANMAR", "my"));
             comboBox.Items.Add(new ComboBoxItem("NEPALI", "ne"));
             comboBox.Items.Add(new ComboBoxItem("NORWEGIAN", "no"));
-            // comboBox.Items.Add(new ComboBoxItem("ORIYA" , "or"));
-            comboBox.Items.Add(new ComboBoxItem("PASHTO" , "ps"));
+            comboBox.Items.Add(new ComboBoxItem("PASHTO", "ps"));
             comboBox.Items.Add(new ComboBoxItem("PERSIAN", "fa"));
             comboBox.Items.Add(new ComboBoxItem("POLISH", "pl"));
             comboBox.Items.Add(new ComboBoxItem("PORTUGUESE", "pt"));
@@ -752,32 +759,31 @@ namespace Nikse.SubtitleEdit.Forms
                 comboBox.Items.Add(new ComboBoxItem("ROMANJI", "romanji"));
 
             comboBox.Items.Add(new ComboBoxItem("RUSSIAN", "ru"));
-            // comboBox.Items.Add(new ComboBoxItem("SANSKRIT" , "sa"));
+            comboBox.Items.Add(new ComboBoxItem("SAMOAN", "sm"));
+            comboBox.Items.Add(new ComboBoxItem("SCOTS GAELIC", "gd"));
             comboBox.Items.Add(new ComboBoxItem("SERBIAN", "sr"));
-             comboBox.Items.Add(new ComboBoxItem("SINDHI" , "sd"));
             comboBox.Items.Add(new ComboBoxItem("SESOTHO", "st"));
+            comboBox.Items.Add(new ComboBoxItem("SHONA", "sn"));
+            comboBox.Items.Add(new ComboBoxItem("SINDHI", "sd"));
             comboBox.Items.Add(new ComboBoxItem("SINHALA", "si"));
             comboBox.Items.Add(new ComboBoxItem("SLOVAK", "sk"));
             comboBox.Items.Add(new ComboBoxItem("SLOVENIAN", "sl"));
             comboBox.Items.Add(new ComboBoxItem("SOMALI", "so"));
             comboBox.Items.Add(new ComboBoxItem("SPANISH", "es"));
+            comboBox.Items.Add(new ComboBoxItem("SUNDANESE", "su"));
             comboBox.Items.Add(new ComboBoxItem("SWAHILI", "sw"));
             comboBox.Items.Add(new ComboBoxItem("SWEDISH", "sv"));
-            comboBox.Items.Add(new ComboBoxItem("SWAHILII", "sw"));
-            comboBox.Items.Add(new ComboBoxItem("TAJIK" , "tg"));
+            comboBox.Items.Add(new ComboBoxItem("TAJIK", "tg"));
             comboBox.Items.Add(new ComboBoxItem("TAMIL", "ta"));
-            // comboBox.Items.Add(new ComboBoxItem("TAGALOG" , "tl"));
             comboBox.Items.Add(new ComboBoxItem("TELUGU", "te"));
             comboBox.Items.Add(new ComboBoxItem("THAI", "th"));
-            // comboBox.Items.Add(new ComboBoxItem("TIBETAN" , "bo"));
             comboBox.Items.Add(new ComboBoxItem("TURKISH", "tr"));
             comboBox.Items.Add(new ComboBoxItem("UKRAINIAN", "uk"));
             comboBox.Items.Add(new ComboBoxItem("URDU", "ur"));
             comboBox.Items.Add(new ComboBoxItem("UZBEK", "uz"));
-            // comboBox.Items.Add(new ComboBoxItem("UIGHUR" , "ug"));
             comboBox.Items.Add(new ComboBoxItem("VIETNAMESE", "vi"));
             comboBox.Items.Add(new ComboBoxItem("WELSH", "cy"));
-            comboBox.Items.Add(new ComboBoxItem("XHOSA", "xh"));            
+            comboBox.Items.Add(new ComboBoxItem("XHOSA", "xh"));
             comboBox.Items.Add(new ComboBoxItem("YIDDISH", "yi"));
             comboBox.Items.Add(new ComboBoxItem("YORUBA", "yo"));
             comboBox.Items.Add(new ComboBoxItem("ZULU", "zu"));
@@ -893,7 +899,7 @@ namespace Nikse.SubtitleEdit.Forms
             if (node.ChildNodes.Count == 0)
             {
                 string oldText = node.InnerText;
-                string newText = Nikse.SubtitleEdit.Forms.GoogleTranslate.TranslateTextViaApi(node.InnerText, languagePair);
+                string newText = TranslateTextViaApi(node.InnerText, languagePair);
                 if (!string.IsNullOrEmpty(oldText) && !string.IsNullOrEmpty(newText))
                 {
                     if (oldText.Contains("{0:"))
@@ -975,7 +981,8 @@ namespace Nikse.SubtitleEdit.Forms
 
         private string BingTranslateViaAccessToken(string accessToken, string text, string fromLanguage, string toLanguage)
         {
-            string url = string.Format("http://api.microsofttranslator.com/v2/Http.svc/Translate?text={0}&from={1}&to={2}", Utilities.UrlEncode(text), fromLanguage, toLanguage);
+            //max 10000 chars!
+            string url = string.Format("https://api.microsofttranslator.com/V2/Http.svc/Translate?appid=&text={0}&from={1}&to={2}", Utilities.UrlEncode(text), fromLanguage, toLanguage);
             var req = WebRequest.Create(url);
             req.Method = "GET";
             req.Headers["Authorization"] = "Bearer " + accessToken;
@@ -999,19 +1006,14 @@ namespace Nikse.SubtitleEdit.Forms
             }
         }
 
-        private string GetBingAccesstoken(string clientId, string clientSecret)
+        private string GetBingAccesstoken(string clientSecret)
         {
-            string datamarketAccessUri = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13";
-            string requestDetails = string.Format("grant_type=client_credentials&client_id={0}&client_secret={1}&scope=http://api.microsofttranslator.com", Utilities.UrlEncode(clientId), Utilities.UrlEncode(clientSecret));
+            string datamarketAccessUri = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken";
             var webRequest = WebRequest.Create(datamarketAccessUri);
             webRequest.ContentType = "application/x-www-form-urlencoded";
             webRequest.Method = "POST";
-            var bytes = Encoding.ASCII.GetBytes(requestDetails);
-            webRequest.ContentLength = bytes.Length;
-            using (Stream outputStream = webRequest.GetRequestStream())
-            {
-                outputStream.Write(bytes, 0, bytes.Length);
-            }
+            webRequest.Headers.Add("Ocp-Apim-Subscription-Key", clientSecret);
+            webRequest.ContentLength = 0;
             using (WebResponse webResponse = webRequest.GetResponse())
             {
                 var responseStream = webResponse.GetResponseStream();
@@ -1021,20 +1023,9 @@ namespace Nikse.SubtitleEdit.Forms
                 }
                 using (var reader = new StreamReader(responseStream, Encoding.UTF8))
                 {
-                    string json = reader.ReadToEnd();
-                    int startIndex = json.IndexOf("access_token", StringComparison.Ordinal) + 12;
-                    if (startIndex > 0)
-                    {
-                        string s = json.Substring(startIndex).TrimStart(':', ' ', '"');
-                        int endIndex = s.IndexOf("\"", StringComparison.Ordinal);
-                        if (endIndex > 0)
-                        {
-                            return s.Substring(0, endIndex);
-                        }
-                    }
+                    return reader.ReadToEnd(); // raw access token
                 }
             }
-            return null;
         }
 
         public void DoMicrosoftTranslate(string from, string to)
@@ -1124,7 +1115,7 @@ namespace Nikse.SubtitleEdit.Forms
                 int index = 0;
                 foreach (Paragraph p in _subtitle.Paragraphs)
                 {
-                    string text = string.Format("{0} +-+ ", SetFormattingTypeAndSplitting(index, p.Text, from.StartsWith("zh")));
+                    string text = $"{SetFormattingTypeAndSplitting(index, p.Text, @from.StartsWith("zh"))} +-+ ";
                     if (!overQuota)
                     {
                         if (Utilities.UrlEncode(sb + text).Length >= textMaxSize)
@@ -1218,6 +1209,11 @@ namespace Nikse.SubtitleEdit.Forms
                 }
             }
             return null;
+        }
+
+        private void comboBoxTo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            _screenScrapingEncoding = null;
         }
 
     }

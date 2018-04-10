@@ -9,29 +9,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     //  - Mom, when you were my age&#13;what did you want to do?
     public class FinalCutProXml : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".xml"; }
-        }
+        public override string Extension => ".xml";
 
-        public override string Name
-        {
-            get { return "Final Cut Pro Xml"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            var oldFrameRate = Configuration.Settings.General.CurrentFrameRate;
-            LoadSubtitle(subtitle, lines, fileName);
-            Configuration.Settings.General.CurrentFrameRate = oldFrameRate;
-            return subtitle.Paragraphs.Count > 0;
-        }
+        public override string Name => "Final Cut Pro Xml";
 
         public static string GetFrameRateAsString()
         {
@@ -40,15 +20,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (Configuration.Settings.General.CurrentFrameRate < 25)
                 return "24";
             if (Configuration.Settings.General.CurrentFrameRate < 29)
-                return "25";
-            if (Configuration.Settings.General.CurrentFrameRate < 29)
-                return "25";
+                return "25";            
             if (Configuration.Settings.General.CurrentFrameRate < 30)
                 return "30"; // ntsc 29.97
             if (Configuration.Settings.General.CurrentFrameRate < 40)
-                return "30";
-            if (Configuration.Settings.General.CurrentFrameRate < 40)
-                return "30";
+                return "30";            
             if (Configuration.Settings.General.CurrentFrameRate < 60)
                 return "60"; // ntsc 59.94
             return "60";
@@ -466,7 +442,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     }
                 }
 
-                foreach (XmlNode node in xml.SelectNodes("xmeml/sequence/media/video/track"))
+                foreach (XmlNode node in xml.SelectNodes("//video/track"))
                 {
                     try
                     {

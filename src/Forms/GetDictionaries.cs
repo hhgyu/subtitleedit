@@ -14,12 +14,18 @@ namespace Nikse.SubtitleEdit.Forms
     {
         private List<string> _dictionaryDownloadLinks = new List<string>();
         private List<string> _descriptions = new List<string>();
+        private List<string> _englishNames = new List<string>();
         private string _xmlName;
         private int _testAllIndex = -1;
 
+        public string SelectedEnglishName { get; private set; } = null;
+
+
         public GetDictionaries()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             Text = Configuration.Settings.Language.GetDictionaries.Title;
             labelDescription1.Text = Configuration.Settings.Language.GetDictionaries.DescriptionLine1;
@@ -41,6 +47,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             _dictionaryDownloadLinks = new List<string>();
             _descriptions = new List<string>();
+            _englishNames = new List<string>();
             _xmlName = xmlRessourceName;
             System.Reflection.Assembly asm = System.Reflection.Assembly.GetExecutingAssembly();
             var strm = asm.GetManifestResourceStream(_xmlName);
@@ -74,10 +81,13 @@ namespace Nikse.SubtitleEdit.Forms
                         comboBoxDictionaries.Items.Add(name);
                         _dictionaryDownloadLinks.Add(downloadLink);
                         _descriptions.Add(description);
+                        _englishNames.Add(englishName);
                     }
                 }
                 comboBoxDictionaries.SelectedIndex = 0;
             }
+            comboBoxDictionaries.AutoCompleteSource = AutoCompleteSource.ListItems;
+            comboBoxDictionaries.AutoCompleteMode = AutoCompleteMode.Append;
         }
 
         private void FixLargeFonts()
@@ -118,11 +128,12 @@ namespace Nikse.SubtitleEdit.Forms
                 buttonDownload.Enabled = false;
                 buttonDownloadAll.Enabled = false;
                 comboBoxDictionaries.Enabled = false;
-                this.Refresh();
+                Refresh();
                 Cursor = Cursors.WaitCursor;
 
                 int index = comboBoxDictionaries.SelectedIndex;
                 string url = _dictionaryDownloadLinks[index];
+                SelectedEnglishName = _englishNames[index];
 
                 var wc = new WebClient { Proxy = Utilities.GetProxy() };
                 wc.DownloadDataCompleted += wc_DownloadDataCompleted;
@@ -246,7 +257,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void buttonDownloadAll_Click(object sender, EventArgs e)
         {
-            _testAllIndex = -1;
+            _testAllIndex = comboBoxDictionaries.SelectedIndex - 1;
+            if (_testAllIndex < -1)
+                _testAllIndex = -1;
             DownloadNext();
         }
 
@@ -258,6 +271,10 @@ namespace Nikse.SubtitleEdit.Forms
                 comboBoxDictionaries.SelectedIndex = _testAllIndex;
                 buttonDownload_Click(null, null);
             }
+            else
+            {
+                LoadDictionaryList("Nikse.SubtitleEdit.Resources.HunspellBackupDictionaries.xml.gz");
+            }            
         }
 
     }

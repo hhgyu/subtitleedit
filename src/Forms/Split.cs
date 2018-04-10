@@ -20,7 +20,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public Split()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             var l = Configuration.Settings.Language.Split;
             Text = l.Title;
@@ -83,7 +85,7 @@ namespace Nikse.SubtitleEdit.Forms
             UiUtil.InitializeTextEncodingComboBox(comboBoxEncoding);
 
             if (numericUpDownParts.Maximum > _subtitle.Paragraphs.Count)
-                numericUpDownParts.Maximum = _subtitle.Paragraphs.Count / 2;
+                numericUpDownParts.Maximum = (int)Math.Round(_subtitle.Paragraphs.Count / 2.0);
 
             if (!string.IsNullOrEmpty(_fileName))
                 textBoxOutputFolder.Text = Path.GetDirectoryName(_fileName);

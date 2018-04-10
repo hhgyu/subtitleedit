@@ -12,27 +12,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static readonly Regex RegexTimeCodes = new Regex(@"^\d\d\:\d\d\:\d\d\s+\d+    ", RegexOptions.Compiled);
         private static readonly Regex RegexNumberAndText = new Regex(@"^\d+    [^ ]+", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".txt"; }
-        }
+        public override string Extension => ".txt";
 
-        public override string Name
-        {
-            get { return "Unknown 33"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 33";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -50,23 +32,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 var lines = HtmlUtil.RemoveHtmlTags(p.Text).SplitToLines();
-                if (lines.Length > 0)
+                sb.AppendLine(string.Format(paragraphWriteFormat, EncodeTimeCode(p.StartTime), count.ToString(CultureInfo.InvariantCulture).PadLeft(2, ' '), lines[0]));
+                for (int i = 1; i < lines.Count; i++)
                 {
-                    sb.AppendLine(string.Format(paragraphWriteFormat, EncodeTimeCode(p.StartTime), count.ToString(CultureInfo.InvariantCulture).PadLeft(2, ' '), lines[0]));
-                    for (int i = 1; i < lines.Length; i++)
-                    {
-                        count++;
-                        if (count > 26)
-                        {
-                            sb.Append(string.Empty.PadLeft(38, ' ') + count2);
-                            sb.AppendLine();
-                            sb.AppendLine();
-                            count = 1;
-                            count2++;
-                        }
-                        sb.AppendLine(string.Format(paragraphWriteFormat, string.Empty, count.ToString(CultureInfo.InvariantCulture).PadLeft(10, ' '), lines[i]));
-                    }
-
                     count++;
                     if (count > 26)
                     {
@@ -76,15 +44,28 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         count = 1;
                         count2++;
                     }
+
+                    sb.AppendLine(string.Format(paragraphWriteFormat, string.Empty, count.ToString(CultureInfo.InvariantCulture).PadLeft(10, ' '), lines[i]));
+                }
+
+                count++;
+                if (count > 26)
+                {
+                    sb.Append(string.Empty.PadLeft(38, ' ') + count2);
+                    sb.AppendLine();
+                    sb.AppendLine();
+                    count = 1;
+                    count2++;
                 }
             }
+
             return sb.ToString().Trim();
         }
 
         private static string EncodeTimeCode(TimeCode timeCode)
         {
             int seconds = (int)Math.Round(timeCode.Seconds + timeCode.Milliseconds / 1000.0);
-            return string.Format("{0:00}:{1:00}:{2:00}", timeCode.Hours, timeCode.Minutes, seconds);
+            return $"{timeCode.Hours:00}:{timeCode.Minutes:00}:{seconds:00}";
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)

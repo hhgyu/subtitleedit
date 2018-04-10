@@ -17,8 +17,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override string Name => NameOfFormat;
 
-        public override bool IsTimeBased => true;
-
         public override bool IsMine(List<string> lines, string fileName)
         {
             if (fileName != null && !(fileName.EndsWith(Extension, StringComparison.OrdinalIgnoreCase) || fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)))
@@ -29,9 +27,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (!sb.ToString().Contains("http://www.smpte-ra.org/schemas/2052-1/2010/smpte-tt#cea608"))
                 return false;
 
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > 0;
+            return base.IsMine(lines, fileName);
         }
 
         public override string ToText(Subtitle subtitle, string title)
@@ -68,17 +64,15 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             try
                             {
                                 var ssaStyle = AdvancedSubStationAlpha.GetSsaStyle(styleName, subtitle.Header);
-                                if (ssaStyle != null)
-                                {
-                                    string fontStyle = "normal";
-                                    if (ssaStyle.Italic)
-                                        fontStyle = "italic";
-                                    string fontWeight = "normal";
-                                    if (ssaStyle.Bold)
-                                        fontWeight = "bold";
-                                    AddStyleToXml(x, styleHead, xnsmgr, ssaStyle.Name, ssaStyle.FontName, fontWeight, fontStyle, Utilities.ColorToHex(ssaStyle.Primary), ssaStyle.FontSize.ToString());
-                                    convertedFromSubStationAlpha = true;
-                                }
+                                
+                                string fontStyle = "normal";
+                                if (ssaStyle.Italic)
+                                    fontStyle = "italic";
+                                string fontWeight = "normal";
+                                if (ssaStyle.Bold)
+                                    fontWeight = "bold";
+                                AddStyleToXml(x, styleHead, xnsmgr, ssaStyle.Name, ssaStyle.FontName, fontWeight, fontStyle, Utilities.ColorToHex(ssaStyle.Primary), ssaStyle.FontSize.ToString());
+                                convertedFromSubStationAlpha = true;                                
                             }
                             catch
                             {

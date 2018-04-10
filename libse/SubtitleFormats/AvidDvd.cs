@@ -16,20 +16,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static readonly Regex RegexTimeCode = new Regex(@"^\d+\t\d\d:\d\d:\d\d:\d\d\t\d\d:\d\d:\d\d:\d\d\t.+$", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".txt"; }
-        }
+        public override string Extension => ".txt";
 
-        public override string Name
-        {
-            get { return "Avid DVD"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "Avid DVD";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -42,9 +31,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     return false;
             }
 
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
+            return base.IsMine(lines, fileName);
         }
 
         private static string MakeTimeCode(TimeCode tc)
@@ -78,7 +65,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
 
                 text = HtmlUtil.RemoveHtmlTags(text, true);
-                sb.AppendLine(string.Format("{0}\t{1}\t{2}\t{3}", count, MakeTimeCode(p.StartTime), MakeTimeCode(p.EndTime), text.Replace(Environment.NewLine, "|")));
+                sb.AppendLine($"{count}\t{MakeTimeCode(p.StartTime)}\t{MakeTimeCode(p.EndTime)}\t{text.Replace(Environment.NewLine, "|")}");
                 sb.AppendLine();
                 count++;
             }
@@ -111,7 +98,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                             string text = s.Remove(0, arr[0].Length + arr[1].Length + arr[2].Length + 2).Trim();
 
                             if (string.IsNullOrWhiteSpace(text.Replace("0", string.Empty).Replace("1", string.Empty).Replace("2", string.Empty).Replace("3", string.Empty).Replace("4", string.Empty).Replace("5", string.Empty).
-                                Replace("6", string.Empty).Replace("7", string.Empty).Replace("8", string.Empty).Replace("9", string.Empty).Replace(".", string.Empty).Replace(":", string.Empty).Replace(",", string.Empty)))
+                                Replace("6", string.Empty).Replace("7", string.Empty).Replace("8", string.Empty).Replace("9", string.Empty).RemoveChar('.').RemoveChar(':').RemoveChar(',')))
                                 _errorCount++;
                             if (italic)
                                 text = "<i>" + text + "</i>";
@@ -128,11 +115,11 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 }
                 else if (s.StartsWith('$'))
                 {
-                    if (s.Replace(" ", string.Empty).Equals("$italic=true", StringComparison.OrdinalIgnoreCase))
+                    if (s.RemoveChar(' ').Equals("$italic=true", StringComparison.OrdinalIgnoreCase))
                     {
                         italic = true;
                     }
-                    else if (s.Replace(" ", string.Empty).Equals("$italic=false", StringComparison.OrdinalIgnoreCase))
+                    else if (s.RemoveChar(' ').Equals("$italic=false", StringComparison.OrdinalIgnoreCase))
                     {
                         italic = false;
                     }

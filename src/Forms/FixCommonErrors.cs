@@ -123,25 +123,34 @@ namespace Nikse.SubtitleEdit.Forms
             string threeLetterIsoLanguageName = ci.ThreeLetterISOLanguageName;
 
             comboBoxLanguage.Items.Clear();
+            comboBoxLanguage.Items.Add("-Auto-");
             foreach (CultureInfo x in CultureInfo.GetCultures(CultureTypes.NeutralCultures))
-                comboBoxLanguage.Items.Add(x);
+            {
+                if (!string.IsNullOrWhiteSpace(x.ToString()))
+                    comboBoxLanguage.Items.Add(x);
+            }
             comboBoxLanguage.Sorted = true;
             int languageIndex = 0;
             int j = 0;
             foreach (var x in comboBoxLanguage.Items)
             {
-                var xci = (CultureInfo)x;
-                if (xci.TwoLetterISOLanguageName == ci.TwoLetterISOLanguageName)
+                var xci = x as CultureInfo;
+                if (xci != null)
                 {
-                    languageIndex = j;
-                    break;
-                }
-                if (xci.TwoLetterISOLanguageName == "en")
-                {
-                    languageIndex = j;
+                    if (xci.TwoLetterISOLanguageName == ci.TwoLetterISOLanguageName)
+                    {
+                        languageIndex = j;
+                        break;
+                    }
+                    if (xci.TwoLetterISOLanguageName == "en")
+                    {
+                        languageIndex = j;
+                    }
                 }
                 j++;
             }
+            if (string.IsNullOrEmpty(language))
+                languageIndex = 0;
             comboBoxLanguage.SelectedIndex = languageIndex;
             AddFixActions(threeLetterIsoLanguageName);
             _originalSubtitle = new Subtitle(subtitle, false); // copy constructor
@@ -160,9 +169,9 @@ namespace Nikse.SubtitleEdit.Forms
         {
             get
             {
-                var ci = (CultureInfo)comboBoxLanguage.SelectedItem;
+                var ci = comboBoxLanguage.SelectedItem as CultureInfo;
                 if (ci == null)
-                    return "en";
+                    return string.Empty;
                 return ci.TwoLetterISOLanguageName;
             }
             set
@@ -310,10 +319,15 @@ namespace Nikse.SubtitleEdit.Forms
                 int x, y;
                 if (arr.Length == 2 && int.TryParse(arr[0], out x) && int.TryParse(arr[1], out y))
                 {
-                    if (x > 0 && x < Screen.PrimaryScreen.WorkingArea.Width && y > 0 && y < Screen.PrimaryScreen.WorkingArea.Height)
+                    var screen = Screen.FromPoint(Cursor.Position);
+                    if (screen != null && x > 0 && x < screen.WorkingArea.Width && y > 0 && y < screen.WorkingArea.Height)
                     {
                         Left = x;
                         Top = y;
+                    }
+                    else
+                    {
+                        StartPosition = FormStartPosition.CenterParent;
                     }
                 }
             }
@@ -401,7 +415,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public FixCommonErrors()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             labelStartTimeWarning.Text = string.Empty;
             labelDurationWarning.Text = string.Empty;
@@ -479,8 +495,8 @@ namespace Nikse.SubtitleEdit.Forms
                 var item = new ListViewItem(string.Empty) { Checked = true, Tag = p };
                 item.SubItems.Add(p.Number.ToString(CultureInfo.InvariantCulture));
                 item.SubItems.Add(action);
-                item.SubItems.Add(before.Replace(Environment.NewLine, Configuration.Settings.General.ListViewLineSeparatorString));
-                item.SubItems.Add(after.Replace(Environment.NewLine, Configuration.Settings.General.ListViewLineSeparatorString));
+                item.SubItems.Add(UiUtil.GetListViewTextFromString(before));
+                item.SubItems.Add(UiUtil.GetListViewTextFromString(after));
                 listViewFixes.Items.Add(item);
             }
         }
@@ -1095,7 +1111,7 @@ namespace Nikse.SubtitleEdit.Forms
 
                     // update _subtitle + listview
                     currentParagraph.EndTime.TotalMilliseconds = currentParagraph.StartTime.TotalMilliseconds + ((double)numericUpDownDuration.Value * TimeCode.BaseUnit);
-                    subtitleListView1.SetDuration(firstSelectedIndex, currentParagraph);
+                    subtitleListView1.SetDuration(firstSelectedIndex, currentParagraph, _originalSubtitle.GetParagraphOrDefault(firstSelectedIndex + 1));
                 }
             }
         }
@@ -1166,7 +1182,7 @@ namespace Nikse.SubtitleEdit.Forms
                 _originalSubtitle.Paragraphs[_subtitleListViewIndex].EndTime.TotalMilliseconds +=
                     (startTime.TotalMilliseconds - _originalSubtitle.Paragraphs[_subtitleListViewIndex].StartTime.TotalMilliseconds);
                 _originalSubtitle.Paragraphs[_subtitleListViewIndex].StartTime = startTime;
-                subtitleListView1.SetStartTimeAndDuration(_subtitleListViewIndex, _originalSubtitle.Paragraphs[_subtitleListViewIndex]);
+                subtitleListView1.SetStartTimeAndDuration(_subtitleListViewIndex, _originalSubtitle.Paragraphs[_subtitleListViewIndex], _originalSubtitle.GetParagraphOrDefault(_subtitleListViewIndex + 1), _originalSubtitle.GetParagraphOrDefault(_subtitleListViewIndex - 1));
             }
         }
 
@@ -1174,9 +1190,10 @@ namespace Nikse.SubtitleEdit.Forms
         {
             labelTextLineLengths.Text = _languageGeneral.SingleLineLengths;
             labelSingleLine.Left = labelTextLineLengths.Left + labelTextLineLengths.Width - 6;
+            text = HtmlUtil.RemoveHtmlTags(text, true);
             UiUtil.GetLineLengths(labelSingleLine, text);
 
-            string s = HtmlUtil.RemoveHtmlTags(text, true).Replace(Environment.NewLine, " ");
+            string s = text.Replace(Environment.NewLine, " ");
             buttonSplitLine.Visible = false;
             if (s.Length < Configuration.Settings.General.SubtitleLineMaximumLength * 1.9)
             {
@@ -1530,7 +1547,7 @@ namespace Nikse.SubtitleEdit.Forms
 
                 string oldText = currentParagraph.Text;
                 var lines = currentParagraph.Text.SplitToLines();
-                if (lines.Length == 2 && (lines[0].EndsWith('.') || lines[0].EndsWith('!') || lines[0].EndsWith('?')))
+                if (lines.Count == 2 && (lines[0].EndsWith('.') || lines[0].EndsWith('!') || lines[0].EndsWith('?')))
                 {
                     currentParagraph.Text = Utilities.AutoBreakLine(lines[0], Language);
                     newParagraph.Text = Utilities.AutoBreakLine(lines[1], Language);
@@ -1539,7 +1556,7 @@ namespace Nikse.SubtitleEdit.Forms
                 {
                     string s = Utilities.AutoBreakLine(currentParagraph.Text, 5, Configuration.Settings.Tools.MergeLinesShorterThan, Language);
                     lines = s.SplitToLines();
-                    if (lines.Length == 2)
+                    if (lines.Count == 2)
                     {
                         currentParagraph.Text = Utilities.AutoBreakLine(lines[0], Language);
                         newParagraph.Text = Utilities.AutoBreakLine(lines[1], Language);
@@ -1598,9 +1615,12 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (Subtitle != null)
             {
-                var ci = (CultureInfo)comboBoxLanguage.SelectedItem;
-                _autoDetectGoogleLanguage = ci.TwoLetterISOLanguageName;
-                AddFixActions(ci.ThreeLetterISOLanguageName);
+                var ci = comboBoxLanguage.SelectedItem as CultureInfo;
+                if (ci != null)
+                {
+                    _autoDetectGoogleLanguage = ci.TwoLetterISOLanguageName;
+                    AddFixActions(ci.ThreeLetterISOLanguageName);
+                }
             }
         }
 
@@ -1613,6 +1633,25 @@ namespace Nikse.SubtitleEdit.Forms
         {
             Configuration.Settings.CommonErrors.SetDefaultFixes();
             AddFixActions(CultureInfo.GetCultureInfo(_autoDetectGoogleLanguage).ThreeLetterISOLanguageName);
+        }
+
+        private void subtitleListView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.A && e.Modifiers == Keys.Control)
+            {
+                subtitleListView1.SelectAll();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.D && e.Modifiers == Keys.Control)
+            {
+                subtitleListView1.SelectFirstSelectedItemOnly();
+                e.SuppressKeyPress = true;
+            }
+            else if (e.KeyCode == Keys.I && e.Modifiers == (Keys.Control | Keys.Shift)) //InverseSelection
+            {
+                subtitleListView1.InverseSelection();
+                e.SuppressKeyPress = true;
+            }
         }
     }
 }

@@ -165,7 +165,7 @@
             this.numericUpDownVideoHeight.Name = "numericUpDownVideoHeight";
             this.numericUpDownVideoHeight.Size = new System.Drawing.Size(47, 20);
             this.numericUpDownVideoHeight.TabIndex = 1;
-            this.numericUpDownVideoHeight.ValueChanged += new System.EventHandler(this.numericUpDownVideoHeight_ValueChanged);
+            this.numericUpDownVideoHeight.ValueChanged += new System.EventHandler(this.NumericUpDownVideoWidthOrHeightValueChanged);
             // 
             // buttonGetResolutionFromVideo
             // 
@@ -197,7 +197,7 @@
             this.numericUpDownVideoWidth.Name = "numericUpDownVideoWidth";
             this.numericUpDownVideoWidth.Size = new System.Drawing.Size(47, 20);
             this.numericUpDownVideoWidth.TabIndex = 0;
-            this.numericUpDownVideoWidth.ValueChanged += new System.EventHandler(this.numericUpDownVideoWidth_ValueChanged);
+            this.numericUpDownVideoWidth.ValueChanged += new System.EventHandler(this.NumericUpDownVideoWidthOrHeightValueChanged);
             // 
             // groupBoxOptions
             // 
@@ -367,7 +367,7 @@
             // 
             this.numericUpDownMarginVertical.Location = new System.Drawing.Point(188, 33);
             this.numericUpDownMarginVertical.Maximum = new decimal(new int[] {
-            250,
+            1000,
             0,
             0,
             0});
@@ -380,7 +380,7 @@
             // 
             this.numericUpDownMarginRight.Location = new System.Drawing.Point(101, 33);
             this.numericUpDownMarginRight.Maximum = new decimal(new int[] {
-            250,
+            500,
             0,
             0,
             0});
@@ -393,7 +393,7 @@
             // 
             this.numericUpDownMarginLeft.Location = new System.Drawing.Point(16, 33);
             this.numericUpDownMarginLeft.Maximum = new decimal(new int[] {
-            250,
+            500,
             0,
             0,
             0});
@@ -719,7 +719,7 @@
             this.comboBoxFontName.Name = "comboBoxFontName";
             this.comboBoxFontName.Size = new System.Drawing.Size(188, 21);
             this.comboBoxFontName.TabIndex = 1;
-            this.comboBoxFontName.SelectedValueChanged += new System.EventHandler(this.comboBoxFontName_SelectedValueChanged);
+            this.comboBoxFontName.TextChanged += new System.EventHandler(this.comboBoxFontName_TextChanged);
             this.comboBoxFontName.KeyUp += new System.Windows.Forms.KeyEventHandler(this.comboBoxFontName_KeyUp);
             // 
             // labelFontSize

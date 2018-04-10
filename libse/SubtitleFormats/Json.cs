@@ -6,27 +6,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class Json : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".json"; }
-        }
+        public override string Extension => ".json";
 
-        public override string Name
-        {
-            get { return "JSON"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "JSON";
 
         public static string EncodeJsonText(string text)
         {
@@ -158,12 +140,16 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                 res = ConvertJsonSpecialCharacters(res);
                 res = res.Replace("\\\"", "@__1");
                 int endIndex = res.IndexOf("\"}", StringComparison.Ordinal);
+                if (endIndex == -1)
+                {
+                    endIndex = res.LastIndexOf('"');
+                }
                 int endAlternate = res.IndexOf("\",", StringComparison.Ordinal);
                 if (endIndex < 0)
                     endIndex = endAlternate;
                 else if (endAlternate > 0 && endAlternate < endIndex)
                     endIndex = endAlternate;
-                if (endIndex < 0 && res.EndsWith("\""))
+                if (endIndex < 0 && res.EndsWith("\"", StringComparison.Ordinal))
                     endIndex = res.Length - 1;
                 if (endIndex < 0)
                     return null;

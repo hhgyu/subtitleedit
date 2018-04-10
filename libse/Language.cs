@@ -18,6 +18,7 @@ namespace Nikse.SubtitleEdit.Core
         public LanguageStructure.AddWaveformBatch AddWaveformBatch;
         public LanguageStructure.AdjustDisplayDuration AdjustDisplayDuration;
         public LanguageStructure.ApplyDurationLimits ApplyDurationLimits;
+        public LanguageStructure.AudioToText AudioToText;
         public LanguageStructure.AutoBreakUnbreakLines AutoBreakUnbreakLines;
         public LanguageStructure.BatchConvert BatchConvert;
         public LanguageStructure.Beamer Beamer;
@@ -41,6 +42,7 @@ namespace Nikse.SubtitleEdit.Core
         public LanguageStructure.EffectTypewriter EffectTypewriter;
         public LanguageStructure.ExportCustomText ExportCustomText;
         public LanguageStructure.ExportCustomTextFormat ExportCustomTextFormat;
+        public LanguageStructure.ExportFcpXmlAdvanced ExportFcpXmlAdvanced;
         public LanguageStructure.ExportPngXml ExportPngXml;
         public LanguageStructure.ExportText ExportText;
         public LanguageStructure.ExtractDateTimeInfo ExtractDateTimeInfo;
@@ -81,6 +83,7 @@ namespace Nikse.SubtitleEdit.Core
         public LanguageStructure.SetSyncPoint SetSyncPoint;
         public LanguageStructure.Settings Settings;
         public LanguageStructure.SettingsMpv SettingsMpv;
+        public LanguageStructure.SettingsFfmpeg SettingsFfmpeg;
         public LanguageStructure.SetVideoOffset SetVideoOffset;
         public LanguageStructure.ShowEarlierLater ShowEarlierLater;
         public LanguageStructure.ShowHistory ShowHistory;
@@ -140,6 +143,7 @@ namespace Nikse.SubtitleEdit.Core
                 CharsPerSec = "Chars/sec",
                 WordsPerMin = "Words/min",
                 Actor = "Actor",
+                Gap = "Gap",
                 Region = "Region",
                 NumberSymbol = "#",
                 Number = "Number",
@@ -236,7 +240,7 @@ namespace Nikse.SubtitleEdit.Core
                 GeneratingPeakFile = "Generating peak file...",
                 GeneratingSpectrogram = "Generating spectrogram...",
                 ExtractingSeconds = "Extracting audio: {0:0.0} seconds",
-                ExtractingMinutes = "Extracting audio: {0}.{1:00} minutes",
+                ExtractingMinutes = "Extracting audio: {0}:{1:00} minutes",
                 WaveFileNotFound = "Could not find extracted wave file!" + Environment.NewLine +
                                    "This feature requires VLC media player 1.1.x or newer ({0}-bit)." + Environment.NewLine +
                                    Environment.NewLine +
@@ -270,7 +274,6 @@ namespace Nikse.SubtitleEdit.Core
                 Seconds = "Seconds",
                 Note = "Note: Display time will not overlap start time of next text",
                 PleaseSelectAValueFromTheDropDownList = "Please select a value from the dropdown list",
-                PleaseChoose = " - Please choose - ",
             };
 
             ApplyDurationLimits = new LanguageStructure.ApplyDurationLimits
@@ -278,6 +281,16 @@ namespace Nikse.SubtitleEdit.Core
                 Title = "Apply duration limits",
                 FixesAvailable = "Fixes available: {0}",
                 UnableToFix = "Unable to fix: {0}",
+            };
+
+            AudioToText = new LanguageStructure.AudioToText
+            {
+                Title = "Audio to text",
+                ExtractingAudioUsingX = "Extracting audio using {0}...",
+                ExtractingTextUsingX = "Extracting text from audio using {0}...",
+                ProgessViaXy = "Extracting text via {0} progress: {1}%",
+                ShowLess = "Show less  ▲",
+                ShowMore = "Show more  ▼"
             };
 
             AutoBreakUnbreakLines = new LanguageStructure.AutoBreakUnbreakLines
@@ -304,6 +317,7 @@ namespace Nikse.SubtitleEdit.Core
                 RemoveFormatting = "Remove formatting tags",
                 Status = "Status",
                 Style = "Style...",
+                UseStyleFromSource = "Use style from source",
                 NothingToConvert = "Nothing to convert!",
                 PleaseChooseOutputFolder = "Please choose output folder",
                 NotConverted = "Failed",
@@ -316,6 +330,7 @@ namespace Nikse.SubtitleEdit.Core
                 ScanningFolder = "Scanning {0} and subfolders for subtitle files...",
                 Recursive = "Include sub folders",
                 SetMinMsBetweenSubtitles = "Set min. milliseconds between subtitles",
+                BridgeGaps = "Bridge gaps",
                 PlainText = "Plain text",
                 Ocr = "OCR...",
                 Filter = "Filter",
@@ -326,6 +341,7 @@ namespace Nikse.SubtitleEdit.Core
                 FixCommonErrorsErrorX = "Fix common errors: {0}",
                 MultipleReplaceErrorX = "Multiple replace: {0}",
                 AutoBalanceErrorX = "Auto balance: {0}",
+                OffsetTimeCodes = "Offset time codes",
             };
 
             Beamer = new LanguageStructure.Beamer
@@ -432,10 +448,11 @@ namespace Nikse.SubtitleEdit.Core
                 NextDifference = "&Next difference",
                 SubtitlesNotAlike = "Subtitles have no similarities",
                 XNumberOfDifference = "Number of differences: {0}",
-                XNumberOfDifferenceAndPercentChanged = "Number of differences: {0} ({1}% of words changed)",
-                XNumberOfDifferenceAndPercentLettersChanged = "Number of differences: {0} ({1}% of letters changed)",
+                XNumberOfDifferenceAndPercentChanged = "Number of differences: {0} ({1:0.##}% of words changed)",
+                XNumberOfDifferenceAndPercentLettersChanged = "Number of differences: {0} ({1:0.##}% of letters changed)",
                 ShowOnlyDifferences = "Show only differences",
                 IgnoreLineBreaks = "Ignore line breaks",
+                IgnoreFormatting = "Ignore formatting",
                 OnlyLookForDifferencesInText = "Only look for differences in text",
                 CannotCompareWithImageBasedSubtitles = "Cannot compare with image based subtitles",
             };
@@ -596,6 +613,16 @@ namespace Nikse.SubtitleEdit.Core
                 DoNotModify = "[Do not modify]",
             };
 
+            ExportFcpXmlAdvanced = new LanguageStructure.ExportFcpXmlAdvanced
+            {
+                Title = "Export Final Cut Pro XML advanced",
+                FontName = "Font name",
+                FontSize = "Font size",
+                FontFace = "Font face",
+                Alignment = "Alignment",
+                Baseline = "Baseline",
+            };
+
             ExportPngXml = new LanguageStructure.ExportPngXml
             {
                 Title = "Export BDN XML/PNG",
@@ -627,6 +654,7 @@ namespace Nikse.SubtitleEdit.Core
                 Left = "Left",
                 Center = "Center",
                 Right = "Right",
+                CenterLeftJustify = "Center, left justify",
                 BottomMargin = "Bottom margin",
                 LeftRightMargin = "Left/right margin",
                 SaveBluRraySupAs = "Choose Blu-ray sup file name",
@@ -644,6 +672,7 @@ namespace Nikse.SubtitleEdit.Core
                 Forced = "Forced",
                 ChooseBackgroundColor = "Choose background color",
                 SaveImageAs = "Save image as...",
+                FcpUseFullPathUrl = "Use full image path url in FCP xml",
             };
 
             ExportText = new LanguageStructure.ExportText
@@ -889,15 +918,18 @@ namespace Nikse.SubtitleEdit.Core
 
             ImportSceneChanges = new LanguageStructure.ImportSceneChanges
             {
-                Title = "Import scene changes",
+                Title = "Generate/import scene changes",
                 OpenTextFile = "Open text file...",
-                ImportOptions = "Import options",
+                Import = "Import scene changes",
+                Generate = "Generate scene changes",
                 TextFiles = "Text files",
                 TimeCodes = "Time codes",
                 Frames = "Frames",
                 Seconds = "Seconds",
                 Milliseconds = "Milliseconds",
-                GetSceneChangesWithFfmpeg = "Get scene changes with FFmpeg"
+                GetSceneChangesWithFfmpeg = "Generate scene changes with FFmpeg",
+                Sensitivity = "Sensitivity",
+                SensitivityDescription = "Lower value gives more scene changes"
             };
 
             ImportText = new LanguageStructure.ImportText
@@ -1284,6 +1316,7 @@ namespace Nikse.SubtitleEdit.Core
                 NegativeTimeWarning = "Subtitle contains negative time codes. Continue with saving?",
                 BeforeMergeShortLines = "Before merge short lines",
                 BeforeSplitLongLines = "Before split long lines",
+                LongLinesSplitX = "Number of lines split: {0}",
                 MergedShortLinesX = "Number of lines merged: {0}",
                 BeforeDurationsBridgeGap = "Before bridge small gaps",
                 BeforeSetMinimumDisplayTimeBetweenParagraphs = "Before set minimum display time between subtitles",
@@ -1329,6 +1362,7 @@ namespace Nikse.SubtitleEdit.Core
                 BeforeColumnDelete = "Before column delete",
                 BeforeColumnImportText = "Before column import text",
                 BeforeColumnShiftCellsDown = "Before column shift cells down",
+                BeforeX = "Before: {0}",
                 ErrorLoadingPluginXErrorY = "Error loading plugin: {0}: {1}",
                 BeforeRunningPluginXVersionY = "Before running plugin: {0}: {1}",
                 UnableToReadPluginResult = "Unable to read subtitle result from plugin!",
@@ -1343,9 +1377,15 @@ namespace Nikse.SubtitleEdit.Core
                 ImportTimeCodesDifferentNumberOfLinesWarning = "Subtitle with time codes has a different number of lines ({0}) than current subtitle ({1}) - continue anyway?",
                 ParsingTransportStream = "Parsing transport stream - please wait...",
                 XPercentCompleted = "{0}% completed",
+                NextX = "Next: {0}",
+                PromptInsertSubtitleOverlap = "Insert subtitle at waveform position will cause overlap!" + Environment.NewLine +
+                                              Environment.NewLine +
+                                              "Continue anyway?",
+                SetPlayRateX = "Set play rate (speed) to {0}%",
                 ErrorLoadIdx = "Cannot read/edit .idx files. Idx files are a part of an idx/sub file pair (also called VobSub), and Subtitle Edit can open the .sub file.",
                 ErrorLoadRar = "This file seems to be a compressed .rar file. Subtitle Edit cannot open compressed files.",
                 ErrorLoadZip = "This file seems to be a compressed .zip file. Subtitle Edit cannot open compressed files.",
+                ErrorLoad7Zip = "This file seems to be a compressed 7-Zip file. Subtitle Edit cannot open compressed files.",
                 ErrorLoadPng = "This file seems to be a PNG image file. Subtitle Edit cannot open PNG files.",
                 ErrorLoadJpg = "This file seems to be a JPG image file. Subtitle Edit cannot open JPG files.",
                 ErrorLoadSrr = "This file seems to be a ReScene .srr file - not a subtitle file.",
@@ -1485,7 +1525,8 @@ namespace Nikse.SubtitleEdit.Core
                         ChooseAudioTrack = "Choose audio track",
                         CloseVideo = "Close video file",
                         SetVideoOffset = "Set video offset...",
-                        ImportSceneChanges = "Import scene changes...",
+                        SmptTimeMode = "SMPTE timing (drop frame)",
+                        GenerateImportSceneChanges = "Generate/import scene changes...",
                         RemoveSceneChanges = "Remove scene changes",
                         WaveformBatchGenerate = "Batch generate waveforms...",
                         ShowHideVideo = "Show/hide video",
@@ -1586,6 +1627,7 @@ namespace Nikse.SubtitleEdit.Core
                         Paste = "Paste",
                         Delete = "Delete",
                         SplitLineAtCursorPosition = "Split line at cursor position",
+                        SplitLineAtCursorAndWaveformPosition = "Split line at cursor/video position",
                         AutoDurationCurrentLine = "Auto duration (current line)",
                         SelectAll = "Select all",
                         InsertFirstLine = "Insert line",
@@ -1600,6 +1642,8 @@ namespace Nikse.SubtitleEdit.Core
                         ColumnInsertTextFromSubtitle = "Insert text from subtitle...",
                         ColumnImportTextAndShiftCellsDown = "Import text and shift cells down",
                         ColumnPasteFromClipboard = "Paste from clipboard...",
+                        ColumnTextUp = "Text up",
+                        ColumnTextDown = "Text down",
                         ColumnCopyOriginalTextToCurrent = "Copy text from original to current",
                         Split = "Split",
                         MergeSelectedLines = "Merge selected lines",
@@ -1693,11 +1737,7 @@ namespace Nikse.SubtitleEdit.Core
                     NewTextInsertAtX = "New text inserted at {0}",
 
                     Center = "Center",
-                    PlayRate = "Play rate (speed)",
-                    Slow = "Slow",
-                    Normal = "Normal",
-                    Fast = "Fast",
-                    VeryFast = "Very fast",
+                    PlayRate = "Play rate (speed)"
                 },
             };
 
@@ -1781,6 +1821,7 @@ namespace Nikse.SubtitleEdit.Core
                 Normal = "Normal",
                 CaseSensitive = "Case sensitive",
                 RegularExpression = "Regular expression",
+                Description = "Description",
                 LinesFoundX = "Lines found: {0}",
                 Remove = "Remove",
                 Add = "&Add",
@@ -1792,6 +1833,8 @@ namespace Nikse.SubtitleEdit.Core
                 Export = "Export...",
                 ImportRulesTitle = "Import replace rule(s) from...",
                 ExportRulesTitle = "Export replace rule(s) to...",
+                ChooseGroupsToImport = "Choose groups to import",
+                ChooseGroupsToExport = "Choose groups to export",
                 Rules = "Find and replace rules",
                 MoveToBottom = "Move to bottom",
                 MoveToTop = "Move to top",
@@ -1801,6 +1844,7 @@ namespace Nikse.SubtitleEdit.Core
                 RenameGroup = "Rename group...",
                 RulesForGroupX = "Rules for group \"{0}\"",
                 NewGroup = "New group...",
+                NothingToImport = "Nothing to import"
             };
 
             NetworkChat = new LanguageStructure.NetworkChat
@@ -1966,6 +2010,7 @@ can edit in same subtitle file (collaboration)",
                 WordLists = "Word lists",
                 SsaStyle = "ASS/SSA Style",
                 Network = "Network",
+                Rules = "Rules",
                 NetworkSessionSettings = "Network session settings",
                 NetworkSessionNewSound = "Play sound file when new message arrives",
                 ShowToolBarButtons = "Show tool bar buttons",
@@ -1980,6 +2025,8 @@ can edit in same subtitle file (collaboration)",
                 NetflixQualityCheck = "Netflix quality check",
                 SettingsName = "Settings",
                 Help = "Help",
+                UnbreakNoSpace = "Unbreak without space (CJK)",
+                FontInUi = "UI Font",
                 ShowFrameRate = "Show frame rate in toolbar",
                 DefaultFrameRate = "Default frame rate",
                 DefaultFileEncoding = "Default file encoding",
@@ -2000,6 +2047,7 @@ can edit in same subtitle file (collaboration)",
                 SubtitleBackgroundColor = "Subtitle background color",
                 SpellChecker = "Spell checker",
                 VideoAutoOpen = "Auto-open video file when opening subtitle",
+                AllowVolumeBoost = "Allow volume boost",
                 RememberRecentFiles = "Show recent files (for reopen)",
                 StartWithLastFileLoaded = "Start with last file loaded",
                 RememberSelectedLine = "Remember selected line",
@@ -2007,8 +2055,8 @@ can edit in same subtitle file (collaboration)",
                 StartInSourceView = "Start in source view",
                 RemoveBlankLinesWhenOpening = "Remove blank lines when opening a subtitle",
                 ShowLineBreaksAs = "Show line breaks in list view as",
+                SaveAsFileNameFrom = "\"Save as...\" uses file name from",
                 MainListViewDoubleClickAction = "Double-clicking line in main window list view will",
-                MainListViewColumns = "List view columns",
                 MainListViewColumnsInfo = "Choose visible list view columns",
                 MainListViewNothing = "Nothing",
                 MainListViewVideoGoToPositionAndPause = "Go to video position and pause",
@@ -2018,6 +2066,8 @@ can edit in same subtitle file (collaboration)",
                 MainListViewVideoGoToPositionMinusHalfSecAndPause = "Go to video position - 0.5 s and pause",
                 MainListViewVideoGoToPositionMinus1SecAndPlay = "Go to video position - 1 s and play",
                 MainListViewEditTextAndPause = "Go to edit text box, and pause at video position",
+                VideoFileName = "Video file name",
+                ExistingFileName = "Existing file name",
                 AutoBackup = "Auto-backup",
                 AutoBackupEveryMinute = "Every minute",
                 AutoBackupEveryFiveMinutes = "Every 5th minute",
@@ -2074,6 +2124,7 @@ can edit in same subtitle file (collaboration)",
                 SpectrogramOneColorGradient = "One color gradient",
                 SpectrogramClassic = "Classic",
                 WaveformUseFFmpeg = "Use FFmpeg for wave extraction",
+                DownloadFFmpeg = "Download FFmpeg",
                 WaveformFFmpegPath = "Path to FFmpeg",
                 WaveformBrowseToFFmpeg = "Browse to FFmpeg",
                 WaveformBrowseToVLC = "Browse to VLC portable",
@@ -2113,8 +2164,8 @@ can edit in same subtitle file (collaboration)",
                 RemoveTextForHi = "Remove text for HI",
                 MergeLinesShorterThan = "Unbreak subtitles shorter than",
                 MusicSymbol = "Music symbol",
-                MusicSymbolsToReplace = "Music symbols to replace (separate by space)",
-                FixCommonOcrErrorsUseHardcodedRules = "Fix common OCR errors - also use hardcoded rules",
+                MusicSymbolsReplace = "Music symbols to replace (separate by comma)",
+                FixCommonOcrErrorsUseHardcodedRules = "Fix common OCR errors - also use hard-coded rules",
                 FixCommonerrorsFixShortDisplayTimesAllowMoveStartTime = "Fix short display time - allow move of start time",
                 FixCommonErrorsSkipStepOne = "Skip step one (choose fix rules)",
                 Shortcuts = "Shortcuts",
@@ -2123,7 +2174,8 @@ can edit in same subtitle file (collaboration)",
                 Alt = "Alt",
                 Shift = "Shift",
                 Key = "Key",
-                TextBox = "Textbox",
+                ListView = "List View",
+                TextBox = "Text box",
                 UpdateShortcut = "Update",
                 ToggleDockUndockOfVideoControls = "Toggle dock/undock of video controls",
                 CreateSetEndAddNewAndGoToNew = "Set end, add new and go to new",
@@ -2134,6 +2186,10 @@ can edit in same subtitle file (collaboration)",
                 AdjustStartDownEndUpAndGoToNext = "Key down=set start, Key up=set end and go to next",
                 AdjustSelected100MsForward = "Move selected lines 100 ms forward",
                 AdjustSelected100MsBack = "Move selected lines 100 ms back",
+                AdjustStartXMsBack = "Move start {0} ms back",
+                AdjustStartXMsForward = "Move start {0} ms forward",
+                AdjustEndXMsBack = "Move end {0} ms back",
+                AdjustEndXMsForward = "Move end {0} ms forward",
                 AdjustSetStartTimeKeepDuration = "Set start time, keep duration",
                 AdjustSetEndAndOffsetTheRest = "Set end, offset the rest",
                 AdjustSetEndAndOffsetTheRestAndGoToNext = "Set end, offset the rest and go to next",
@@ -2149,6 +2205,7 @@ can edit in same subtitle file (collaboration)",
                 GoToNextSubtitleAndFocusVideo = "Go to next line and set video position",
                 ToggleFocus = "Toggle focus between list view and subtitle text box",
                 ToggleDialogDashes = "Toggle dialog dashes",
+                ToggleMusicSymbols = "Toggle music symbols",
                 Alignment = "Alignment (selected lines)",
                 CopyTextOnly = "Copy text only to clip board (selected lines)",
                 CopyTextOnlyFromOriginalToCurrent = "Copy text from original to current",
@@ -2165,6 +2222,7 @@ can edit in same subtitle file (collaboration)",
                 WaveformPlayFirstSelectedSubtitle = "Play first selected subtitle",
                 WaveformFocusListView = "Focus list view",
                 WaveformGoToNextSubtitle = "Go to next subtitle (from video position)",
+                WaveformGoToPreviousSceneChange = "Go to previous scene change",
                 WaveformGoToNextSceneChange = "Go to next scene change",
                 WaveformToggleSceneChange = "Toggle scene change",
                 GoBack1Frame = "One frame back",
@@ -2182,12 +2240,13 @@ can edit in same subtitle file (collaboration)",
                 Pause = "Pause",
                 TogglePlayPause = "Toggle play/pause",
                 Fullscreen = "Fullscreen",
+                PlayRateSlower = "Play rate slower",
+                PlayRateFaster = "Play rate faster",
                 CustomSearch1 = "Translate, custom search 1",
                 CustomSearch2 = "Translate, custom search 2",
                 CustomSearch3 = "Translate, custom search 3",
                 CustomSearch4 = "Translate, custom search 4",
                 CustomSearch5 = "Translate, custom search 5",
-                CustomSearch6 = "Translate, custom search 6",
                 SyntaxColoring = "Syntax coloring",
                 ListViewSyntaxColoring = "List view syntax coloring",
                 SyntaxColorDurationIfTooSmall = "Color duration if too short",
@@ -2200,7 +2259,7 @@ can edit in same subtitle file (collaboration)",
                 GoToNextEmptyLine = "Go to next empty line",
                 MergeSelectedLines = "Merge selected lines",
                 MergeSelectedLinesOnlyFirstText = "Merge selected lines, keep only first non-empty text",
-                ToggleTranslationMode = "Toggle translation mode",
+                ToggleTranslationMode = "Toggle translator mode",
                 SwitchOriginalAndTranslation = "Switch original and translation",
                 MergeOriginalAndTranslation = "Merge original and translation",
                 MergeWithNext = "Merge with next",
@@ -2210,11 +2269,15 @@ can edit in same subtitle file (collaboration)",
                 ListViewColumnDelete = "Column, delete text",
                 ListViewColumnInsert = "Column, insert text",
                 ListViewColumnPaste = "Column, paste",
+                ListViewColumnTextUp = "Column, text up",
+                ListViewColumnTextDown = "Column, text down",
                 ListViewFocusWaveform = "Focus waveform/spectrogram",
                 ListViewGoToNextError = "Go to next error",
                 ShowBeamer = "Start subtitle fullscreen beamer",
-                MainTextBoxMoveLastWordDown = "Move last word down to next subtitle line",
-                MainTextBoxMoveFirstWordFromNextUp = "Move first word from next subtitle line up",
+                MainTextBoxMoveLastWordDown = "Move last word to next subtitle",
+                MainTextBoxMoveFirstWordFromNextUp = "Fetch first word from next subtitle",
+                MainTextBoxMoveLastWordDownCurrent = "Move last word from first line down (current subtitle)",
+                MainTextBoxMoveFirstWordUpCurrent = "Move first word from next line up (current subtitle)",
                 MainTextBoxSelectionToLower = "Selection to lowercase",
                 MainTextBoxSelectionToUpper = "Selection to uppercase",
                 MainTextBoxToggleAutoDuration = "Toggle auto duration",
@@ -2227,8 +2290,10 @@ can edit in same subtitle file (collaboration)",
                 MicrosoftBingTranslator = "Microsoft Bing Translator",
                 HowToSignUp = "How to sign up",
                 GoogleTranslateUrl = "Google translate url",
-                ClientId = "Client ID",
-                ClientSecret = "Client secret"
+                MicrosoftTranslateApiKey = "Key",
+                FontNote = "Note: These font settings are for the Subtitle Edit UI only." + Environment.NewLine +
+                           "Setting a font for a subtitle is normally done in the video player, but can also be done when using a subtitle format with built-in font information like " + Environment.NewLine +
+                           "\"Advanced Sub Station Alpha\" or via export to image based formats."
             };
 
             SettingsMpv = new LanguageStructure.SettingsMpv
@@ -2237,6 +2302,14 @@ can edit in same subtitle file (collaboration)",
                 DownloadMpv = "Download mpv lib",
                 DownloadMpvFailed = "Unable to download mpv - please re-try later!",
                 DownloadMpvOk = "The mpv lib was downloaded and is ready for use.",
+            };
+
+
+            SettingsFfmpeg = new LanguageStructure.SettingsFfmpeg
+            {
+                Title = "Download FFmpeg",
+                XDownloadFailed = "Unable to download {0} - please re-try later!",
+                XDownloadOk = "{0} was downloaded and is ready for use.",
             };
 
             SetVideoOffset = new LanguageStructure.SetVideoOffset
@@ -2292,12 +2365,14 @@ can edit in same subtitle file (collaboration)",
                 EditWholeText = "Edit whole text",
                 EditWordOnly = "Edit word only",
                 AddXToNames = "Add '{0}' to name list",
+                AddXToUserDictionary = "Add '{0}' to user dictionary",
                 AutoFixNames = "Auto fix names where only casing differ",
                 CheckOneLetterWords = "Prompt for unknown one letter words",
                 TreatINQuoteAsING = "Treat word ending \" in' \" as \" ing \" (English only)",
                 ImageText = "Image text",
                 SpellCheckCompleted = "Spell check completed",
                 SpellCheckAborted = "Spell check aborted",
+                SpacesNotAllowed = "Spaces not allowed in single word!",
                 UndoX = "Undo: {0}",
             };
 
@@ -2376,6 +2451,7 @@ can edit in same subtitle file (collaboration)",
                 LengthInFormatXinCharactersY = "Number of characters as {0}: {1:#,###,##0}",
                 NumberOfCharactersInTextOnly = "Number of characters in text only: {0:#,###,##0}",
                 NumberOfItalicTags = "Number of italic tags: {0}",
+                TotalDuration = "Total duration of all subtitles: {0}",
                 TotalCharsPerSecond = "Total characters/second: {0:0.0} seconds",
                 TotalWords = "Total words in subtitle: {0}",
                 NumberOfBoldTags = "Number of bold tags: {0}",
@@ -2576,7 +2652,6 @@ Keep changes?",
                 SaveAllSubtitleImagesAsBdnXml = "Save all images (png/bdn xml)...",
                 SaveAllSubtitleImagesWithHtml = "Save all images with HTML index...",
                 XImagesSavedInY = "{0} images saved in {1}",
-                TryModiForUnknownWords = "Try Microsoft MODI OCR for unknown words",
                 DictionaryX = "Dictionary: {0}",
                 RightToLeft = "Right to left",
                 ShowOnlyForcedSubtitles = "Show only forced subtitles",
@@ -2588,6 +2663,7 @@ Keep changes?",
                 SetUnitalicFactor = "Set un-italic factor...",
                 DiscardTitle = "Discard changes made in OCR?",
                 DiscardText = "Do you want to discard changes made in current OCR session?",
+                MinLineSplitHeight = "Min. line height (split)",
             };
 
             VobSubOcrCharacter = new LanguageStructure.VobSubOcrCharacter

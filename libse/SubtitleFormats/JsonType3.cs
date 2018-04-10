@@ -6,27 +6,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class JsonType3 : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".json"; }
-        }
+        public override string Extension => ".json";
 
-        public override string Name
-        {
-            get { return "JSON Type 3"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "JSON Type 3";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -57,11 +39,12 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             var sb = new StringBuilder();
             foreach (string s in lines)
                 sb.Append(s);
-            int startIndex = sb.ToString().IndexOf("[{\"", StringComparison.Ordinal);
-            if (startIndex < 0)
+            var text = sb.ToString();
+            int startIndex = text.IndexOf("[{\"", StringComparison.Ordinal);
+            if (startIndex < 0 || text.Contains("\"captions\"", StringComparison.Ordinal))
                 return;
 
-            string text = sb.ToString().Substring(startIndex);
+            text = text.Substring(startIndex);
             foreach (string line in text.Replace("},{", Environment.NewLine).SplitToLines())
             {
                 string s = line.Trim() + "}";

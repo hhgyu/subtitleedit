@@ -1,6 +1,10 @@
-﻿using Nikse.SubtitleEdit.Core.TransportStream;
+﻿using Nikse.SubtitleEdit.Core.ContainerFormats;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
+using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
+using Nikse.SubtitleEdit.Core.TransportStream;
 using Nikse.SubtitleEdit.Core.VobSub;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -39,6 +43,16 @@ namespace Nikse.SubtitleEdit.Core
             }
         }
 
+        public static List<string> ReadAllLinesShared(string path, Encoding encoding)
+        {
+            return encoding.GetString(ReadAllBytesShared(path)).SplitToLines();
+        }
+
+        public static string ReadAllTextShared(string path, Encoding encoding)
+        {
+            return encoding.GetString(ReadAllBytesShared(path));
+        }
+
         public static bool IsZip(string fileName)
         {
             using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -51,6 +65,22 @@ namespace Nikse.SubtitleEdit.Core
                     && buffer[1] == 0x4B  // K
                     && buffer[2] == 0x03  // (ETX)
                     && buffer[3] == 0x04; // (EOT)
+            }
+        }
+        public static bool Is7Zip(string fileName)
+        {
+            using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                var buffer = new byte[6];
+                var count = fs.Read(buffer, 0, buffer.Length);
+                if (count != buffer.Length)
+                    return false;
+                return buffer[0] == 0x37     // 7
+                       && buffer[1] == 0x7a  // z
+                       && buffer[2] == 0xbc
+                       && buffer[3] == 0xaf
+                       && buffer[4] == 0x27
+                       && buffer[5] == 0x1c;
             }
         }
 
@@ -321,37 +351,111 @@ namespace Nikse.SubtitleEdit.Core
             var s = File.ReadAllText(fileName, enc);
 
             int numberCount = 0;
-            int binaryCount = 0;
             int letterCount = 0;
+            int len = s.Length;
 
-            for (int i = 0; i < s.Length; i++)
+            for (int i = 0; i < len; i++)
             {
                 char ch = s[i];
                 if (char.IsLetter(ch) || " -,.!?[]()\r\n".Contains(ch))
                 {
                     letterCount++;
                 }
-                else if (char.IsControl(ch) && ch != '\t')
+                else if (char.IsControl(ch) && ch != '\t') // binary found
                 {
-                    binaryCount++;
+                    return false;
                 }
-                else if ("0123456789".Contains(ch))
+                else if (CharUtils.IsDigit(ch))
                 {
                     numberCount++;
                 }
             }
-            if (binaryCount > 0)
-            {
-                return false;
-            }
-            if (s.Length < 100)
+            if (len < 100)
             {
                 return numberCount < 5 && letterCount > 20;
             }
-            var numberThreshold = (s.Length * 0.002) + 1;
-            var letterThreshold = s.Length * 0.8;
+            var numberThreshold = len * 0.002 + 2;
+            var letterThreshold = len * 0.8;
             return numberCount < numberThreshold && letterCount > letterThreshold;
         }
 
+        public static VideoInfo TryReadVideoInfoViaMatroskaHeader(string fileName)
+        {
+            var info = new VideoInfo { Success = false };
+            using (var matroska = new MatroskaFile(fileName))
+            {
+                if (matroska.IsValid)
+                {
+                    matroska.GetInfo(out var frameRate, out var width, out var height, out var milliseconds, out var videoCodec);
+
+                    info.Width = width;
+                    info.Height = height;
+                    info.FramesPerSecond = frameRate;
+                    info.Success = true;
+                    info.TotalMilliseconds = milliseconds;
+                    info.TotalSeconds = milliseconds / TimeCode.BaseUnit;
+                    info.TotalFrames = info.TotalSeconds * frameRate;
+                    info.VideoCodec = videoCodec;
+                }
+            }
+            return info;
+        }
+
+        public static VideoInfo TryReadVideoInfoViaAviHeader(string fileName)
+        {
+            var info = new VideoInfo { Success = false };
+
+            try
+            {
+                using (var rp = new RiffParser())
+                {
+                    if (rp.TryOpenFile(fileName) && rp.FileType == RiffParser.CkidAvi)
+                    {
+                        var dh = new RiffDecodeHeader(rp);
+                        dh.ProcessMainAvi();
+                        info.FileType = RiffParser.FromFourCc(rp.FileType);
+                        info.Width = dh.Width;
+                        info.Height = dh.Height;
+                        info.FramesPerSecond = dh.FrameRate;
+                        info.TotalFrames = dh.TotalFrames;
+                        info.TotalMilliseconds = dh.TotalMilliseconds;
+                        info.TotalSeconds = info.TotalMilliseconds / TimeCode.BaseUnit;
+                        info.VideoCodec = dh.VideoHandler;
+                        info.Success = true;
+                    }
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return info;
+        }
+
+        public static VideoInfo TryReadVideoInfoViaMp4(string fileName)
+        {
+            var info = new VideoInfo { Success = false };
+
+            try
+            {
+                var mp4Parser = new MP4Parser(fileName);
+                if (mp4Parser.Moov != null && mp4Parser.VideoResolution.X > 0)
+                {
+                    info.Width = mp4Parser.VideoResolution.X;
+                    info.Height = mp4Parser.VideoResolution.Y;
+                    info.TotalMilliseconds = mp4Parser.Duration.TotalSeconds;
+                    info.VideoCodec = "MP4";
+                    info.FramesPerSecond = mp4Parser.FrameRate;
+                    info.Success = true;
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+
+            return info;
+        }
     }
 }

@@ -17,20 +17,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             Text
         }
 
-        public override string Extension
-        {
-            get { return ".txt"; }
-        }
+        public override string Extension => ".txt";
 
-        public override string Name
-        {
-            get { return "Footage"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "Footage";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -38,9 +27,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             if (fileName != null && asc.IsMine(null, fileName))
                 return false;
 
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
+            return base.IsMine(lines, fileName);
         }
 
         public override string ToText(Subtitle subtitle, string title)
@@ -83,7 +70,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             {
                 if (line.EndsWith('.') && Utilities.IsInteger(line.TrimEnd('.')))
                 {
-                    if (paragraph != null && !string.IsNullOrEmpty(paragraph.Text))
+                    if (!string.IsNullOrEmpty(paragraph?.Text))
                         subtitle.Paragraphs.Add(paragraph);
                     paragraph = new Paragraph();
                     expecting = ExpectingLine.TimeStart;
@@ -155,7 +142,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             int frames = MillisecondsToFrames(time.TotalMilliseconds);
             int footage = frames / 16;
             int rest = (int)Math.Round(frames % 16.0 / 16.0 * 24.0);
-            return string.Format("{0:00},{1:00}", footage, rest).PadLeft(8);
+            return $"{footage:00},{rest:00}".PadLeft(8);
         }
 
         private static TimeCode DecodeTimeCode(string[] parts)

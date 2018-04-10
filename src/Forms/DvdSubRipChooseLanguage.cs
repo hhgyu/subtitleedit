@@ -36,7 +36,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public DvdSubRipChooseLanguage()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             Text = Configuration.Settings.Language.DvdSubRipChooseLanguage.Title;
             labelChooseLanguage.Text = Configuration.Settings.Language.DvdSubRipChooseLanguage.ChooseLanguageStreamId;
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
@@ -84,7 +86,7 @@ namespace Nikse.SubtitleEdit.Forms
 
         private static string ShowInSrtFormat(TimeSpan ts)
         {
-            return string.Format("{0:00}:{1:00}:{2:00},{3:000}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds);
+            return $"{ts.Hours:00}:{ts.Minutes:00}:{ts.Seconds:00},{ts.Milliseconds:000}";
         }
 
         private void ListBox1SelectedIndexChanged(object sender, EventArgs e)
@@ -136,6 +138,11 @@ namespace Nikse.SubtitleEdit.Forms
         }
 
         private void ButtonOkClick(object sender, EventArgs e)
+        {
+            SelectActive();
+        }
+
+        internal void SelectActive()
         {
             if (_languages != null && comboBoxLanguages.SelectedIndex >= 0 && comboBoxLanguages.SelectedIndex < _languages.Count)
                 SelectedLanguageString = _languages[comboBoxLanguages.SelectedIndex];

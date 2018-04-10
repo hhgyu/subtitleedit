@@ -4,7 +4,6 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using System.Xml;
 
@@ -146,7 +145,7 @@ Line 3";
             var text = target.ToText(subtitle, "title");
 
             var outSubtitle = new Subtitle();
-            target.LoadSubtitle(outSubtitle, text.SplitToLines().ToList(), null);
+            target.LoadSubtitle(outSubtitle, text.SplitToLines(), null);
             Assert.IsTrue(outSubtitle.Paragraphs[0].Text == subText);
         }
 
@@ -362,7 +361,7 @@ Dialogue: 0,0:00:16.84,0:00:18.16,rechts,,0000,0000,0000,," + lineOneText;
             var subtitle = new Subtitle();
             target.LoadSubtitle(subtitle, GetAssLines(@"{\fs20\pos(1,1)\blur5}Bla-bla-bla"), null);
             string actual = subtitle.Paragraphs[0].Text;
-            const string expected = "<font size=\"20\">{\\pos(1,1)\\blur5}Bla-bla-bla</font>";
+            const string expected = @"{\fs20\pos(1,1)\blur5}Bla-bla-bla";
             Assert.AreEqual(expected, actual);
         }
 
@@ -374,6 +373,36 @@ Dialogue: 0,0:00:16.84,0:00:18.16,rechts,,0000,0000,0000,," + lineOneText;
             var text = new AdvancedSubStationAlpha().ToText(s, string.Empty);
             Assert.IsTrue(text.Contains("{\\c&H0000ff&}Previously...{\\c} :)"));
         }
+
+        [TestMethod]
+        public void AssFontEventsLast()
+        {
+            var text = @"[Script Info]
+; test
+
+[Aegisub Project Garbage]
+Last Style Storage: Default
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Segoe Script Red shadow alpha 160,Segoe Script,77,&H006EBAB4,&H0300FFFF,&H00000000,&HA00000FF,0,0,0,0,100,100,0,0,1,5,5,2,170,170,29,1
+
+[Fonts]
+fontname: AGENCYR_0.TTF
+!!%
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 0,0:00:01.80,0:00:04.93,Segoe Script Red shadow alpha 160,,0,0,0,,Die met de zuurstof\Ngezichtsbehandeling? Geweldig!
+Dialogue: 0,0:00:05.02,0:00:07.94,Segoe Script Red shadow alpha 160,,0,0,0,,Dit wordt de trip van ons leven.";
+            var target = new AdvancedSubStationAlpha();
+            var subtitle = new Subtitle();
+            target.LoadSubtitle(subtitle, text.SplitToLines(), null);
+            var output = new AdvancedSubStationAlpha().ToText(subtitle, string.Empty);
+            Assert.IsTrue(output.Contains("[Events]"));
+            Assert.AreEqual(2, subtitle.Paragraphs.Count);
+        }
+
 
         #endregion Advanced Sub Station alpha (.ass)
 
@@ -441,7 +470,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
         [TestMethod]
         public void DcinemaInteropItalic()
         {
-            var target = new DCSubtitle();
+            var target = new DCinemaInterop();
             var subtitle = new Subtitle();
             subtitle.Paragraphs.Add(new Paragraph("<i>Italic</i>", 1000, 5000));
             string text = target.ToText(subtitle, "title");
@@ -451,7 +480,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
         [TestMethod]
         public void DcinemaInteropColorAndItalic()
         {
-            var target = new DCSubtitle();
+            var target = new DCinemaInterop();
             var subtitle = new Subtitle();
             subtitle.Paragraphs.Add(new Paragraph("<font color=\"#ff0000\"><i>Red</i></font>", 1000, 5000));
             string text = target.ToText(subtitle, "title");
@@ -605,7 +634,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
             var text = target.ToText(subtitle, "title");
 
             var outSubtitle = new Subtitle();
-            target.LoadSubtitle(outSubtitle, text.SplitToLines().ToList(), null);
+            target.LoadSubtitle(outSubtitle, text.SplitToLines(), null);
             Assert.IsTrue(outSubtitle.Paragraphs[0].Text == subText);
         }
 
@@ -620,7 +649,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
             var text = target.ToText(subtitle, "title");
 
             var outSubtitle = new Subtitle();
-            target.LoadSubtitle(outSubtitle, text.SplitToLines().ToList(), null);
+            target.LoadSubtitle(outSubtitle, text.SplitToLines(), null);
             Assert.IsTrue(outSubtitle.Paragraphs[0].Text == subText);
             Assert.IsTrue(outSubtitle.Paragraphs[1].Text == subText);
         }
@@ -636,7 +665,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
             var text = target.ToText(subtitle, "title");
 
             var outSubtitle = new Subtitle();
-            target.LoadSubtitle(outSubtitle, text.SplitToLines().ToList(), null);
+            target.LoadSubtitle(outSubtitle, text.SplitToLines(), null);
             Assert.IsTrue(outSubtitle.Paragraphs[0].Text == subText);
             Assert.IsTrue(outSubtitle.Paragraphs[1].Text == subText);
         }
@@ -852,7 +881,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
             string s = "#Every satellite...#\r\n#0:02:06.14,0:02:08.08";
             var target = new Utx();
             var subtitle = new Subtitle();
-            target.LoadSubtitle(subtitle, s.SplitToLines().ToList(), string.Empty);
+            target.LoadSubtitle(subtitle, s.SplitToLines(), string.Empty);
             string actual = subtitle.Paragraphs[0].Text;
             Assert.AreEqual("#Every satellite...#", actual);
         }
@@ -869,7 +898,7 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
                 sb.AppendLine(Utilities.LowercaseLetters);
                 sb.AppendLine();
             }
-            var lines = sb.ToString().SplitToLines().ToList();
+            var lines = sb.ToString().SplitToLines();
             Configuration.Settings.General.CurrentFrameRate = 27;
             foreach (var format in SubtitleFormat.AllSubtitleFormats)
             {
@@ -969,7 +998,7 @@ and astronauts.“...""
     </tt:div>
   </tt:body>
 </tt:tt>".Replace("'", "\"");
-            target.LoadSubtitle(subtitle, raw.SplitToLines().ToList(), null);
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
             string actual = subtitle.Paragraphs[0].Text;
             const string expected = "Hallo world.";
             Assert.AreEqual(expected, actual);
@@ -1053,5 +1082,78 @@ and astronauts.“...""
         }
         #endregion
 
+        #region WebVTT
+
+        [TestMethod]
+        public void WebVttFontColor()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"
+WEBVTT
+
+00:00:54.440 --> 00:00:58.920 align:middle line:-4
+Hi, I'm Keith Lemon.
+
+00:00:58.960 --> 00:01:03.280 align:middle line:-3
+<c.yellow>AUDIENCE: Aww!</c>";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            string actual = subtitle.Paragraphs[1].Text;
+            const string expected = "<font color=\"yellow\">AUDIENCE: Aww!</font>";
+            Assert.AreEqual(expected, actual);
+
+            var webVtt = subtitle.ToText(target);
+            Assert.IsTrue(webVtt.Contains("<c.yellow>AUDIENCE: Aww!</c>"));
+        }
+
+        [TestMethod]
+        public void WebVttSpaceBeforeTimeCode()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+
+ 00:39:32.240 --> 00:39:37.640 align:middle
+Jag måste ge mig av.
+Hemskt ledsen.
+
+00:39:48.960 --> 00:39:51.120 align:middle
+
+VÄLKOMMEN TILL TEXAS
+
+00:40:15.520 --> 00:40:19.640 align:middle
+-Hej, Martin.
+-Hej, pappa.";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            Assert.AreEqual(3, subtitle.Paragraphs.Count);
+        }
+
+        [TestMethod]
+        public void WebVttFontBlankLine()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+
+00:39:32.240 --> 00:39:37.640 align:middle
+Jag måste ge mig av.
+Hemskt ledsen.
+
+00:39:48.960 --> 00:39:51.120 align:middle
+
+VÄLKOMMEN TILL TEXAS
+
+00:40:15.520 --> 00:40:19.640 align:middle
+-Hej, Martin.
+-Hej, pappa.";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            string actual = subtitle.Paragraphs[1].Text;
+            string expected = Environment.NewLine + "VÄLKOMMEN TILL TEXAS";
+            Assert.AreEqual(expected, actual);
+        }
+
+       
+
+        #endregion
     }
 }

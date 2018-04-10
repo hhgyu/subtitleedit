@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
-using Nikse.SubtitleEdit.Logic;
 
 namespace Nikse.SubtitleEdit.Forms.Ocr
 {
@@ -15,7 +15,9 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
 
         public VobSubOcrCharacter()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             var language = Configuration.Settings.Language.VobSubOcrCharacter;
             Text = language.Title;
@@ -25,7 +27,7 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
             labelCharacters.Text = language.Characters;
             labelCharactersAsText.Text = language.CharactersAsText;
             checkBoxItalic.Text = language.Italic;
-            labelItalicOn.Text = language.Italic.Replace("&", string.Empty);
+            labelItalicOn.Text = language.Italic.RemoveChar('&');
             labelItalicOn.Visible = false;
             buttonAbort.Text = language.Abort;
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
@@ -126,7 +128,7 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
                 using (var g = Graphics.FromImage(bm))
                 {
                     g.DrawImage(org, 0, 0, org.Width, org.Height);
-                    g.DrawRectangle(Pens.Red, character.X, character.Y, character.NikseBitmap.Width, character.NikseBitmap.Height - 1);
+                    g.DrawRectangle(Pens.Red, character.X - 1, character.Y - 1, character.NikseBitmap.Width + 1, character.NikseBitmap.Height + 1);
                 }
                 pictureBoxSubtitleImage.Image = bm;
             }
@@ -134,10 +136,7 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
             pictureBoxCharacter.Top = labelCharacters.Top + 16;
             pictureBoxLastEdit.Left = buttonLastEdit.Left + buttonLastEdit.Width + 5;
 
-            if (!allowExpand)
-            {
-                buttonExpandSelection.Visible = false;
-            }
+            buttonExpandSelection.Visible = allowExpand;
         }
 
         private void ButtonOkClick(object sender, EventArgs e)
@@ -173,7 +172,7 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
                 dataGridView1.Font = new Font(dataGridView1.Font.FontFamily, dataGridView1.Font.Size);
                 labelItalicOn.Visible = false;
                 checkBoxItalic.Font = new Font(checkBoxItalic.Font.FontFamily, checkBoxItalic.Font.Size);
-                checkBoxItalic.ForeColor = Control.DefaultForeColor;
+                checkBoxItalic.ForeColor = DefaultForeColor;
             }
         }
 
@@ -240,20 +239,25 @@ namespace Nikse.SubtitleEdit.Forms.Ocr
 
         private void VobSubOcrCharacter_KeyDown(object sender, KeyEventArgs e)
         {
-            if (buttonShrinkSelection.Visible &&
-                (e.Modifiers == Keys.Alt && e.KeyCode == Keys.Left) ||
-                (e.Modifiers == Keys.Shift && e.KeyCode == Keys.Subtract) ||
-                (e.Modifiers == Keys.Alt && e.KeyCode == Keys.D))
+            if (buttonShrinkSelection.Visible && 
+                e.Modifiers == Keys.Alt && e.KeyCode == Keys.Left ||
+                e.Modifiers == Keys.Shift && e.KeyCode == Keys.Subtract ||
+                e.Modifiers == Keys.Alt && e.KeyCode == Keys.D)
             {
                 ButtonShrinkSelectionClick(null, null);
                 e.SuppressKeyPress = true;
             }
             else if (buttonExpandSelection.Visible &&
-               (e.Modifiers == Keys.Alt && e.KeyCode == Keys.Right) ||
-               (e.Modifiers == Keys.Shift && e.KeyCode == Keys.Add) ||
-               (e.Modifiers == Keys.Alt && e.KeyCode == Keys.E))
+                     e.Modifiers == Keys.Alt && e.KeyCode == Keys.Right ||
+                     e.Modifiers == Keys.Shift && e.KeyCode == Keys.Add ||
+                     e.Modifiers == Keys.Alt && e.KeyCode == Keys.E)
             {
                 ButtonExpandSelectionClick(null, null);
+                e.SuppressKeyPress = true;
+            }
+            else if (e.Modifiers == Keys.Control && e.KeyCode == Keys.I)
+            {
+                checkBoxItalic.Checked = !checkBoxItalic.Checked;
                 e.SuppressKeyPress = true;
             }
         }

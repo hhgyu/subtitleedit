@@ -9,23 +9,20 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         private static readonly Regex RegexAvDicPlayer = new Regex(@"<AVDicPlayer[^\s]*", RegexOptions.Compiled); //AVDicPlayer_TEDSYNⓒ_VER1.1
 
-        public override string Name
-        {
-            get { return "SAMI AVDicPlayer"; }
-        }
+        public override string Name => "SAMI AVDicPlayer";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
             var text = GetSamiFromAvDicPlayerText(lines);
             var subtitle = new Subtitle();
-            base.LoadSubtitle(subtitle, text.SplitToLines().ToList(), fileName);
+            base.LoadSubtitle(subtitle, text.SplitToLines(), fileName);
             return subtitle.Paragraphs.Count > _errorCount;
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
         {
             var text = GetSamiFromAvDicPlayerText(lines);
-            base.LoadSubtitle(subtitle, text.SplitToLines().ToList(), fileName);
+            base.LoadSubtitle(subtitle, text.SplitToLines(), fileName);
         }
 
         public override string ToText(Subtitle subtitle, string title)

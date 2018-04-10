@@ -67,7 +67,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
         private IntPtr _libMpvDll;
         private IntPtr _mpvHandle;
         private Timer _videoLoadedTimer;
-        private double? _pausePosition = null; // Hack to hold precise seeking when paused
+        private double? _pausePosition; // Hack to hold precise seeking when paused
         //        private Timer _videoEndedTimer;
 
         public override event EventHandler OnVideoLoaded;
@@ -162,7 +162,8 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
             }
             set
             {
-                DoMpvCommand("set", "volume", value.ToString());
+                var v = Configuration.Settings.General.AllowVolumeBoost ? (int)Math.Round(value * 1.5) : value;
+                DoMpvCommand("set", "volume",  v.ToString(CultureInfo.InvariantCulture));
                 _volume = value;
             }
         }
@@ -232,7 +233,7 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
                 return;
 
             DoMpvCommand("frame-step");
-            _pausePosition = null;            
+            _pausePosition = null;
         }
 
         public void GetPreviousFrame()
@@ -427,25 +428,45 @@ namespace Nikse.SubtitleEdit.Logic.VideoPlayers
             if (!string.IsNullOrEmpty(videoFileName))
             {
                 _mpvInitialize.Invoke(_mpvHandle);
+                SetVideoOwner(ownerControl);
 
                 string videoOutput = "direct3d";
                 if (!string.IsNullOrWhiteSpace(Configuration.Settings.General.MpvVideoOutput))
                     videoOutput = Configuration.Settings.General.MpvVideoOutput;
                 _mpvSetOptionString(_mpvHandle, GetUtf8Bytes("vo"), GetUtf8Bytes(videoOutput)); // use "direct3d" or "opengl"
-
                 _mpvSetOptionString(_mpvHandle, GetUtf8Bytes("keep-open"), GetUtf8Bytes("always")); // don't auto close video
                 _mpvSetOptionString(_mpvHandle, GetUtf8Bytes("no-sub"), GetUtf8Bytes("")); // don't load subtitles
-                if (ownerControl != null)
-                {
-                    int mpvFormatInt64 = 4;
-                    var windowId = ownerControl.Handle.ToInt64();
-                    _mpvSetOption(_mpvHandle, GetUtf8Bytes("wid"), mpvFormatInt64, ref windowId);
-                }
+                if (videoFileName.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    videoFileName.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    _mpvSetOptionString(_mpvHandle, GetUtf8Bytes("ytdl"), GetUtf8Bytes("yes"));
                 DoMpvCommand("loadfile", videoFileName);
 
                 _videoLoadedTimer = new Timer { Interval = 50 };
                 _videoLoadedTimer.Tick += VideoLoadedTimer_Tick;
                 _videoLoadedTimer.Start();
+
+                SetVideoOwner(ownerControl);
+            }
+        }
+
+        private void SetVideoOwner(Control ownerControl)
+        {
+            if (ownerControl != null)
+            {
+                int iterations = 25;
+                int returnCode = -1;
+                int mpvFormatInt64 = 4;
+                var windowId = ownerControl.Handle.ToInt64();
+                while (returnCode != 0 && iterations > 0)
+                {
+                    Application.DoEvents();
+                    returnCode = _mpvSetOption(_mpvHandle, GetUtf8Bytes("wid"), mpvFormatInt64, ref windowId);
+                    if (returnCode != 0)
+                    {
+                        iterations--;
+                        System.Threading.Thread.Sleep(100);
+                    }
+                }
             }
         }
 

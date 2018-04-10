@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Logic;
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
@@ -15,7 +16,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public ImportUnknownFormat(string fileName)
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             _refreshTimer.Interval = 400;
             _refreshTimer.Tick += RefreshTimerTick;
 
@@ -43,7 +46,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             var uknownFormatImporter = new UknownFormatImporter();
             uknownFormatImporter.UseFrames = radioButtonTimeCodeFrames.Checked;
-            ImportedSubitle = uknownFormatImporter.AutoGuessImport(textBoxText.Lines);
+            ImportedSubitle = uknownFormatImporter.AutoGuessImport(textBoxText.Lines.ToList());
             groupBoxImportResult.Text = string.Format(Configuration.Settings.Language.ImportText.PreviewLinesModifiedX, ImportedSubitle.Paragraphs.Count);
             SubtitleListview1.Fill(ImportedSubitle);
             if (ImportedSubitle.Paragraphs.Count > 0)

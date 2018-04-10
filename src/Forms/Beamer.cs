@@ -33,7 +33,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public Beamer(Main main, Subtitle subtitle, int index)
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             _main = main;
             _subtitle = subtitle;
             _index = index;
@@ -254,7 +256,6 @@ namespace Nikse.SubtitleEdit.Forms
             bool newLine = false;
             int lineNumber = 0;
             float leftMargin = left;
-            bool italicFromStart = false;
             int newLinePathPoint = -1;
             Color c = _subtitleColor;
             var colorStack = new Stack<Color>();
@@ -373,7 +374,6 @@ namespace Nikse.SubtitleEdit.Forms
                 }
                 else if (text.Substring(i).StartsWith("<i>", StringComparison.OrdinalIgnoreCase))
                 {
-                    italicFromStart = i == 0;
                     if (sb.Length > 0)
                     {
                         TextDraw.DrawText(font, sf, path, sb, isItalic, subtitleFontBold, false, left, top, ref newLine, leftMargin, ref newLinePathPoint);
@@ -394,7 +394,7 @@ namespace Nikse.SubtitleEdit.Forms
                     isItalic = false;
                     i += 3;
                 }
-                else if (text.Substring(i).StartsWith(Environment.NewLine))
+                else if (text.Substring(i).StartsWith(Environment.NewLine, StringComparison.Ordinal))
                 {
                     TextDraw.DrawText(font, sf, path, sb, isItalic, subtitleFontBold, false, left, top, ref newLine, leftMargin, ref newLinePathPoint);
 
@@ -407,8 +407,6 @@ namespace Nikse.SubtitleEdit.Forms
                         leftMargin = lefts[lineNumber];
                         left = leftMargin;
                     }
-                    if (isItalic)
-                        italicFromStart = true;
                 }
                 else
                 {

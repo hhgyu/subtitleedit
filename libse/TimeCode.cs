@@ -153,7 +153,7 @@ namespace Nikse.SubtitleEdit.Core
                 _totalMilliseconds = value.TotalMilliseconds;
             }
         }
-        
+
         public override string ToString() => ToString(false);
 
         public string ToString(bool localize)
@@ -164,7 +164,7 @@ namespace Nikse.SubtitleEdit.Core
 
             if (TotalMilliseconds >= 0)
                 return s;
-            return "-" + s.Replace("-", string.Empty);
+            return "-" + s.RemoveChar('-');
         }
 
         public string ToShortString(bool localize = false)
@@ -181,46 +181,71 @@ namespace Nikse.SubtitleEdit.Core
 
             if (TotalMilliseconds >= 0)
                 return s;
-            return "-" + s.Replace("-", string.Empty);
+            return "-" + s.RemoveChar('-');
         }
 
         public string ToShortStringHHMMSSFF()
         {
             string s = ToHHMMSSFF();
+            string pre = string.Empty;
+            if (s.StartsWith('-'))
+            {
+                pre = "-";
+                s = s.TrimStart('-');
+            }
             int j = 0;
             int len = s.Length;
             while (j + 6 < len && s[j] == '0' && s[j + 1] == '0' && s[j + 2] == ':')
             {
                 j += 3;
             }
-            return j > 0 ? s.Substring(j) : s;
+            s = j > 0 ? s.Substring(j) : s;
+            return pre + s;
         }
 
         public string ToHHMMSSFF()
         {
+            string s;
             var ts = TimeSpan;
             var frames = Math.Round(ts.Milliseconds / (BaseUnit / Configuration.Settings.General.CurrentFrameRate));
             if (frames >= Configuration.Settings.General.CurrentFrameRate - 0.001)
-                return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", ts.Hours, ts.Minutes, ts.Seconds + 1, 0);
-            return string.Format("{0:00}:{1:00}:{2:00}:{3:00}", ts.Hours, ts.Minutes, ts.Seconds, SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds));
+                s = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", ts.Days * 24 + ts.Hours, ts.Minutes, ts.Seconds + 1, 0);
+            else
+                s = string.Format("{0:00}:{1:00}:{2:00}:{3:00}", ts.Days * 24 + ts.Hours, ts.Minutes, ts.Seconds, SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds));
+
+            if (TotalMilliseconds >= 0)
+                return s;
+            return "-" + s.RemoveChar('-');
         }
 
         public string ToSSFF()
         {
+            string s;
             var ts = TimeSpan;
             var frames = Math.Round(ts.Milliseconds / (BaseUnit / Configuration.Settings.General.CurrentFrameRate));
             if (frames >= Configuration.Settings.General.CurrentFrameRate - 0.001)
-                return string.Format("{0:00}:{1:00}", ts.Seconds + 1, 0);
-            return string.Format("{0:00}:{1:00}", ts.Seconds, SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds));
+                s = string.Format("{0:00}:{1:00}", ts.Seconds + 1, 0);
+            else
+                s = string.Format("{0:00}:{1:00}", ts.Seconds, SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds));
+
+            if (TotalMilliseconds >= 0)
+                return s;
+            return "-" + s.RemoveChar('-');
         }
 
         public string ToHHMMSSPeriodFF()
         {
+            string s;
             var ts = TimeSpan;
             var frames = Math.Round(ts.Milliseconds / (BaseUnit / Configuration.Settings.General.CurrentFrameRate));
             if (frames >= Configuration.Settings.General.CurrentFrameRate - 0.001)
-                return string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds + 1, 0);
-            return string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds));
+                s = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Days * 24 + ts.Hours, ts.Minutes, ts.Seconds + 1, 0);
+            else
+                s = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Days * 24 + ts.Hours, ts.Minutes, ts.Seconds, SubtitleFormat.MillisecondsToFramesMaxFrameRate(ts.Milliseconds));
+
+            if (TotalMilliseconds >= 0)
+                return s;
+            return "-" + s.RemoveChar('-');
         }
 
         public string ToDisplayString()

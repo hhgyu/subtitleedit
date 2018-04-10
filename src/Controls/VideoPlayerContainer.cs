@@ -34,6 +34,7 @@ namespace Nikse.SubtitleEdit.Controls
         }
 
         public event EventHandler OnButtonClicked;
+        public event EventHandler OnEmptyPlayerClicked;
         public Panel PanelPlayer { get; private set; }
         private Panel _panelSubtitle;
         private RichTextBoxViewOnly _subtitleTextBox;
@@ -59,6 +60,7 @@ namespace Nikse.SubtitleEdit.Controls
                     _subtitlesHeight = 57;
                 }
                 _mpvTextFileName = null;
+                VideoPlayerContainerResize(this, null);
             }
         }
 
@@ -107,10 +109,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public RightToLeft TextRightToLeft
         {
-            get
-            {
-                return _subtitleTextBox.RightToLeft;
-            }
+            get { return _subtitleTextBox.RightToLeft; }
             set
             {
                 _subtitleTextBox.RightToLeft = value;
@@ -121,10 +120,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public bool ShowStopButton
         {
-            get
-            {
-                return _pictureBoxStop.Visible || _pictureBoxStopOver.Visible || _pictureBoxStopDown.Visible;
-            }
+            get { return _pictureBoxStop.Visible || _pictureBoxStopOver.Visible || _pictureBoxStopDown.Visible; }
             set
             {
                 if (value)
@@ -140,10 +136,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public bool ShowMuteButton
         {
-            get
-            {
-                return _pictureBoxMute.Visible || _pictureBoxMuteOver.Visible || _pictureBoxMuteDown.Visible;
-            }
+            get { return _pictureBoxMute.Visible || _pictureBoxMuteOver.Visible || _pictureBoxMuteDown.Visible; }
             set
             {
                 if (value)
@@ -159,10 +152,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public bool ShowFullscreenButton
         {
-            get
-            {
-                return _pictureBoxFullscreen.Visible || _pictureBoxFullscreenOver.Visible || _pictureBoxFullscreenDown.Visible;
-            }
+            get { return _pictureBoxFullscreen.Visible || _pictureBoxFullscreenOver.Visible || _pictureBoxFullscreenDown.Visible; }
             set
             {
                 if (value)
@@ -178,6 +168,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public VideoPlayerContainer()
         {
+            SmpteMode = false;
             FontSizeFactor = 1.0F;
             BorderStyle = BorderStyle.None;
             _resources = new System.ComponentModel.ComponentResourceManager(typeof(VideoPlayerContainer));
@@ -322,6 +313,7 @@ namespace Nikse.SubtitleEdit.Controls
         private Subtitle _subtitlePrev;
         private static string _mpvTextOld = string.Empty;
         private string _mpvTextFileName;
+        private int _retryCount = 3;
         private void RefreshMpv(LibMpvDynamic mpv, Subtitle subtitle)
         {
             if (subtitle == null)
@@ -333,6 +325,13 @@ namespace Nikse.SubtitleEdit.Controls
                 if (subtitle.Header == null || !subtitle.Header.Contains("[V4+ Styles]"))
                 {
                     subtitle = new Subtitle(subtitle);
+                    if (_subtitleTextBox.RightToLeft == RightToLeft.Yes && LanguageAutoDetect.CouldBeRightToLeftLanguge(subtitle))
+                    {
+                        foreach (var paragraph in subtitle.Paragraphs)
+                        {
+                            paragraph.Text = "\u200F" + paragraph.Text.Replace(Environment.NewLine, "\u200F" + Environment.NewLine + "\u200F") + "\u200F"; // RTL control character
+                        }
+                    }
                     var oldFontSize = Configuration.Settings.SubtitleSettings.SsaFontSize;
                     var oldFontBold = Configuration.Settings.SubtitleSettings.SsaFontBold;
                     Configuration.Settings.SubtitleSettings.SsaFontSize = Configuration.Settings.General.VideoPlayerPreviewFontSize;
@@ -343,14 +342,16 @@ namespace Nikse.SubtitleEdit.Controls
                 }
 
                 string text = subtitle.ToText(format);
-                if (text != _mpvTextOld || _mpvTextFileName == null)
+                if (text != _mpvTextOld || _mpvTextFileName == null || _retryCount > 0)
                 {
-                    if (string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev != subtitle || !_mpvTextFileName.EndsWith(format.Extension))
-                    {
+                    if (_retryCount >= 0 || string.IsNullOrEmpty(_mpvTextFileName) || _subtitlePrev == null || _subtitlePrev.FileName != subtitle.FileName || !_mpvTextFileName.EndsWith(format.Extension, StringComparison.Ordinal))
+                    {                        
+                        mpv.RemoveSubtitle();
                         DeleteTempMpvFileName();
                         _mpvTextFileName = Path.GetTempFileName() + format.Extension;
                         File.WriteAllText(_mpvTextFileName, text);
                         mpv.LoadSubtitle(_mpvTextFileName);
+                        _retryCount--;
                     }
                     else
                     {
@@ -384,10 +385,7 @@ namespace Nikse.SubtitleEdit.Controls
 
         public string SubtitleText
         {
-            get
-            {
-                return _subtitleText;
-            }
+            get { return _subtitleText; }
             set
             {
                 _subtitleText = value;
@@ -543,6 +541,10 @@ namespace Nikse.SubtitleEdit.Controls
                         isFontColor = false;
                         i += 6;
                     }
+                    else if (text.Substring(i).StartsWith("</font>", StringComparison.OrdinalIgnoreCase))
+                    {
+                        i += 6;
+                    }
                     else if (text[i] == '\n') // RichTextBox only count NewLine as one character!
                     {
                         sb.Append(text[i]);
@@ -599,6 +601,9 @@ namespace Nikse.SubtitleEdit.Controls
 
         private void PanelPlayerMouseDown(object sender, MouseEventArgs e)
         {
+            if (VideoPlayer == null)
+                OnEmptyPlayerClicked?.Invoke(sender, e);
+
             TogglePlayPause();
         }
 
@@ -914,15 +919,15 @@ namespace Nikse.SubtitleEdit.Controls
 
             _labelTimeCode.Location = new Point(280, 28);
             _labelTimeCode.ForeColor = Color.Gray;
-            _labelTimeCode.Font = new Font(_labelTimeCode.Font.FontFamily, 7);
+            _labelTimeCode.Font = new Font(_labelTimeCode.Font.FontFamily, 8);
             _labelTimeCode.AutoSize = true;
             _panelcontrols.Controls.Add(_labelTimeCode);
 
-            _labelVideoPlayerName.Location = new Point(280, 17);
+            _labelVideoPlayerName.Location = new Point(282, 17);
             _labelVideoPlayerName.ForeColor = Color.Gray;
             _labelVideoPlayerName.BackColor = Color.FromArgb(67, 75, 93);
             _labelVideoPlayerName.AutoSize = true;
-            _labelVideoPlayerName.Font = new Font(_labelTimeCode.Font.FontFamily, 5);
+            _labelVideoPlayerName.Font = new Font(_labelTimeCode.Font.FontFamily, 6);
 
             _panelcontrols.Controls.Add(_labelVideoPlayerName);
 
@@ -1340,6 +1345,13 @@ namespace Nikse.SubtitleEdit.Controls
             OnButtonClicked?.Invoke(sender, e);
         }
 
+        /// <summary>
+        /// Use SMPTE time (drop frame mode)
+        /// See https://blog.frame.io/2017/07/17/timecode-and-frame-rates/ and
+        ///     https://backlothelp.netflix.com/hc/en-us/articles/215131928-How-do-I-know-whether-to-select-SMPTE-or-MEDIA-for-a-timing-reference-
+        /// </summary>
+        public bool SmpteMode { get; set; }
+
         public void RefreshProgressBar()
         {
             if (VideoPlayer == null)
@@ -1358,10 +1370,18 @@ namespace Nikse.SubtitleEdit.Controls
                 var pos = CurrentPosition;
                 if (pos > 1000000)
                     pos = 0;
-                var span = TimeCode.FromSeconds(pos + Configuration.Settings.General.CurrentVideoOffsetInMs / TimeCode.BaseUnit);
-                var dur = TimeCode.FromSeconds(Duration + Configuration.Settings.General.CurrentVideoOffsetInMs / TimeCode.BaseUnit);
 
-                _labelTimeCode.Text = string.Format("{0} / {1}", span.ToDisplayString(), dur.ToDisplayString());
+                var dur = TimeCode.FromSeconds(Duration + Configuration.Settings.General.CurrentVideoOffsetInMs / TimeCode.BaseUnit);
+                if (SmpteMode)
+                {
+                    var span = TimeCode.FromSeconds(pos + 0.017 + Configuration.Settings.General.CurrentVideoOffsetInMs / TimeCode.BaseUnit);
+                    _labelTimeCode.Text = $"{span.ToDisplayString()} / {dur.ToDisplayString()} SMPTE";
+                }
+                else
+                {
+                    var span = TimeCode.FromSeconds(pos + Configuration.Settings.General.CurrentVideoOffsetInMs / TimeCode.BaseUnit);
+                    _labelTimeCode.Text = $"{span.ToDisplayString()} / {dur.ToDisplayString()}";
+                }
 
                 RefreshPlayPauseButtons();
             }
@@ -1494,14 +1514,30 @@ namespace Nikse.SubtitleEdit.Controls
             get
             {
                 if (VideoPlayer != null)
-                    return VideoPlayer.CurrentPosition;
+                {
+                    if (SmpteMode)
+                    {
+                        return VideoPlayer.CurrentPosition / 1.001;
+                    }
+                    else
+                    {
+                        return VideoPlayer.CurrentPosition;
+                    }
+                }                    
                 return 0;
             }
             set
             {
                 if (VideoPlayer != null)
                 {
-                    VideoPlayer.CurrentPosition = value;
+                    if (SmpteMode)
+                    {
+                        VideoPlayer.CurrentPosition = value * 1.001;
+                    }
+                    else
+                    {
+                        VideoPlayer.CurrentPosition = value;
+                    }
                 }
                 else
                 {
@@ -1557,6 +1593,19 @@ namespace Nikse.SubtitleEdit.Controls
         {
             DeleteTempMpvFileName();
             base.Dispose(disposing);
+            _retryCount = 3;
+            SmpteMode = false;
+        }
+
+        public void PauseAndDisposePlayer()
+        {
+            Pause();
+            SubtitleText = string.Empty;
+            VideoPlayer.DisposeVideoPlayer();
+            VideoPlayer = null;
+            DeleteTempMpvFileName();            
+            _retryCount = 3;
+            SmpteMode = false;
         }
 
     }

@@ -3,6 +3,7 @@ using Nikse.SubtitleEdit.Logic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,29 +19,48 @@ namespace Nikse.SubtitleEdit.Forms
         private readonly double _frameRate = 25;
         private readonly string _videoFileName;
         private double _lastSeconds;
-        private static readonly Regex TimeRegex = new Regex(@"pts_time:\d+.\d+", RegexOptions.Compiled);
+        private static readonly Regex TimeRegex = new Regex(@"pts_time:\d+[.,]*\d*", RegexOptions.Compiled);
         private bool _abort;
+        private bool _pause;
+        private readonly StringBuilder _log;
 
         public ImportSceneChanges(VideoInfo videoInfo, string videoFileName)
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             if (videoInfo != null && videoInfo.FramesPerSecond > 1)
                 _frameRate = videoInfo.FramesPerSecond;
             _videoFileName = videoFileName;
 
             Text = Configuration.Settings.Language.ImportSceneChanges.Title;
-            groupBoxImportText.Text = Configuration.Settings.Language.ImportSceneChanges.Title;
+            groupBoxGenerateSceneChanges.Text = Configuration.Settings.Language.ImportSceneChanges.Generate;
             buttonOpenText.Text = Configuration.Settings.Language.ImportSceneChanges.OpenTextFile;
-            groupBoxImportOptions.Text = Configuration.Settings.Language.ImportSceneChanges.ImportOptions;
+            groupBoxImportText.Text = Configuration.Settings.Language.ImportSceneChanges.Import;
             radioButtonFrames.Text = Configuration.Settings.Language.ImportSceneChanges.Frames;
             radioButtonSeconds.Text = Configuration.Settings.Language.ImportSceneChanges.Seconds;
             radioButtonMilliseconds.Text = Configuration.Settings.Language.ImportSceneChanges.Milliseconds;
             groupBoxTimeCodes.Text = Configuration.Settings.Language.ImportSceneChanges.TimeCodes;
+            buttonDownloadFfmpeg.Text = Configuration.Settings.Language.Settings.DownloadFFmpeg;
             buttonImportWithFfmpeg.Text = Configuration.Settings.Language.ImportSceneChanges.GetSceneChangesWithFfmpeg;
+            labelFfmpegThreshold.Text = Configuration.Settings.Language.ImportSceneChanges.Sensitivity;
+            labelThressholdDescription.Text = Configuration.Settings.Language.ImportSceneChanges.SensitivityDescription;
             buttonOK.Text = Configuration.Settings.Language.General.Ok;
             buttonCancel.Text = Configuration.Settings.Language.General.Cancel;
             UiUtil.FixLargeFonts(this, buttonOK);
             buttonImportWithFfmpeg.Enabled = !string.IsNullOrWhiteSpace(Configuration.Settings.General.FFmpegLocation) && File.Exists(Configuration.Settings.General.FFmpegLocation);
+            numericUpDownThreshold.Enabled = !string.IsNullOrWhiteSpace(Configuration.Settings.General.FFmpegLocation) && File.Exists(Configuration.Settings.General.FFmpegLocation);
+            var isFfmpegAvailable = !string.IsNullOrEmpty(Configuration.Settings.General.FFmpegLocation) && File.Exists(Configuration.Settings.General.FFmpegLocation);
+            buttonDownloadFfmpeg.Visible = !isFfmpegAvailable;
+            decimal thresshold;
+            if (decimal.TryParse(Configuration.Settings.General.FFmpegSceneThreshold, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out thresshold) &&
+                thresshold >= numericUpDownThreshold.Minimum &&
+                thresshold <= numericUpDownThreshold.Maximum)
+            {
+                numericUpDownThreshold.Value = thresshold;
+            }
+            _log = new StringBuilder();
+            textBoxLog.Visible = false;
         }
 
         public sealed override string Text
@@ -52,8 +72,8 @@ namespace Nikse.SubtitleEdit.Forms
         private void buttonOpenText_Click(object sender, EventArgs e)
         {
             openFileDialog1.Title = buttonOpenText.Text;
-            openFileDialog1.Filter = Configuration.Settings.Language.ImportText.TextFiles + "|*.txt;*.scenechange"  +
-                                     "|Matroska xml chapter file|*.xml" + 
+            openFileDialog1.Filter = Configuration.Settings.Language.ImportText.TextFiles + "|*.txt;*.scenechange" +
+                                     "|Matroska xml chapter file|*.xml" +
                                      "|" + Configuration.Settings.Language.General.AllFiles + "|*.*";
             openFileDialog1.FileName = string.Empty;
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -69,7 +89,7 @@ namespace Nikse.SubtitleEdit.Forms
                 var res = LoadFromMatroskaChapterFile(fileName);
                 if (!string.IsNullOrEmpty(res))
                 {
-                    textBoxText.Text = res;
+                    textBoxIImport.Text = res;
                     radioButtonHHMMSSMS.Checked = true;
                     return;
                 }
@@ -88,11 +108,11 @@ namespace Nikse.SubtitleEdit.Forms
                         if (!string.IsNullOrWhiteSpace(line))
                             sb.AppendLine(line.Trim());
                     }
-                    textBoxText.Text = sb.ToString();
+                    textBoxIImport.Text = sb.ToString();
                 }
                 else
                 {
-                    textBoxText.Text = s;
+                    textBoxIImport.Text = s;
                 }
             }
             catch (Exception ex)
@@ -126,7 +146,7 @@ namespace Nikse.SubtitleEdit.Forms
                 }
                 return sb.ToString();
             }
-            catch 
+            catch
             {
                 return null;
             }
@@ -137,7 +157,7 @@ namespace Nikse.SubtitleEdit.Forms
         private void buttonOK_Click(object sender, EventArgs e)
         {
             SceneChangesInSeconds = new List<double>();
-            foreach (string line in textBoxText.Lines)
+            foreach (string line in string.IsNullOrEmpty(textBoxGenerate.Text) ? textBoxIImport.Lines : textBoxGenerate.Lines)
             {
                 if (radioButtonHHMMSSMS.Checked)
                 {
@@ -176,6 +196,7 @@ namespace Nikse.SubtitleEdit.Forms
                     }
                 }
             }
+            Configuration.Settings.General.FFmpegSceneThreshold = numericUpDownThreshold.Value.ToString(CultureInfo.InvariantCulture);
             DialogResult = DialogResult.OK;
         }
 
@@ -188,21 +209,43 @@ namespace Nikse.SubtitleEdit.Forms
         private void ImportSceneChanges_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
+            {
                 DialogResult = DialogResult.Cancel;
+            }
+            else if (e.KeyCode == Keys.F8)
+            {
+                if (_pause)
+                {
+                    _pause = false;
+                    textBoxLog.Visible = false;
+                    Cursor = Cursors.WaitCursor;
+                }
+                else
+                {
+                    Cursor = Cursors.Default;
+                    textBoxLog.Text = _log.ToString();
+                    _pause = true;
+                    textBoxLog.Visible = true;
+                    textBoxLog.BringToFront();
+                }
+            }
         }
 
         private void buttonImportWithFfmpeg_Click(object sender, EventArgs e)
         {
+            groupBoxImportText.Enabled = false;
             buttonOK.Enabled = false;
             progressBar1.Visible = true;
             progressBar1.Style = ProgressBarStyle.Marquee;
             buttonImportWithFfmpeg.Enabled = false;
+            numericUpDownThreshold.Enabled = false;
             Cursor = Cursors.WaitCursor;
+            textBoxGenerate.Text = string.Empty;
             _timeCodes = new StringBuilder();
             using (var process = new Process())
             {
                 process.StartInfo.FileName = Configuration.Settings.General.FFmpegLocation;
-                process.StartInfo.Arguments = $"-i \"{_videoFileName}\" -vf \"select=gt(scene\\,0.2),showinfo\" -vsync vfr -f null -";
+                process.StartInfo.Arguments = $"-i \"{_videoFileName}\" -vf \"select=gt(scene\\," + numericUpDownThreshold.Value.ToString(CultureInfo.InvariantCulture) + "),showinfo\" -vsync vfr -f null -";
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.RedirectStandardError = true;
@@ -218,10 +261,16 @@ namespace Nikse.SubtitleEdit.Forms
                 {
                     Application.DoEvents();
                     System.Threading.Thread.Sleep(100);
+
+                    if (_pause && !_abort)
+                    {
+                        continue;
+                    }
+
                     if (_lastSeconds > 0.1 && Math.Abs(lastUpdateSeconds - _lastSeconds) > 0 - 001)
                     {
                         lastUpdateSeconds = _lastSeconds;
-                        UpdateTextBox();
+                        UpdateImportTextBox();
                     }
                     if (_abort)
                     {
@@ -232,35 +281,56 @@ namespace Nikse.SubtitleEdit.Forms
                 }
             }
             Cursor = Cursors.Default;
-            UpdateTextBox();
+            UpdateImportTextBox();
             buttonOK.Enabled = true;
-            buttonOK_Click(sender, e);
+            if (!_pause)
+                buttonOK_Click(sender, e);
         }
 
-        private void UpdateTextBox()
+        private void UpdateImportTextBox()
         {
-            textBoxText.Text = _timeCodes.ToString();
-            textBoxText.SelectionStart = textBoxText.Text.Length;
-            textBoxText.ScrollToCaret();
+            textBoxGenerate.Text = _timeCodes.ToString();
+            textBoxGenerate.SelectionStart = textBoxGenerate.Text.Length;
+            textBoxGenerate.ScrollToCaret();
         }
 
         void OutputHandler(object sendingProcess, DataReceivedEventArgs outLine)
         {
             if (!string.IsNullOrWhiteSpace(outLine.Data))
             {
+                _log.AppendLine(outLine.Data);
                 var match = TimeRegex.Match(outLine.Data);
                 if (match.Success)
                 {
-                    var timeCode = match.Value.Replace("pts_time:", string.Empty).Replace(",", ".");
+                    var timeCode = match.Value.Replace("pts_time:", string.Empty).Replace(",", ".").Replace("٫", ".").Replace("⠨", ".");
                     double seconds;
-                    if (double.TryParse(timeCode, out seconds) && seconds > 0.2)
+                    if (double.TryParse(timeCode, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out seconds) && seconds > 0.2)
                     {
-                        _timeCodes.AppendLine(TimeCode.FromSeconds(seconds).ToShortDisplayString());
+                        _timeCodes.AppendLine(TimeCode.FromSeconds(seconds).ToShortString());
                         _lastSeconds = seconds;
                     }
                 }
             }
         }
 
+        private void ImportSceneChanges_Shown(object sender, EventArgs e)
+        {
+            Activate();
+        }
+
+        private void buttonDownloadFfmpeg_Click(object sender, EventArgs e)
+        {
+            using (var form = new DownloadFfmpeg())
+            {
+                if (form.ShowDialog(this) == DialogResult.OK && !string.IsNullOrEmpty(form.FFmpegPath))
+                {
+                    Configuration.Settings.General.FFmpegLocation = form.FFmpegPath;
+                    buttonDownloadFfmpeg.Visible = false;
+                    buttonImportWithFfmpeg.Enabled = true;
+                    numericUpDownThreshold.Enabled = true;
+                    Configuration.Settings.Save();
+                }
+            }
+        }
     }
 }

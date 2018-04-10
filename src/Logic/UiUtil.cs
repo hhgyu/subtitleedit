@@ -20,15 +20,15 @@ namespace Nikse.SubtitleEdit.Logic
 
         public static VideoInfo GetVideoInfo(string fileName)
         {
-            VideoInfo info = Utilities.TryReadVideoInfoViaAviHeader(fileName);
+            VideoInfo info = FileUtil.TryReadVideoInfoViaAviHeader(fileName);
             if (info.Success)
                 return info;
 
-            info = Utilities.TryReadVideoInfoViaMatroskaHeader(fileName);
+            info = FileUtil.TryReadVideoInfoViaMatroskaHeader(fileName);
             if (info.Success)
                 return info;
 
-            info = Utilities.TryReadVideoInfoViaMp4(fileName);
+            info = FileUtil.TryReadVideoInfoViaMp4(fileName);
             if (info.Success)
                 return info;
 
@@ -42,7 +42,7 @@ namespace Nikse.SubtitleEdit.Logic
         private static VideoInfo TryReadVideoInfoViaDirectShow(string fileName)
         {
             return QuartsPlayer.GetVideoInfo(fileName);
-        }      
+        }
 
         public static int ShowSubtitle(Subtitle subtitle, VideoPlayerContainer videoPlayerContainer)
         {
@@ -56,7 +56,7 @@ namespace Nikse.SubtitleEdit.Logic
                         p.EndTime.TotalMilliseconds > positionInMilliseconds)
                     {
                         string text = p.Text.Replace("|", Environment.NewLine);
-                        bool isInfo = p == subtitle.Paragraphs[0] && (p.StartTime.TotalMilliseconds == 0 && p.Duration.TotalMilliseconds == 0 || p.StartTime.TotalMilliseconds == Pac.PacNullTime.TotalMilliseconds);
+                        bool isInfo = p == subtitle.Paragraphs[0] && (Math.Abs(p.StartTime.TotalMilliseconds) < 0.01 && Math.Abs(p.Duration.TotalMilliseconds) < 0.01 || Math.Abs(p.StartTime.TotalMilliseconds - Pac.PacNullTime.TotalMilliseconds) < 0.01);
                         if (!isInfo)
                         {
                             if (videoPlayerContainer.LastParagraph != p)
@@ -205,9 +205,17 @@ namespace Nikse.SubtitleEdit.Logic
                 videoPlayerContainer.ShowMuteButton = Configuration.Settings.General.VideoPlayerShowMuteButton;
                 videoPlayerContainer.Volume = Configuration.Settings.General.VideoPlayerDefaultVolume;
                 videoPlayerContainer.EnableMouseWheelStep();
-                videoPlayerContainer.VideoWidth = videoInfo.Width;
-                videoPlayerContainer.VideoHeight = videoInfo.Height;
-                videoPlayerContainer.VideoPlayer.Resize(videoPlayerContainer.PanelPlayer.Width, videoPlayerContainer.PanelPlayer.Height);
+                if (fileName != null && (fileName.StartsWith("https://") || fileName.StartsWith("http://")))
+                {
+                    // we don't have videoInfo for streams...
+                }
+                else
+                {
+                    videoPlayerContainer.VideoWidth = videoInfo.Width;
+                    videoPlayerContainer.VideoHeight = videoInfo.Height;
+                    videoPlayerContainer.VideoPlayer.Resize(videoPlayerContainer.PanelPlayer.Width, videoPlayerContainer.PanelPlayer.Height);
+                }
+
             }
             catch (Exception exception)
             {
@@ -323,20 +331,101 @@ namespace Nikse.SubtitleEdit.Logic
             var gs = Configuration.Settings.General;
 
             if (string.IsNullOrEmpty(gs.SubtitleFontName))
-                gs.SubtitleFontName = "Tahoma";
+                gs.SubtitleFontName = SystemFonts.MessageBoxFont.Name;
 
             try
             {
-                if (gs.SubtitleFontBold)
-                    control.Font = new Font(gs.SubtitleFontName, gs.SubtitleFontSize, FontStyle.Bold);
+                if (control is ListView)
+                {
+                    if (gs.SubtitleListViewFontBold)
+                        control.Font = new Font(gs.SubtitleFontName, gs.SubtitleListViewFontSize, FontStyle.Bold);
+                    else
+                        control.Font = new Font(gs.SubtitleFontName, gs.SubtitleListViewFontSize);
+                }
                 else
-                    control.Font = new Font(gs.SubtitleFontName, gs.SubtitleFontSize);
+                {
+                    if (gs.SubtitleFontBold)
+                        control.Font = new Font(gs.SubtitleFontName, gs.SubtitleFontSize, FontStyle.Bold);
+                    else
+                        control.Font = new Font(gs.SubtitleFontName, gs.SubtitleFontSize);
+                }
 
                 control.BackColor = gs.SubtitleBackgroundColor;
                 control.ForeColor = gs.SubtitleFontColor;
             }
             catch
             {
+                // ignored
+            }
+        }
+
+        private static Font GetDefaultFont()
+        {
+            var gs = Configuration.Settings.General;
+            if (string.IsNullOrEmpty(gs.SystemSubtitleFontNameOverride) || gs.SystemSubtitleFontSizeOverride < 5)
+            {
+                return SystemFonts.MessageBoxFont;
+            }
+
+            try
+            {
+                return new Font(gs.SystemSubtitleFontNameOverride, gs.SystemSubtitleFontSizeOverride);
+            }
+            catch
+            {
+                return SystemFonts.MessageBoxFont;
+            }
+        }
+
+        internal static void PreInitialize(Form form)
+        {
+            form.AutoScaleMode = AutoScaleMode.Dpi;
+            form.Font = GetDefaultFont();
+        }
+
+        public static void FixFonts(Control form, int iterations = 5)
+        {
+            FixFontsInner(form, iterations);
+            if (Configuration.Settings.General.UseDarkTheme)
+                DarkTheme.SetDarkTheme(form, 1500);
+        }
+
+        public static void FixFonts(ToolStripMenuItem item)
+        {
+            item.Font = GetDefaultFont();
+            if (Configuration.Settings.General.UseDarkTheme)
+                DarkTheme.SetDarkTheme(item);
+        }
+
+        public static void FixFonts(ToolStripSeparator item)
+        {
+            item.Font = GetDefaultFont();
+            if (Configuration.Settings.General.UseDarkTheme)
+                DarkTheme.SetDarkTheme(item);
+        }
+
+        internal static void FixFonts(ToolStripItem item)
+        {
+            item.Font = GetDefaultFont();
+            if (Configuration.Settings.General.UseDarkTheme)
+                DarkTheme.SetDarkTheme(item);
+        }
+
+        private static void FixFontsInner(Control form, int iterations = 5)
+        {
+            if (iterations < 1)
+                return;
+
+            foreach (Control c in form.Controls)
+            {
+                if (!c.Font.Name.Equals("Tahoma", StringComparison.Ordinal))
+                {
+                    c.Font = GetDefaultFont();
+                }
+                foreach (Control inner in c.Controls)
+                {
+                    FixFontsInner(inner, iterations - 1);
+                }
             }
         }
 
@@ -369,12 +458,12 @@ namespace Nikse.SubtitleEdit.Logic
         public static void GetLineLengths(Label label, string text)
         {
             label.ForeColor = Color.Black;
-            var lines = HtmlUtil.RemoveHtmlTags(text, true).SplitToLines();
+            var lines = text.SplitToLines();
 
             const int max = 3;
 
             var sb = new StringBuilder();
-            for (int i = 0; i < lines.Length; i++)
+            for (int i = 0; i < lines.Count; i++)
             {
                 string line = lines[i];
                 if (i > 0)
@@ -476,6 +565,8 @@ namespace Nikse.SubtitleEdit.Logic
                 comboBox.SelectedItem = selectedItem;
             comboBox.EndUpdate();
             Configuration.Settings.General.DefaultEncoding = (comboBox.SelectedItem as TextEncodingListItem).Encoding.WebName;
+            comboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
+            comboBox.AutoCompleteMode = AutoCompleteMode.Append;
         }
 
         public static Encoding GetTextEncodingComboBoxCurrentEncoding(ComboBox comboBox)
@@ -631,8 +722,11 @@ namespace Nikse.SubtitleEdit.Logic
             AddExtension(sb, ".mxf");
             AddExtension(sb, ".sup");
             AddExtension(sb, ".dost");
+            AddExtension(sb, new FinalDraftTemplate2().Extension);
             AddExtension(sb, new Ayato().Extension);
             AddExtension(sb, new PacUnicode().Extension);
+            AddExtension(sb, new WinCaps32().Extension);
+            AddExtension(sb, new IsmtDfxp().Extension);
 
             if (!string.IsNullOrEmpty(Configuration.Settings.General.OpenSubtitleExtraExtensions))
             {
@@ -649,6 +743,51 @@ namespace Nikse.SubtitleEdit.Logic
             sb.Append(Configuration.Settings.Language.General.AllFiles);
             sb.Append("|*.*");
             return sb.ToString();
+        }
+
+        public static string GetListViewTextFromString(string s) => s.Replace(Environment.NewLine, Configuration.Settings.General.ListViewLineSeparatorString);
+
+        public static string GetStringFromListViewText(string lviText) => lviText.Replace(Configuration.Settings.General.ListViewLineSeparatorString, Environment.NewLine);
+
+        public static void SelectAll(this ListView lv)
+        {
+            lv.BeginUpdate();
+            foreach (ListViewItem item in lv.Items)
+                item.Selected = true;
+            lv.EndUpdate();
+        }
+
+        public static void SelectFirstSelectedItemOnly(this ListView lv)
+        {
+            int itemsCount = lv.SelectedItems.Count - 1;
+            if (itemsCount > 0)
+            {
+                lv.BeginUpdate();
+                do
+                {
+                    lv.SelectedItems[itemsCount--].Selected = false;
+                }
+                while (itemsCount > 0);
+                if (lv.SelectedItems.Count > 0)
+                {
+                    lv.EnsureVisible(lv.SelectedItems[0].Index);
+                    lv.FocusedItem = lv.SelectedItems[0];
+                }
+                else if (lv.Items.Count > 0)
+                {
+                    lv.EnsureVisible(0);
+                    lv.FocusedItem = lv.Items[0];
+                }
+                lv.EndUpdate();
+            }
+        }
+
+        public static void InverseSelection(this ListView lv)
+        {
+            lv.BeginUpdate();
+            foreach (ListViewItem item in lv.Items)
+                item.Selected = !item.Selected;
+            lv.EndUpdate();
         }
 
     }

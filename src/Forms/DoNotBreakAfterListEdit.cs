@@ -17,7 +17,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public DoNotBreakAfterListEdit()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             Text = Configuration.Settings.Language.Settings.UseDoNotBreakAfterList;
             labelLanguage.Text = Configuration.Settings.Language.ChooseLanguage.Language;
@@ -150,7 +152,7 @@ namespace Nikse.SubtitleEdit.Forms
             }
             else
             {
-                if (!Utilities.IsValidRegex(textBoxNoBreakAfter.Text))
+                if (!RegexUtils.IsValidRegex(textBoxNoBreakAfter.Text))
                 {
                     MessageBox.Show(Configuration.Settings.Language.General.RegularExpressionIsNotValid);
                     return;

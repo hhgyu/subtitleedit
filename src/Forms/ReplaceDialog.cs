@@ -15,7 +15,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public ReplaceDialog()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             Text = Configuration.Settings.Language.ReplaceDialog.Title;
             labelFindWhat.Text = Configuration.Settings.Language.ReplaceDialog.FindWhat;
@@ -23,6 +25,7 @@ namespace Nikse.SubtitleEdit.Forms
             radioButtonCaseSensitive.Text = Configuration.Settings.Language.ReplaceDialog.CaseSensitive;
             radioButtonRegEx.Text = Configuration.Settings.Language.ReplaceDialog.RegularExpression;
             labelReplaceWith.Text = Configuration.Settings.Language.ReplaceDialog.ReplaceWith;
+            checkBoxWholeWord.Text = Configuration.Settings.Language.FindDialog.WholeWord;
             buttonFind.Text = Configuration.Settings.Language.ReplaceDialog.Find;
             buttonReplace.Text = Configuration.Settings.Language.ReplaceDialog.Replace;
             buttonReplaceAll.Text = Configuration.Settings.Language.ReplaceDialog.ReplaceAll;
@@ -36,18 +39,22 @@ namespace Nikse.SubtitleEdit.Forms
         public bool ReplaceAll { get; set; }
         public bool FindOnly { get; set; }
 
-        public FindType GetFindType()
+        public ReplaceType GetFindType()
         {
+            var result = new ReplaceType();
             if (radioButtonNormal.Checked)
-                return FindType.Normal;
-            if (radioButtonCaseSensitive.Checked)
-                return FindType.CaseSensitive;
-            return FindType.RegEx;
+                result.FindType = FindType.Normal;
+            else if (radioButtonCaseSensitive.Checked)
+                result.FindType = FindType.CaseSensitive;
+            else
+                result.FindType = FindType.RegEx;
+            result.WholeWord = checkBoxWholeWord.Checked;
+            return result;
         }
 
         public FindReplaceDialogHelper GetFindDialogHelper(int startLineIndex)
         {
-            return new FindReplaceDialogHelper(GetFindType(), false, textBoxFind.Text, _regEx, textBoxReplace.Text, startLineIndex);
+            return new FindReplaceDialogHelper(GetFindType(), textBoxFind.Text, _regEx, textBoxReplace.Text, startLineIndex);
         }
 
         private void FormReplaceDialog_KeyDown(object sender, KeyEventArgs e)
@@ -61,14 +68,19 @@ namespace Nikse.SubtitleEdit.Forms
             textBoxFind.Text = selectedText;
             //if we are searching for the same thing, then keep the replace text the same.
             if (selectedText == findHelper.FindText)
-                textBoxReplace.Text = findHelper.ReplaceText;
+            {
+                textBoxReplace.Text = findHelper.ReplaceText.Replace(Environment.NewLine, "\\n");
+            }
             textBoxFind.SelectAll();
-            if (findHelper.FindType == FindType.RegEx)
+            if (findHelper.FindReplaceType.FindType == FindType.RegEx)
                 radioButtonRegEx.Checked = true;
-            else if (findHelper.FindType == FindType.CaseSensitive)
+            else if (findHelper.FindReplaceType.FindType == FindType.CaseSensitive)
                 radioButtonCaseSensitive.Checked = true;
             else
                 radioButtonNormal.Checked = true;
+
+            if (findHelper.FindReplaceType.FindType != FindType.RegEx)
+                checkBoxWholeWord.Checked = findHelper.FindReplaceType.WholeWord;
         }
 
         private void ButtonReplaceClick(object sender, EventArgs e)
@@ -107,7 +119,7 @@ namespace Nikse.SubtitleEdit.Forms
             {
                 try
                 {
-                    _regEx = new Regex(textBoxFind.Text, RegexOptions.Compiled);
+                    _regEx = new Regex(textBoxFind.Text, RegexOptions.Compiled | RegexOptions.Multiline);
                     DialogResult = DialogResult.OK;
                     _userAction = true;
                 }
@@ -147,8 +159,7 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (bitmap != null)
             {
-                IntPtr Hicon = bitmap.GetHicon();
-                this.Icon = Icon.FromHandle(Hicon);
+                Icon = Icon.FromHandle(bitmap.GetHicon());
             }
         }
 

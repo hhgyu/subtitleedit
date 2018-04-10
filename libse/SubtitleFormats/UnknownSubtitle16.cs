@@ -6,27 +6,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class UnknownSubtitle16 : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".cip"; }
-        }
+        public override string Extension => ".cip";
 
-        public override string Name
-        {
-            get { return "Unknown 16"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 16";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -46,7 +28,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (string s in lines)
                 text.AppendLine(s);
 
-            var lines2 = text.ToString().FromRtf().SplitToLines().ToList();
+            var lines2 = text.ToString().FromRtf().SplitToLines();
             var u52 = new UnknownSubtitle52();
             u52.LoadSubtitle(subtitle, lines2, fileName);
             _errorCount = u52.ErrorCount;

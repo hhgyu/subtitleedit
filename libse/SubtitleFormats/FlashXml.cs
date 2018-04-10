@@ -17,20 +17,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     //</tt>
     public class FlashXml : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".xml"; }
-        }
+        public override string Extension => ".xml";
 
-        public override string Name
-        {
-            get { return "Flash Xml"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
+        public override string Name => "Flash Xml";
 
         public override bool IsMine(List<string> lines, string fileName)
         {
@@ -56,7 +45,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string ConvertToTimeString(TimeCode time)
         {
-            return string.Format("{0:00}:{1:00}:{2:00}.{3:00}", time.Hours, time.Minutes, time.Seconds, time.Milliseconds);
+            return $"{time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}.{time.Milliseconds:00}";
         }
 
         public override string ToText(Subtitle subtitle, string title)

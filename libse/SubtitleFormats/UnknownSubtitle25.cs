@@ -12,27 +12,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static readonly Regex RegexTimeCode2 = new Regex(@"^\d+ \d+.[0-9]{1,2}$", RegexOptions.Compiled);
         private static readonly Regex RegexTimeCode3 = new Regex(@"^\d+.[0-9]{1,2} \d+$", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".sub"; }
-        }
+        public override string Extension => ".sub";
 
-        public override string Name
-        {
-            get { return "Unknown 25"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 25";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -48,7 +30,7 @@ NOTE=
             Paragraph last = null;
             foreach (Paragraph p in subtitle.Paragraphs)
             {
-                sb.AppendLine(string.Format("{0} {1}\r\n{2}\r\n", MakeTimeCode(p.StartTime, last), string.Format("{0:0.0#}", (p.Duration.Seconds + p.Duration.Milliseconds / TimeCode.BaseUnit)), p.Text));
+                sb.AppendLine($"{MakeTimeCode(p.StartTime, last)} {p.Duration.Seconds + p.Duration.Milliseconds / TimeCode.BaseUnit:0.0#}\r\n{p.Text}\r\n");
                 last = p;
             }
             return sb.ToString().Trim().Replace(Environment.NewLine, "\n");
@@ -59,7 +41,7 @@ NOTE=
             double start = 0;
             if (last != null)
                 start = last.EndTime.TotalSeconds;
-            return string.Format("{0:0.0#}", (timeCode.TotalSeconds - start));
+            return $"{timeCode.TotalSeconds - start:0.0#}";
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
@@ -104,8 +86,13 @@ NOTE=
                 }
                 else if (!string.IsNullOrWhiteSpace(s))
                 {
-                    if (subtitle.Paragraphs.Count == 0 && (s.StartsWith("TITLE=", StringComparison.Ordinal) || s.StartsWith("TITLE=", StringComparison.Ordinal) || s.StartsWith("FILE=", StringComparison.Ordinal) || s.StartsWith("AUTHOR=", StringComparison.Ordinal) ||
-                                                            s.StartsWith("TYPE=VIDEO", StringComparison.Ordinal) || s.StartsWith("FORMAT=", StringComparison.Ordinal) || s.StartsWith("NOTE=", StringComparison.Ordinal)))
+                    if (subtitle.Paragraphs.Count == 0 &&
+                        (s.StartsWith("TITLE=", StringComparison.Ordinal) ||
+                         s.StartsWith("FILE=", StringComparison.Ordinal) ||
+                         s.StartsWith("AUTHOR=", StringComparison.Ordinal) ||
+                         s.StartsWith("TYPE=VIDEO", StringComparison.Ordinal) ||
+                         s.StartsWith("FORMAT=", StringComparison.Ordinal) ||
+                         s.StartsWith("NOTE=", StringComparison.Ordinal)))
                     {
                     }
                     else

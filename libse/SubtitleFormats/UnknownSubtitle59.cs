@@ -12,27 +12,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
         private static readonly Regex RegexStartOnly = new Regex(@"^\d\d\:\d\d\:\d\d\t.+$", RegexOptions.Compiled);
         private static readonly Regex RegexEndOnly = new Regex(@"\d\d\:\d\d\:\d\d$", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".txt"; }
-        }
+        public override string Extension => ".txt";
 
-        public override string Name
-        {
-            get { return "Unknown 59"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            Subtitle subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Unknown 59";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -46,20 +28,18 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             foreach (Paragraph p in subtitle.Paragraphs)
             {
                 var lines = HtmlUtil.RemoveHtmlTags(p.Text).SplitToLines();
-                if (lines.Length > 0)
-                {
-                    sb.AppendLine(EncodeTimeCode(p.StartTime) + "\t" + lines[0]);
-                    for (int i = 1; i < lines.Length; i++)
-                        sb.AppendLine("\t" + lines[i]);
-                }
+                sb.AppendLine(EncodeTimeCode(p.StartTime) + "\t" + lines[0]);
+                for (int i = 1; i < lines.Count; i++)
+                    sb.AppendLine("\t" + lines[i]);
             }
+
             return sb.ToString().Trim();
         }
 
         private static string EncodeTimeCode(TimeCode timeCode)
         {
             int seconds = (int)Math.Round(timeCode.Seconds + timeCode.Milliseconds / 1000.0);
-            return string.Format("{0:00}:{1:00}:{2:00}", timeCode.Hours, timeCode.Minutes, seconds);
+            return $"{timeCode.Hours:00}:{timeCode.Minutes:00}:{seconds:00}";
         }
 
         public override void LoadSubtitle(Subtitle subtitle, List<string> lines, string fileName)
@@ -152,7 +132,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         _errorCount++;
                     }
                 }
-                else if (line.StartsWith("\t") && p != null)
+                else if (line.StartsWith("\t", StringComparison.Ordinal) && p != null)
                 {
                     if (p.Text.Length > 1000)
                     {

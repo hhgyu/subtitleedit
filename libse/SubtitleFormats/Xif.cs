@@ -8,27 +8,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 {
     public class Xif : SubtitleFormat
     {
-        public override string Extension
-        {
-            get { return ".xif"; }
-        }
+        public override string Extension => ".xif";
 
-        public override string Name
-        {
-            get { return "XIF"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "XIF";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -129,7 +111,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                 var paragraphNode = content.SelectSingleNode("ContentBlock/ThreadedObject/Content/SubtitleText/Paragraph");
                 var lines = HtmlUtil.RemoveHtmlTags(p.Text, true).SplitToLines();
-                for (int i = 1; i < lines.Length + 1; i++)
+                for (int i = 1; i < lines.Count + 1; i++)
                 {
                     var rowNode = xml.CreateElement("Row");
 
@@ -147,7 +129,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
                     paragraphNode.AppendChild(rowNode);
                 }
-                for (int index = 0; index < lines.Length; index++)
+                for (int index = 0; index < lines.Count; index++)
                 {
                     var line = lines[index];
 

@@ -20,7 +20,6 @@ namespace Nikse.SubtitleEdit.Forms
         private Subtitle _inputSubtitle;
         private Subtitle _inputAlternateSubtitle;
         private double _oldFrameRate;
-        private bool _frameRateChanged;
         private bool _isStartSceneActive;
         private double _startGoBackPosition;
         private double _startStopPosition = -1.0;
@@ -36,34 +35,19 @@ namespace Nikse.SubtitleEdit.Forms
 
         public bool OkPressed { get; set; }
 
-        public bool FrameRateChanged
-        {
-            get { return _frameRateChanged; }
-        }
+        public bool FrameRateChanged { get; private set; }
 
-        public double FrameRate
-        {
-            get
-            {
-                if (_videoInfo == null)
-                    return 0;
-                return _videoInfo.FramesPerSecond;
-            }
-        }
+        public double FrameRate => _videoInfo?.FramesPerSecond ?? 0;
 
-        public List<Paragraph> Paragraphs
-        {
-            get { return _paragraphs; }
-        }
+        public List<Paragraph> Paragraphs => _paragraphs;
 
-        public List<Paragraph> ParagraphsAlternate
-        {
-            get { return _paragraphsAlternate; }
-        }
+        public List<Paragraph> ParagraphsAlternate => _paragraphsAlternate;
 
         public VisualSync()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
 
             openFileDialog1.InitialDirectory = string.Empty;
 
@@ -160,7 +144,7 @@ namespace Nikse.SubtitleEdit.Forms
                     {
                         _inputSubtitle.CalculateTimeCodesFromFrameNumbers(_videoInfo.FramesPerSecond);
                         LoadAndShowOriginalSubtitle();
-                        _frameRateChanged = true;
+                        FrameRateChanged = true;
                     }
                 }
                 if (_inputAlternateSubtitle != null && _inputAlternateSubtitle.WasLoadedWithFrameNumbers) // frame based subtitles like MicroDVD
@@ -169,7 +153,7 @@ namespace Nikse.SubtitleEdit.Forms
                     {
                         _inputAlternateSubtitle.CalculateTimeCodesFromFrameNumbers(_videoInfo.FramesPerSecond);
                         LoadAndShowOriginalSubtitle();
-                        _frameRateChanged = true;
+                        FrameRateChanged = true;
                     }
                 }
 
@@ -293,10 +277,8 @@ namespace Nikse.SubtitleEdit.Forms
             labelSyncDone.Text = string.Empty;
             timer1.Stop();
             timerProgressBarRefresh.Stop();
-            if (MediaPlayerStart != null)
-                MediaPlayerStart.Pause();
-            if (MediaPlayerEnd != null)
-                MediaPlayerEnd.Pause();
+            MediaPlayerStart?.Pause();
+            MediaPlayerEnd?.Pause();
 
             bool change = false;
             for (int i = 0; i < _paragraphs.Count; i++)
@@ -316,9 +298,13 @@ namespace Nikse.SubtitleEdit.Forms
 
             DialogResult dr;
             if (DialogResult == DialogResult.OK)
+            {
                 dr = DialogResult.Yes;
+            }
             else
+            {
                 dr = MessageBox.Show(_language.KeepChangesMessage, _language.KeepChangesTitle, MessageBoxButtons.YesNoCancel);
+            }
 
             if (dr == DialogResult.Cancel)
             {
@@ -340,8 +326,8 @@ namespace Nikse.SubtitleEdit.Forms
         {
             if (bitmap != null)
             {
-                IntPtr Hicon = bitmap.GetHicon();
-                Icon = Icon.FromHandle(Hicon);
+                IntPtr iconHandle = bitmap.GetHicon();
+                Icon = Icon.FromHandle(iconHandle);
             }
 
             _inputSubtitle = subtitle;
@@ -368,9 +354,13 @@ namespace Nikse.SubtitleEdit.Forms
 
             if (comboBoxStartTexts.Items.Count > Configuration.Settings.Tools.StartSceneIndex)
                 comboBoxStartTexts.SelectedIndex = Configuration.Settings.Tools.StartSceneIndex;
+            else
+                comboBoxStartTexts.SelectedIndex = 0;
 
             if (comboBoxEndTexts.Items.Count > Configuration.Settings.Tools.EndSceneIndex)
                 comboBoxEndTexts.SelectedIndex = comboBoxEndTexts.Items.Count - (Configuration.Settings.Tools.EndSceneIndex + 1);
+            else
+                comboBoxEndTexts.SelectedIndex = comboBoxEndTexts.Items.Count - 1;
         }
 
         private void FillStartAndEndTexts()
@@ -381,7 +371,7 @@ namespace Nikse.SubtitleEdit.Forms
             comboBoxEndTexts.Items.Clear();
             foreach (Paragraph p in _paragraphs)
             {
-                string s = p.StartTime + " - " + p.Text.Replace(Environment.NewLine, Configuration.Settings.General.ListViewLineSeparatorString);
+                string s = p.StartTime + " - " + UiUtil.GetListViewTextFromString(p.Text);
                 comboBoxStartTexts.Items.Add(s);
                 comboBoxEndTexts.Items.Add(s);
             }

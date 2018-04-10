@@ -3,21 +3,25 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Forms.Styles;
 using Nikse.SubtitleEdit.Logic;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace Nikse.SubtitleEdit.Forms
 {
     public partial class ChooseStyle : Form
     {
-        public string SelectedStyleName { get; set; }
+        public List<string> SelectedStyleNames { get; set; }
 
         private Subtitle _subtitle;
         private bool _isSubStationAlpha;
 
         public ChooseStyle(Subtitle subtitle, bool isSubStationAlpha)
         {
-            SelectedStyleName = null;
+            SelectedStyleNames = new List<string>();
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             _subtitle = subtitle;
             _isSubStationAlpha = isSubStationAlpha;
 
@@ -44,8 +48,11 @@ namespace Nikse.SubtitleEdit.Forms
 
         private void buttonOK_Click(object sender, EventArgs e)
         {
-            if (listViewStyles.SelectedItems.Count > 0)
-                SelectedStyleName = listViewStyles.SelectedItems[0].Text;
+            foreach (ListViewItem item in listViewStyles.Items)
+            {
+                if (item.Checked)
+                    SelectedStyleNames.Add(item.Text);
+            }
             DialogResult = DialogResult.OK;
         }
 

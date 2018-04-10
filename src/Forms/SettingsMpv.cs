@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Logic;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Windows.Forms;
-using Nikse.SubtitleEdit.Core;
 
 namespace Nikse.SubtitleEdit.Forms
 {
@@ -12,7 +13,9 @@ namespace Nikse.SubtitleEdit.Forms
 
         public SettingsMpv()
         {
+            UiUtil.PreInitialize(this);
             InitializeComponent();
+            UiUtil.FixFonts(this);
             labelPleaseWait.Text = string.Empty;
             if (Configuration.IsRunningOnLinux() && Configuration.Settings.General.MpvVideoOutput == "direct3d")
                 comboBoxVideoOutput.Text = "vaapi";
@@ -30,13 +33,16 @@ namespace Nikse.SubtitleEdit.Forms
                 comboBoxVideoOutput.Items.AddRange(new object[] { "vaapi", "opengl", "sdl", "vdpau" });
                 Controls.Remove(buttonDownload);
             }
+            UiUtil.FixLargeFonts(this, buttonOK);
         }
 
         private void wc_DownloadDataCompleted(object sender, DownloadDataCompletedEventArgs e)
         {
             if (e.Error != null)
             {
-                MessageBox.Show(Configuration.Settings.Language.SettingsMpv.DownloadMpvFailed);
+                MessageBox.Show(Configuration.Settings.Language.SettingsMpv.DownloadMpvFailed + Environment.NewLine +
+                                Environment.NewLine +
+                                e.Error.Message);
                 labelPleaseWait.Text = string.Empty;
                 buttonOK.Enabled = true;
                 buttonDownload.Enabled = !Configuration.IsRunningOnLinux();
@@ -72,7 +78,8 @@ namespace Nikse.SubtitleEdit.Forms
             MessageBox.Show(Configuration.Settings.Language.SettingsMpv.DownloadMpvOk);
         }
 
-        private void buttonDownload_Click_1(object sender, EventArgs e)
+
+        private void ButtonDownloadClick(object sender, EventArgs e)
         {
             try
             {
@@ -82,7 +89,8 @@ namespace Nikse.SubtitleEdit.Forms
                 Refresh();
                 Cursor = Cursors.WaitCursor;
                 string url = "https://github.com/SubtitleEdit/support-files/blob/master/mpv/libmpv" + IntPtr.Size * 8 + ".zip?raw=true";
-                var wc = new WebClient { Proxy = Utilities.GetProxy() };
+                var wc = new WebClient { Proxy = Utilities.GetProxy() };                
+
                 wc.DownloadDataCompleted += wc_DownloadDataCompleted;
                 wc.DownloadProgressChanged += (o, args) =>
                 {

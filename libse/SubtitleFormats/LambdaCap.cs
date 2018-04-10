@@ -16,31 +16,27 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         public override string Name => "Lambda Cap";
 
-        public override bool IsTimeBased => true;
-
-        public string Header {
+        public string Header
+        {
             get
             {
                 if (Configuration.Settings.General.CurrentFrameRate % 1.0 < 0.001)
                 {
                     return "Lambda字幕V4 DF0+1 SCENE\"和文標準\""; // non drop frame
-                }                
+                }
                 return "Lambda字幕V4 DF1+1 SCENE\"和文標準\""; // drop frame
             }
-        }  
+        }
 
         public override bool IsMine(List<string> lines, string fileName)
         {
-            var subtitle = new Subtitle();
-
             var sb = new StringBuilder();
             foreach (string line in lines)
                 sb.AppendLine(line);
             if (sb.ToString().StartsWith("{{\\rtf1", StringComparison.Ordinal))
                 return false;
 
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
+            return base.IsMine(lines, fileName);
         }
 
         private const string AlignVerticalTop = "＠行頭";
@@ -70,7 +66,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
 
         private static string EncodeTimeCode(TimeCode time)
         {
-            return time.ToHHMMSSFF().Replace(":", string.Empty); //HHMMSSFF without seperators, like 00031522
+            return time.ToHHMMSSFF().RemoveChar(':'); //HHMMSSFF without seperators, like 00031522
         }
 
         private static string EncodeStyle(string text)
@@ -79,7 +75,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             text = text.Replace("ー", LongDash2);
 
             var verticalAlignTop = text.StartsWith("{\\an7}", StringComparison.Ordinal) || text.StartsWith("{\\an8}", StringComparison.Ordinal) || text.StartsWith("{\\an9}", StringComparison.Ordinal);
-//            var verticalAlignCenter = text.StartsWith("{\\an4}", StringComparison.Ordinal) || text.StartsWith("{\\an5}", StringComparison.Ordinal) || text.StartsWith("{\\an6}", StringComparison.Ordinal);
+            //            var verticalAlignCenter = text.StartsWith("{\\an4}", StringComparison.Ordinal) || text.StartsWith("{\\an5}", StringComparison.Ordinal) || text.StartsWith("{\\an6}", StringComparison.Ordinal);
             var horizontalAlignLeft = text.StartsWith("{\\an1}", StringComparison.Ordinal) || text.StartsWith("{\\an4}", StringComparison.Ordinal) || text.StartsWith("{\\an7}", StringComparison.Ordinal);
             var horizontalAlignRight = text.StartsWith("{\\an3}", StringComparison.Ordinal) || text.StartsWith("{\\an6}", StringComparison.Ordinal) || text.StartsWith("{\\an9}", StringComparison.Ordinal);
             var s = Utilities.RemoveSsaTags(text);
@@ -176,22 +172,6 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         readUntilEndCode = true;
                     }
                     else if (part.StartsWith("＠ルビ左［", StringComparison.Ordinal)) // Bouten on second line - vertical positioning
-                    {
-                        readUntilEndCode = true;
-                    }
-                    else if (part.StartsWith("＠ルビ上［", StringComparison.Ordinal)) // Ruby on first line - horizontal positioning
-                    {
-                        readUntilEndCode = true;
-                    }
-                    else if (part.StartsWith("＠ルビ下［", StringComparison.Ordinal)) // Ruby on second line - horizontal positioning
-                    {
-                        readUntilEndCode = true;
-                    }
-                    else if (part.StartsWith("＠ルビ右［", StringComparison.Ordinal)) // Ruby on first line - vertical positioning
-                    {
-                        readUntilEndCode = true;
-                    }
-                    else if (part.StartsWith("＠ルビ左［", StringComparison.Ordinal)) // Ruby on second line - vertical positioning
                     {
                         readUntilEndCode = true;
                     }

@@ -224,7 +224,7 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
                             ulong endMs = 0;
                             if (k < endMsList.Count)
                                 endMs = endMsList[k];
-                            subList.Add(new TransportStreamSubtitle(bdSup, startMs, endMs, (ulong)((FirstVideoPts + 45) / 90.0)));
+                            subList.Add(new TransportStreamSubtitle(bdSup, startMs, endMs, (ulong)(FirstVideoPts / 90.0)));
                         }
                         DvbSubtitlesLookup.Add(pid, subList);
                     }
@@ -262,33 +262,32 @@ namespace Nikse.SubtitleEdit.Core.TransportStream
 
             // Merge packets and set start/end time
             DvbSubtitlesLookup = new Dictionary<int, List<TransportStreamSubtitle>>();
-            var firstVideoMs = (ulong)((FirstVideoPts + 45) / 90.0);
+            var firstVideoMs = (ulong)(FirstVideoPts / 90.0);
             foreach (int pid in SubtitlePacketIds)
             {
                 var subtitles = new List<TransportStreamSubtitle>();
                 var list = ParseAndRemoveEmpty(GetSubtitlePesPackets(pid));
 
-                if (list != null)
+                
+                for (int i = 0; i < list.Count; i++)
                 {
-                    for (int i = 0; i < list.Count; i++)
+                    var pes = list[i];
+                    pes.ParseSegments();
+                    if (pes.ObjectDataList.Count > 0)
                     {
-                        var pes = list[i];
-                        pes.ParseSegments();
-                        if (pes.ObjectDataList.Count > 0)
-                        {
-                            var sub = new TransportStreamSubtitle();
-                            sub.StartMilliseconds = pes.PresentationTimestampToMilliseconds();
-                            sub.Pes = pes;
-                            if (i + 1 < list.Count && list[i + 1].PresentationTimestampToMilliseconds() > 25)
-                                sub.EndMilliseconds = list[i + 1].PresentationTimestampToMilliseconds() - 25;
-                            if (sub.EndMilliseconds < sub.StartMilliseconds || sub.EndMilliseconds - sub.StartMilliseconds > (ulong)Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
-                                sub.EndMilliseconds = sub.StartMilliseconds + 3500;
-                            subtitles.Add(sub);
-                            if (sub.StartMilliseconds < firstVideoMs)
-                                firstVideoMs = sub.StartMilliseconds;
-                        }
+                        var sub = new TransportStreamSubtitle();
+                        sub.StartMilliseconds = pes.PresentationTimestampToMilliseconds();
+                        sub.Pes = pes;
+                        if (i + 1 < list.Count && list[i + 1].PresentationTimestampToMilliseconds() > 25)
+                            sub.EndMilliseconds = list[i + 1].PresentationTimestampToMilliseconds() - 25;
+                        if (sub.EndMilliseconds < sub.StartMilliseconds || sub.EndMilliseconds - sub.StartMilliseconds > (ulong)Configuration.Settings.General.SubtitleMaximumDisplayMilliseconds)
+                            sub.EndMilliseconds = sub.StartMilliseconds + 3500;
+                        subtitles.Add(sub);
+                        if (sub.StartMilliseconds < firstVideoMs)
+                            firstVideoMs = sub.StartMilliseconds;
                     }
                 }
+                
                 foreach (var s in subtitles)
                 {
                     s.OffsetMilliseconds = firstVideoMs;

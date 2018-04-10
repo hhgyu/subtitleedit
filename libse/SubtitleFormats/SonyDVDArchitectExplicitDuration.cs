@@ -9,27 +9,9 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
     {
         private static readonly Regex Regex = new Regex(@"^\d\d:\d\d:\d\d\.\d\d\d[ \t]+\d\d:\d\d:\d\d\.\d\d\d[ \t]+\d\d:\d\d:\d\d\.\d\d\d[ \t]+", RegexOptions.Compiled);
 
-        public override string Extension
-        {
-            get { return ".sub"; }
-        }
+        public override string Extension => ".sub";
 
-        public override string Name
-        {
-            get { return "Sony DVDArchitect Explicit duration"; }
-        }
-
-        public override bool IsTimeBased
-        {
-            get { return true; }
-        }
-
-        public override bool IsMine(List<string> lines, string fileName)
-        {
-            var subtitle = new Subtitle();
-            LoadSubtitle(subtitle, lines, fileName);
-            return subtitle.Paragraphs.Count > _errorCount;
-        }
+        public override string Name => "Sony DVDArchitect Explicit duration";
 
         public override string ToText(Subtitle subtitle, string title)
         {
@@ -74,7 +56,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         s = s.Substring(0, match.Length);
                         s = s.Replace('\t', ':');
                         s = s.Replace('.', ':');
-                        s = s.Replace(" ", string.Empty);
+                        s = s.RemoveChar(' ');
                         s = s.Trim().TrimEnd(':').TrimEnd();
                         string[] parts = s.Split(':');
                         if (parts.Length == 12)
