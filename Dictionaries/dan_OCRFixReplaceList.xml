@@ -1,4 +1,5 @@
-﻿<OCRFixReplaceList>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<OCRFixReplaceList>
   <WholeWords>
     <Word from="Haner" to="Han er" />
     <Word from="JaveL" to="Javel" />
@@ -592,6 +593,10 @@
     <Word from="viljeg" to="vil jeg" />
     <Word from="Sætjer" to="Sæt jer" />
     <Word from="udsatham" to="udsat ham" />
+    <Word from="afen" to="af en" />
+    <Word from="påjorden" to="på jorden" />
+    <Word from="afdem" to="af dem" />
+    <Word from="kmt" to="km/t" />
   </WholeWords>
   <PartialWordsAlways>
     <WordPart from="¤" to="o" />
@@ -629,10 +634,29 @@
     <WordPart from="Ã" to="Å" />
     <WordPart from="í" to="i" />
   </PartialWords>
-  <PartialLines />
-  <PartialLinesAlways />
-  <BeginLines />
-  <EndLines />
   <WholeLines />
-  <RegularExpressions />
+  <PartialLinesAlways>
+    <LinePart from="Apollo 1 3" to="Apollo 13" />
+    <LinePart from=",.," to="..." />
+    <LinePart from=" l " to=" I " />
+    <LinePart from=" l." to=" I." />
+    <LinePart from=" l?" to=" I?" />
+    <LinePart from=" l!" to=" I!" />
+    <LinePart from=" . " to=". " />
+  </PartialLinesAlways>
+  <PartialLines />
+  <BeginLines>
+    <Beginning from="-] " to="- I " />
+    <Beginning from="- ] " to="- I " />
+    <Beginning from="] " to="I " />
+    <Beginning from="-| " to="- I " />
+    <Beginning from="- | " to="- I " />
+    <Beginning from="l " to="I " />
+    <Beginning from="- l " to="- I " />
+  </BeginLines>
+  <EndLines />
+  <RegularExpressions>
+    <RegEx find="\b\|\b" replaceWith="I" />
+    <RegEx find="\b\l\b" replaceWith="I" />
+  </RegularExpressions>
 </OCRFixReplaceList>

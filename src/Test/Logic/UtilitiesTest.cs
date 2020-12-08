@@ -2,6 +2,7 @@
 using Nikse.SubtitleEdit.Core;
 using Nikse.SubtitleEdit.Core.Forms.FixCommonErrors;
 using System;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Test.Logic
 {
@@ -87,7 +88,7 @@ namespace Test.Logic
             Configuration.Settings.General.SubtitleLineMaximumLength = 43;
             const string s1 = "Oh, snap, we're still saying the same thing. This is amazing!";
             string s2 = Utilities.AutoBreakLine(s1);
-            string target = "Oh, snap, we're still saying the" + Environment.NewLine + "same thing. This is amazing!";
+            string target = "Oh, snap, we're still saying" + Environment.NewLine + "the same thing. This is amazing!";
             Assert.AreEqual(target, s2);
         }
 
@@ -114,6 +115,187 @@ namespace Test.Logic
             const string s1 = "- Je veux voir ce qu'ils veulent être. - Qu'est ce qui se passe ?";
             string s2 = Utilities.AutoBreakLine(s1);
             Assert.AreEqual("- Je veux voir ce qu'ils veulent être." + Environment.NewLine + "- Qu'est ce qui se passe ?", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLineDialog3()
+        {
+            const string s1 = "- Come on, I… - Here, let's try this one.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("- Come on, I…" + Environment.NewLine + "- Here, let's try this one.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLineDialog4()
+        {
+            const string s1 = "JENNI: When I lose Nicole, I feel like I lose my child.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("JENNI: When I lose Nicole," + Environment.NewLine + "I feel like I lose my child.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakOneWordOnEachLine()
+        {
+            string s1 = "How" + Environment.NewLine + "are" + Environment.NewLine + "you?";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("How are you?", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLineHtmlTags1()
+        {
+            const string s1 = "JENNI: <i>When<i> I lose Nicole, I feel like I lose <i>my</i> child.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("JENNI: <i>When<i> I lose Nicole," + Environment.NewLine + "I feel like I lose <i>my</i> child.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPeriod()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            Configuration.Settings.Tools.AutoBreakLineEndingEarly = true;
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = false;
+            const string s1 = "Sorry. Sorry, I was miles away. Got to get everything ready for today.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("Sorry. Sorry, I was miles away." + Environment.NewLine + "Got to get everything ready for today.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPeriod2()
+        {
+            const string s1 = "That's alright. I get it all the time.";
+            Configuration.Settings.Tools.AutoBreakLineEndingEarly = true;
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("That's alright." + Environment.NewLine + "I get it all the time.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPeriod3()
+        {
+            const string s1 = "That's alright... I get it all the time.";
+            Configuration.Settings.Tools.AutoBreakLineEndingEarly = true;
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("That's alright..." + Environment.NewLine + "I get it all the time.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferExclamation()
+        {
+            const string s1 = "That's alright!!! I get it all the time.";
+            Configuration.Settings.Tools.AutoBreakLineEndingEarly = true;
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("That's alright!!!" + Environment.NewLine + "I get it all the time.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPeriodAndItalic()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            Configuration.Settings.Tools.AutoBreakLineEndingEarly = true;
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = false;
+            const string s1 = "Sorry. Sorry, I was miles away. Got to get everything ready for <i>today</i>.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("Sorry. Sorry, I was miles away." + Environment.NewLine + "Got to get everything ready for <i>today</i>.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferComma()
+        {
+            Configuration.Settings.Tools.AutoBreakCommaBreakEarly = true;
+            const string s1 = "Ha Ha Ha Ha Ha Ha Ha Ha Ha, Ha Ha Ha Ha Ha Ha Ha Ha Ha Ha Ha.";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Assert.AreEqual("Ha Ha Ha Ha Ha Ha Ha Ha Ha," + Environment.NewLine + "Ha Ha Ha Ha Ha Ha Ha Ha Ha Ha Ha.", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine3Lines1ButOnlyTwo()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = false;
+            const string s1 = "Follow him. Day and night wherever he goes and goes and goes and goes and goes <b>again<b>!";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("Follow him. Day and night wherever he goes" + Environment.NewLine + "and goes and goes and goes and goes <b>again<b>!", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine3Lines1ButOnlyTwoWithSpaces()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = false;
+            const string s1 = "Follow him. Day and night wherever he goes and goes and goes and goes and goes <b>again<b>!";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("Follow him. Day and night wherever he goes" + Environment.NewLine + "and goes and goes and goes and goes <b>again<b>!", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine3Lines1()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            const string s1 = "Follow him. Day and night wherever he goes and goes and goes and goes and goes and he goes and goes and goes and he goes <b>again<b>!!";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("Follow him. Day and night wherever he goes" + Environment.NewLine + "and goes and goes and goes and goes and he" + Environment.NewLine + "goes and goes and goes and he goes <b>again<b>!!", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine3Lines2()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            const string s1 = "la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("la la la la la la la la la la la la la la" + Environment.NewLine + "la la la la la la la la la la la la la la" + Environment.NewLine + "la la la la la la la la la la la la la la", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakLine3Lines3()
+        {
+            var old = Configuration.Settings.General.MaxNumberOfLines;
+            Configuration.Settings.General.MaxNumberOfLines = 3;
+            const string s1 = "<i>la</i> la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la la <i>la</i>";
+            string s2 = Utilities.AutoBreakLine(s1);
+            Configuration.Settings.General.MaxNumberOfLines = old;
+            Assert.AreEqual("<i>la</i> la la la la la la la la la la la la la" + Environment.NewLine + "la la la la la la la la la la la la la la" + Environment.NewLine + "la la la la la la la la la la la la la <i>la</i>", s2);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPixelWidth()
+        {
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = true;
+            string res = Utilities.AutoBreakLine("Iiiiii iiiiii iiiiii iiii WWWWWW WWWWWW WWWWWW.");
+            Assert.IsTrue(res.SplitToLines()[0].Contains('W'));
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPixelWidth2()
+        {
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = true;
+            Configuration.Settings.Tools.AutoBreakPreferBottomHeavy = false;
+            string res = Utilities.AutoBreakLine("Samo želim životnog partnera koji će mi biti prijatelj do kraja života,");
+            Assert.AreEqual("Samo želim životnog partnera koji" + Environment.NewLine +
+                            "će mi biti prijatelj do kraja života,", res);
+        }
+
+        [TestMethod]
+        public void AutoBreakPreferPixelWidth3HeavyBottom()
+        {
+            Configuration.Settings.Tools.AutoBreakUsePixelWidth = true;
+            Configuration.Settings.Tools.AutoBreakPreferBottomHeavy = true;
+            Configuration.Settings.Tools.AutoBreakLineEndingEarly = false;
+            Configuration.Settings.Tools.AutoBreakPreferBottomPercent = 6;
+            string res = Utilities.AutoBreakLine("Izvini. Trebalo bi da ima hrane za sve.");
+            Assert.AreEqual("Izvini. Trebalo bi" + Environment.NewLine +
+                            "da ima hrane za sve.", res);
         }
 
         [TestMethod]
@@ -246,6 +428,22 @@ namespace Test.Logic
             var s1 = "<i>Hallo!<i/>" + Environment.NewLine + "<i>Hallo!<i/>" + Environment.NewLine + "<i>Hallo!";
             string s2 = HtmlUtil.FixInvalidItalicTags(s1);
             Assert.AreEqual(s2, "<i>Hallo!" + Environment.NewLine + "Hallo!" + Environment.NewLine + "Hallo!</i>");
+        }
+
+        [TestMethod]
+        public void FixInvalidItalicTagsWithAssTag()
+        {
+            var s1 = "{\\an8}<i>Hallo!<i/>" + Environment.NewLine + "<i>Hallo!<i/>";
+            string s2 = HtmlUtil.FixInvalidItalicTags(s1);
+            Assert.AreEqual(s2, "{\\an8}<i>Hallo!" + Environment.NewLine + "Hallo!</i>");
+        }
+
+        [TestMethod]
+        public void FixInvalidItalicTagsBadStartTag()
+        {
+            var s1 = "<i<Hallo!<i/>";
+            string s2 = HtmlUtil.FixInvalidItalicTags(s1);
+            Assert.AreEqual( "<i>Hallo!</i>", s2);
         }
 
         [TestMethod]
@@ -386,6 +584,34 @@ namespace Test.Logic
         }
 
         [TestMethod]
+        public void RemoveUnneededSpacesBetweenNumbers1()
+        {
+            string s = Utilities.RemoveUnneededSpaces("Yes, it is at 8: 40 today.", "en");
+            Assert.AreEqual("Yes, it is at 8:40 today.", s);
+        }
+
+        [TestMethod]
+        public void RemoveUnneededSpacesBetweenNumbers1NoChange()
+        {
+            string s = Utilities.RemoveUnneededSpaces("Yes, it is at: 40 today.", "en");
+            Assert.AreEqual("Yes, it is at: 40 today.", s);
+        }
+
+        [TestMethod]
+        public void RemoveUnneededSpacesBetweenNumbers2()
+        {
+            string s = Utilities.RemoveUnneededSpaces("The time is 8. 40.", "en");
+            Assert.AreEqual("The time is 8.40.", s);
+        }
+
+        [TestMethod]
+        public void RemoveUnneededSpacesBetweenNumbersDates()
+        {
+            string s = Utilities.RemoveUnneededSpaces("The 4 th and 1 st 3 rd and 2 nd.", "en");
+            Assert.AreEqual("The 4th and 1st 3rd and 2nd.", s);
+        }
+
+        [TestMethod]
         public void CountTagInTextStringOneLetterString()
         {
             int count = Utilities.CountTagInText("HHH", "H");
@@ -463,35 +689,35 @@ namespace Test.Logic
         public void RemoveLineBreaks1()
         {
             string result = Utilities.RemoveLineBreaks("Hey" + Environment.NewLine + "you!");
-            Assert.AreEqual(result, "Hey you!");
+            Assert.AreEqual("Hey you!", result);
         }
 
         [TestMethod]
         public void RemoveLineBreaks2()
         {
             string result = Utilities.RemoveLineBreaks("<i>Foobar " + Environment.NewLine + "</i> foobar.");
-            Assert.AreEqual(result, "<i>Foobar</i> foobar.");
+            Assert.AreEqual("<i>Foobar</i> foobar.", result);
         }
 
         [TestMethod]
         public void RemoveLineBreaks3()
         {
             string result = Utilities.RemoveLineBreaks("<i>Foobar " + Environment.NewLine + "</i>foobar.");
-            Assert.AreEqual(result, "<i>Foobar</i> foobar.");
+            Assert.AreEqual("<i>Foobar</i> foobar.", result);
         }
 
         [TestMethod]
         public void RemoveLineBreaks4()
         {
             string result = Utilities.RemoveLineBreaks("<i>Hey</i>" + Environment.NewLine + "<i>you!</i>");
-            Assert.AreEqual(result, "<i>Hey you!</i>");
+            Assert.AreEqual("<i>Hey you!</i>", result);
         }
 
         [TestMethod]
         public void RemoveLineBreaks5()
         {
             string result = Utilities.RemoveLineBreaks("<i>Foobar" + Environment.NewLine + "</i>");
-            Assert.AreEqual(result, "<i>Foobar</i>");
+            Assert.AreEqual( "<i>Foobar</i>", result);
         }
 
         [TestMethod]
@@ -515,72 +741,128 @@ namespace Test.Logic
         [TestMethod]
         public void ReverseNumbers1()
         {
-            Assert.AreEqual(Utilities.ReverseNumbers("Hallo 009"), "Hallo 900");
+            Assert.AreEqual("Hallo 900", Utilities.ReverseNumbers("Hallo 009"));
         }
 
         [TestMethod]
         public void ReverseNumbers2()
         {
-            Assert.AreEqual(Utilities.ReverseNumbers("Hallo 009 001 Bye"), "Hallo 900 100 Bye");
+            Assert.AreEqual("Hallo 900 100 Bye", Utilities.ReverseNumbers("Hallo 009 001 Bye"));
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft1()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head."), ".I have a big head-");
+            Assert.AreEqual(".I have a big head-", Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head."));
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft2()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("~So do I?"), "?So do I~");
+            Assert.AreEqual("?So do I~", Utilities.ReverseStartAndEndingForRightToLeft("~So do I?"));
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft3()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("+I do too!"), "!I do too+");
+            Assert.AreEqual("!I do too+", Utilities.ReverseStartAndEndingForRightToLeft("+I do too!"));
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft4()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("(Mom)" + Environment.NewLine + "What are you doing here?"), "(Mom)" + Environment.NewLine + "?What are you doing here");
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("(Mom)" + Environment.NewLine + "What are you doing here?");
+            Assert.AreEqual("(Mom)" + Environment.NewLine + "?What are you doing here", result);
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft5()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("{\\an8}+I do too!"), "{\\an8}!I do too+");
+            Assert.AreEqual("{\\an8}!I do too+", Utilities.ReverseStartAndEndingForRightToLeft("{\\an8}+I do too!"));
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft6()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head." + Environment.NewLine + "~So do I?" + Environment.NewLine + "+I do too!"),
-                ".I have a big head-" + Environment.NewLine + "?So do I~" + Environment.NewLine + "!I do too+");
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("-I have a big head." + Environment.NewLine + "~So do I?" + Environment.NewLine + "+I do too!");
+            Assert.AreEqual(".I have a big head-" + Environment.NewLine + "?So do I~" + Environment.NewLine + "!I do too+", result);
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft7HtmlTags()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("<i>-I have a big head.</i>" + Environment.NewLine + "<font color='red'>~So do I?</font>" + Environment.NewLine + "+I do too!"),
-                "<i>.I have a big head-</i>" + Environment.NewLine + "<font color='red'>?So do I~</font>" + Environment.NewLine + "!I do too+");
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("<i>-I have a big head.</i>" + Environment.NewLine + "<font color='red'>~So do I?</font>" + Environment.NewLine + "+I do too!");
+            Assert.AreEqual("<i>.I have a big head-</i>" + Environment.NewLine + "<font color='red'>?So do I~</font>" + Environment.NewLine + "!I do too+", result);
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft8BoldTag()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("<b>-I have a big head.</b>" + Environment.NewLine + "<font color='red'>~So do I?</font>" + Environment.NewLine + "+I do too!"),
-                "<b>.I have a big head-</b>" + Environment.NewLine + "<font color='red'>?So do I~</font>" + Environment.NewLine + "!I do too+");
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("<b>-I have a big head.</b>" + Environment.NewLine + "<font color='red'>~So do I?</font>" + Environment.NewLine + "+I do too!");
+            Assert.AreEqual("<b>.I have a big head-</b>" + Environment.NewLine + "<font color='red'>?So do I~</font>" + Environment.NewLine + "!I do too+", result);
         }
 
         [TestMethod]
         public void ReverseStartAndEndingForRightToLeft9Alignment()
         {
-            Assert.AreEqual(Utilities.ReverseStartAndEndingForRightToLeft("{\an8}Hello" + Environment.NewLine + "Hi."),
-                "{\an8}Hello" + Environment.NewLine + ".Hi");
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("{\an8}Hello" + Environment.NewLine + "Hi.");
+            Assert.AreEqual("{\an8}Hello" + Environment.NewLine + ".Hi", result);
         }
 
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeftWithQuotes()
+        {
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("\"<font color=\"#000000\">مرحباً</font>\"");
+            Assert.AreEqual("\"<font color=\"#000000\">مرحباً</font>\"", result);
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeftQuotes2()
+        {
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("\"Hey." + Environment.NewLine + "Hey.\"");
+            Assert.AreEqual(".Hey\"" + Environment.NewLine + "\".Hey", result);
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeftMusicSymbols()
+        {
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("♪ Hey... ♪");
+            Assert.AreEqual("♪ ...Hey ♪", result);
+        }
+
+        [TestMethod]
+        public void ReverseStartAndEndingForRightToLeftMusicSymbols2()
+        {
+            var result = Utilities.ReverseStartAndEndingForRightToLeft("♫Hey...♫");
+            Assert.AreEqual("♫...Hey♫", result);
+        }
+
+        [TestMethod]
+        public void GetPathAndFileNameWithoutExtension1()
+        {
+            var result = Utilities.GetPathAndFileNameWithoutExtension("file.srt");
+            Assert.AreEqual("file", result);
+        }
+
+        [TestMethod]
+        public void GetPathAndFileNameWithoutExtension2()
+        {
+            var result = Utilities.GetPathAndFileNameWithoutExtension("how.are.you[eng].srt");
+            Assert.AreEqual("how.are.you[eng]", result);
+        }
+
+        [TestMethod]
+        public void GetPathAndFileNameWithoutExtension3()
+        {
+            var result = Utilities.GetPathAndFileNameWithoutExtension("C:" + System.IO.Path.DirectorySeparatorChar + "my.files" + System.IO.Path.DirectorySeparatorChar + "file1");
+            Assert.AreEqual("C:" + System.IO.Path.DirectorySeparatorChar + "my.files" + System.IO.Path.DirectorySeparatorChar + "file1", result);
+        }
+
+        [TestMethod]
+        public void GetPathAndFileNameWithoutExtension4()
+        {
+            var result = Utilities.GetPathAndFileNameWithoutExtension("C:" + System.IO.Path.DirectorySeparatorChar + "my.files" + System.IO.Path.DirectorySeparatorChar + "file1.srt");
+            Assert.AreEqual("C:" + System.IO.Path.DirectorySeparatorChar + "my.files" + System.IO.Path.DirectorySeparatorChar + "file1", result);
+        }
     }
 }

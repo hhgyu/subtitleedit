@@ -3,6 +3,8 @@ SETLOCAL
 PUSHD %~dp0
 SET "ConfigurationName=%~2"
 
+ECHO %cd%
+
 IF /I "%~1" == "rsrc" GOTO UpdateResourceScript
 IF /I "%~1" == "lang" GOTO UpdateLanguageFiles
 IF /I "%~1" == "rev"  GOTO UpdateAssemblyInfo
@@ -20,7 +22,7 @@ IF NOT EXIST "%ToolPath%" (
   GOTO END
 )
 
-"%ToolPath%" "src\Win32Resources\Resources.rc.template" "src\bin\%ConfigurationName%\SubtitleEdit.exe"
+"%ToolPath%" "src\Win32Resources\Resources.rc.template" "src\ui\bin\%ConfigurationName%\SubtitleEdit.exe"
 
 IF %ERRORLEVEL% NEQ 0 (
   ECHO ERROR: Something went wrong when generating the resource script...
@@ -35,7 +37,7 @@ IF NOT EXIST "%ToolPath%" (
   GOTO END
 )
 
-"%ToolPath%" "LanguageMaster.xml" "libse\LanguageDeserializer.cs"
+"%ToolPath%" "LanguageMaster.xml" "src\libse\LanguageDeserializer.cs"
 
 IF %ERRORLEVEL% NEQ 0 (
   ECHO ERROR: Something went wrong when generating the language files...
@@ -50,7 +52,7 @@ IF NOT EXIST "%ToolPath%" (
   GOTO END
 )
 
-"%ToolPath%" "src\Properties\AssemblyInfo.cs.template" "libse\Properties\AssemblyInfo.cs.template"
+"%ToolPath%" "src\ui\Properties\AssemblyInfo.cs.template" "src\libse\Properties\AssemblyInfo.cs.template"
 
 IF %ERRORLEVEL% NEQ 0 (
   ECHO ERROR: Something went wrong when generating the revision number...

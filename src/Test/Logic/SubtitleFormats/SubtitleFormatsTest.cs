@@ -4,8 +4,10 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Xml;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Test.Logic.SubtitleFormats
 {
@@ -86,9 +88,7 @@ Line1.
 00:00:08,000 --> 00:00:09,920
 Line 2.";
             target.LoadSubtitle(subtitle, GetSrtLines(text), null);
-            string actual = subtitle.Paragraphs.Count.ToString(CultureInfo.InvariantCulture);
-            const string expected = "2";
-            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(2, subtitle.Paragraphs.Count);
         }
 
         [TestMethod]
@@ -147,6 +147,287 @@ Line 3";
             var outSubtitle = new Subtitle();
             target.LoadSubtitle(outSubtitle, text.SplitToLines(), null);
             Assert.IsTrue(outSubtitle.Paragraphs[0].Text == subText);
+        }
+
+        [TestMethod]
+        public void SrtDifficultLines1()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"303
+00:16:22,417 --> 00:16:24,417
+sky bots?
+
+304
+00:16:24,417 --> 00:16:27,042
+how do you think i did
+
+
+all the stuff
+for the show?
+
+305
+00:16:27,042 --> 00:16:29,417
+you think i went myself?";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(3, subtitle.Paragraphs.Count);
+            const string expected = @"how do you think i did
+
+
+all the stuff
+for the show?";
+            Assert.AreEqual(expected, subtitle.Paragraphs[1].Text);
+        }
+
+        [TestMethod]
+        public void SrtLineNumbers()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"1
+00:01:10,040 --> 00:01:13,360 
+K-A-R...
+
+2
+00:01:16,840 --> 00:01:19,080 
+... A-N-T...
+
+3
+00:01:21,280 --> 00:01:23,720 
+... Æ-N-E.
+
+4
+00:01:27,120 --> 00:01:29,680 
+Karantæne.
+
+5
+00:01:29,840 --> 00:01:32,360 
+K-A-R...";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(5, subtitle.Paragraphs.Count);
+            Assert.AreEqual("K-A-R...", subtitle.Paragraphs[0].Text);
+        }
+
+        [TestMethod]
+        public void SrtSpacesPre()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"1
+ 00:01:10,040 --> 00:01:13,360 
+K-A-R...
+
+ 2
+00:01:16,840 --> 00:01:19,080 
+... A-N-T...
+
+3
+ 00:01:21,280 --> 00:01:23,720 
+... Æ-N-E.
+
+4
+00:01:27,120 --> 00:01:29,680 
+Karantæne.
+
+5
+00:01:29,840 --> 00:01:32,360 
+K-A-R...";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(5, subtitle.Paragraphs.Count);
+            Assert.AreEqual("K-A-R...", subtitle.Paragraphs[0].Text);
+        }
+
+        [TestMethod]
+        public void SrtDifficultLines2()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"1
+01:38:18,534 --> 01:38:20,067
+ 
+6530
+
+2
+01:39:17,534 --> 01:39:19,400
+ppp
+";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(2, subtitle.Paragraphs.Count);
+            const string expected = @" 
+6530";
+            Assert.AreEqual(expected.Trim(), subtitle.Paragraphs[0].Text.Trim());
+        }
+
+
+        [TestMethod]
+        public void SrtDifficultLines3()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"1
+00:06:25,218 --> 00:06:27,420
+<font color='white' face='monospace' size='1c'>
+    We have detected a new signal.
+   </font>
+
+2
+00:06:32,225 --> 00:06:34,526
+<font color='white' face='monospace' size='1c'>
+
+
+
+
+    Where is it this time?
+   </font>
+
+3
+00:06:34,560 --> 00:06:37,096
+<font color='white' face='monospace' size='1c'>
+    Outside of Federation space.
+   </font>";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(3, subtitle.Paragraphs.Count);
+            Assert.AreEqual(@"<font color='white' face='monospace' size='1c'>
+    We have detected a new signal.
+   </font>", subtitle.Paragraphs[0].Text); Assert.AreEqual(@"<font color='white' face='monospace' size='1c'>
+
+
+
+
+    Where is it this time?
+   </font>", subtitle.Paragraphs[1].Text);
+        }
+
+        [TestMethod]
+        public void SrtBadTimeCode1()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"1
+00:00:16.583 --> 00:00:19.833
+1941
+
+2
+00:00:21.333 --> 00:00:24.083
+Half the world is at war...
+
+3
+00:00:26.500 --> 00:00:28.875
+Germany has taken most of Europe...";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(3, subtitle.Paragraphs.Count);
+            Assert.AreEqual("1941", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("Half the world is at war...", subtitle.Paragraphs[1].Text);
+            Assert.AreEqual("Germany has taken most of Europe...", subtitle.Paragraphs[2].Text);
+        }
+
+        [TestMethod]
+        public void SrtMissingNewLinesAndBadTimeCodes()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"1
+00: 00: 12,083  -->  00: 00: 15,726
+text1
+ 2
+00: 00: 15,750  -->  00: 00: 28,892
+text2
+3
+00: 00: 28,916  -->  00: 00: 33,726
+text3a
+text3b";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(3, subtitle.Paragraphs.Count);
+            Assert.AreEqual("text1", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("text2", subtitle.Paragraphs[1].Text);
+            Assert.AreEqual("text3a" + Environment.NewLine + "text3b", subtitle.Paragraphs[2].Text);
+        }
+
+        [TestMethod]
+        public void MissingLineNumberAndEmptyLines()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"00:00:00,000 --> 00:00:10,000
+abc
+
+00:00:11,000 --> 00:00:20,000
+
+00:00:21,000 --> 00:00:30,000
+def";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(3, subtitle.Paragraphs.Count);
+            Assert.AreEqual("abc", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("", subtitle.Paragraphs[1].Text);
+            Assert.AreEqual("def", subtitle.Paragraphs[2].Text);
+            Assert.AreEqual(30, subtitle.Paragraphs[2].EndTime.TotalSeconds);
+        }
+
+        [TestMethod]
+        public void TestBadFileWithMissingNewLineAndBadNumbers()
+        {
+            var target = new SubRip();
+            var subtitle = new Subtitle();
+            const string text = @"
+00:21:29,998 --> 00:21:32,960
+LONDYN 8 maja 1945.
+
+Jeszcze 13 lat temu,
+
+-Kwadrans po 12... Mamo.
+67
+
+00:21:58,986 --> 00:22:01,947
+GŁÓWNY
+012 235 4526
+model 5732.
+93
+00:22:03,991 --> 00:22:05,784
+- Za wasz
+- Za wasz
+115
+00:22:18,931 --> 00:22:20,674
+- How do you do, Mr. Van Cleve?
+- How do you do, Mr. Van Cleve?
+
+124
+
+00:22:21,175 --> 00:22:23,121
+10:15 PM.
+That's it, you're staying in bed.
+
+312
+00:24:21,175 --> 00:24:23,121
+REŻYSERIA
+611
+00:27:21,175 --> 00:27:23,121
+ZA ŁATWO, PRAGNIE MŁODOŚCI";
+            target.LoadSubtitle(subtitle, GetSrtLines(text), null);
+            Assert.AreEqual(7, subtitle.Paragraphs.Count);
+            Assert.AreEqual("LONDYN 8 maja 1945." + Environment.NewLine + Environment.NewLine + "Jeszcze 13 lat temu," + Environment.NewLine + Environment.NewLine + "-Kwadrans po 12... Mamo.", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("GŁÓWNY" + Environment.NewLine + "012 235 4526" + Environment.NewLine + "model 5732.", subtitle.Paragraphs[1].Text);
+            Assert.AreEqual("- Za wasz" + Environment.NewLine + "- Za wasz", subtitle.Paragraphs[2].Text);
+            Assert.AreEqual("- How do you do, Mr. Van Cleve?" + Environment.NewLine + "- How do you do, Mr. Van Cleve?", subtitle.Paragraphs[3].Text);
+            Assert.AreEqual("10:15 PM." + Environment.NewLine + "That's it, you're staying in bed.", subtitle.Paragraphs[4].Text);
+            Assert.AreEqual("REŻYSERIA", subtitle.Paragraphs[5].Text);
+            Assert.AreEqual("ZA ŁATWO, PRAGNIE MŁODOŚCI", subtitle.Paragraphs[6].Text);
+
+            Assert.AreEqual("00:21:29,998", subtitle.Paragraphs[0].StartTime.ToString(false));
+            Assert.AreEqual("00:21:32,960", subtitle.Paragraphs[0].EndTime.ToString(false));
+
+            Assert.AreEqual("00:21:58,986", subtitle.Paragraphs[1].StartTime.ToString(false));
+            Assert.AreEqual("00:22:01,947", subtitle.Paragraphs[1].EndTime.ToString(false));
+
+            Assert.AreEqual("00:22:03,991", subtitle.Paragraphs[2].StartTime.ToString(false));
+            Assert.AreEqual("00:22:05,784", subtitle.Paragraphs[2].EndTime.ToString(false));
+
+            Assert.AreEqual("00:27:21,175", subtitle.Paragraphs[6].StartTime.ToString(false));
+            Assert.AreEqual("00:27:23,121", subtitle.Paragraphs[6].EndTime.ToString(false));
+
+            Assert.IsTrue(target.Errors.Contains("Line 8 -"));
+            Assert.IsTrue(target.Errors.Contains("Line 14 -"));
+            Assert.IsTrue(target.Errors.Contains("Line 18 -"));
+            Assert.IsTrue(target.Errors.Contains("Line 32 -"));
         }
 
         #endregion SubRip (.srt)
@@ -931,8 +1212,8 @@ Dialogue: Marked=0,0:00:01.00,0:00:03.00,Default,NTP,0000,0000,0000,!Effect," + 
             Assert.AreEqual("Yeah. The Drama Club is worried\r\nthat you haven't been coming.", subtitle.Paragraphs[1].Text);
 
             // Test frames.
-            Assert.AreEqual(SubtitleFormat.FramesToMilliseconds(2447), SubtitleFormat.FramesToMilliseconds(subtitle.Paragraphs[0].StartFrame));
-            Assert.AreEqual(SubtitleFormat.FramesToMilliseconds(2513), SubtitleFormat.FramesToMilliseconds(subtitle.Paragraphs[0].EndFrame));
+            Assert.AreEqual(SubtitleFormat.FramesToMilliseconds(2447), subtitle.Paragraphs[0].StartTime.TotalMilliseconds);
+            Assert.AreEqual(SubtitleFormat.FramesToMilliseconds(2513), subtitle.Paragraphs[0].EndTime.TotalMilliseconds);
 
             // Test total lines.
             Assert.AreEqual(2, subtitle.Paragraphs[1].NumberOfLines);
@@ -967,12 +1248,12 @@ and astronauts.“...""
             // Test line count.
             Assert.AreEqual(2, subtitle.Paragraphs[2].NumberOfLines);
             // Test frame.
-            Assert.AreEqual(3082, subtitle.Paragraphs[1].StartFrame);
+            Assert.AreEqual(3082, SubtitleFormat.MillisecondsToFrames(subtitle.Paragraphs[1].StartTime.TotalMilliseconds));
         }
 
         #endregion
 
-        #region TimedText       
+        #region TimedText
 
         [TestMethod]
         public void TimedTextNameSpaceTt()
@@ -1002,6 +1283,78 @@ and astronauts.“...""
             string actual = subtitle.Paragraphs[0].Text;
             const string expected = "Hallo world.";
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void TimedTextKeepDivs()
+        {
+            var target = new TimedText10();
+            var subtitle = new Subtitle();
+            string raw = @"
+<?xml version='1.0' encoding='utf-8'?>
+<tt xmlns='http://www.w3.org/ns/ttml' xmlns:tts='http://www.w3.org/ns/ttml#styling' xml:lang='en'>
+  <head>
+  </head>
+  <body>
+    <div>
+      <p begin='00:00:01.000' id='p1' end='00:00:03.079'>Test.</p>
+    </div>
+    <div>
+      <p begin='00:00:51.699' id='p2' end='00:00:54.040'>Now.</p>
+      <p begin='00:00:54.064' id='p3' end='00:00:55.429'>We all alive.</p>
+    </div>
+    <div>
+      <p begin='00:01:29.731' id='p4' end='00:01:32.447'>Here is what's left.</p>
+    </div>
+  </body>
+</tt>".Replace("'", "\"");
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            var actual = target.ToText(subtitle, string.Empty);
+            Assert.AreEqual(3, Utilities.CountTagInText(actual, "</div>"));
+        }
+
+        [TestMethod]
+        public void TimedTextKeepReadNewLineAndAmpersand()
+        {
+            var target = new TimedText10();
+            var subtitle = new Subtitle();
+            var input = "You have got to do" + Environment.NewLine +
+                        "what Johnson & Johnson did.";
+            subtitle.Paragraphs.Add(new Paragraph(input, 0, 3000));
+            var raw = target.ToText(subtitle, string.Empty);
+            var subtitleNew = new Subtitle();
+            target.LoadSubtitle(subtitleNew, raw.SplitToLines(), null);
+            Assert.AreEqual(input, subtitleNew.Paragraphs[0].Text);
+        }
+
+        [TestMethod]
+        public void TimedTextKeepSpaces()
+        {
+            var target = new TimedText10();
+            var subtitle = new Subtitle();
+            string raw = @"
+<?xml version = '1.0' encoding='UTF-8' standalone='no'?>
+<tt xmlns:tt='http://www.w3.org/ns/ttml' xmlns:ttm='http://www.w3.org/ns/ttml#metadata' xmlns:ttp='http://www.w3.org/ns/ttml#parameter' xmlns:tts='http://www.w3.org/ns/ttml#styling' ttp:tickRate='10000000' ttp:timeBase='media' xmlns='http://www.w3.org/ns/ttml'>
+    <head>
+        <ttp:profile use='http://netflix.com/ttml/profile/dfxp-ls-sdh'/>
+        <styling>
+            <style tts:color='white' tts:fontSize='100%' tts:fontWeight='normal' tts:textAlign='center' xml:id='normal'/>
+            <style tts:color='white' tts:fontSize='100%' tts:fontStyle='italic' tts:fontWeight='normal' tts:textAlign='center' xml:id='normal_1'/>
+        </styling>
+        <layout>
+            <region tts:displayAlign='after' tts:extent='80.00% 40.00%' tts:origin='10.00% 50.00%' xml:id='bottom'/>
+            <region tts:displayAlign='before' tts:extent='80.00% 40.00%' tts:origin='10.00% 10.00%' xml:id='top'/>
+        </layout>
+    </head>
+    <body region='bottom'>
+        <div xml:space='preserve'>
+            <p begin='1116782332t' end='1134466666t' style='normal' xml:id='subtitle2'><span style='normal_1'>AAA</span> <span style='normal_1'>BBB</span></p>
+        </div>
+    </body>
+</tt>".Replace("'", "\"");
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            var actual = subtitle.Paragraphs.First().Text;
+            Assert.AreEqual("AAA BBB", actual);
         }
 
         #endregion
@@ -1106,6 +1459,42 @@ Hi, I'm Keith Lemon.
             Assert.IsTrue(webVtt.Contains("<c.yellow>AUDIENCE: Aww!</c>"));
         }
 
+        public void WebVttFontColorHex()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+
+00:00:54.440 --> 00:00:58.920 align:middle line:-4
+Hi, I'm Keith Lemon.
+
+00:00:58.960 --> 00:01:03.280 align:middle line:-3
+<c.color008000>AUDIENCE: Aww!</c>";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+
+            Assert.AreEqual("<font color=\"#r008000\">AUDIENCE: Aww!</font>", subtitle.Paragraphs[1].Text);
+        }
+
+        [TestMethod]
+        public void WebVttFontColorHex2()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"
+WEBVTT
+
+00:00:54.440 --> 00:00:58.920
+<font color='#008000'>Text1</c>
+
+00:00:58.960 --> 00:01:03.280 align:middle line:-3
+<font color='#FF0000'>Text2</c>".Replace("'", "\"");
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            var webVtt = subtitle.ToText(target);
+
+            Assert.IsTrue(webVtt.Contains("<c.color008000>Text1</c>"));
+            Assert.IsTrue(webVtt.Contains("<c.red>Text2</c>"));
+        }
+
         [TestMethod]
         public void WebVttSpaceBeforeTimeCode()
         {
@@ -1152,7 +1541,191 @@ VÄLKOMMEN TILL TEXAS
             Assert.AreEqual(expected, actual);
         }
 
-       
+        [TestMethod]
+        public void WebVttFontColor2()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+
+        00:02:00.000 --> 00:02:05.000
+        <c.yellow.bg_blue>This is yellow text</c>
+
+        00:04:00.000 --> 00:04:05.000
+        <c.yellow.bg_blue.magenta.bg_black>This is magenta text</c>
+
+        00:08:00.000 --> 00:09:05.000
+        <c.color008000>This is hex colored</c>";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            target.RemoveNativeFormatting(subtitle, new SubRip());
+            Assert.AreEqual("<font color=\"yellow\">This is yellow text</font>", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("<font color=\"magenta\">This is magenta text</font>", subtitle.Paragraphs[1].Text);
+            Assert.AreEqual("<font color=\"#008000\">This is hex colored</font>", subtitle.Paragraphs[2].Text);
+        }
+
+        [TestMethod]
+        public void WebVttEscapeEncoding()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            subtitle.Paragraphs.Add(new Paragraph("<i>R&D</i>", 0, 0));
+            subtitle.Paragraphs.Add(new Paragraph("i<5", 0, 0));
+            subtitle.Paragraphs.Add(new Paragraph("i>6", 0, 0));
+            subtitle.Paragraphs.Add(new Paragraph("<v Viggo>Hallo", 0, 0));
+            subtitle.Paragraphs.Add(new Paragraph("&rlm;<c.arabic>مسلسلات NETFLIX ألاصلية</c.arabic>", 0, 0));
+            var raw = subtitle.ToText(target);
+            Assert.IsTrue(raw.Contains("<i>R&amp;D</i>"));
+            Assert.IsTrue(raw.Contains("i&lt;5"));
+            Assert.IsTrue(raw.Contains("i&gt;6"));
+            Assert.IsTrue(raw.Contains("<v Viggo>Hallo"));
+            Assert.IsTrue(raw.Contains("&rlm;<c.arabic>مسلسلات NETFLIX ألاصلية</c.arabic>"));
+        }
+
+        [TestMethod]
+        public void WebVttEscapeDecoding()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+
+00:00:00.000 --> 00:00:00.000
+<i>R&amp;D</i>
+
+00:00:00.000 --> 00:00:00.000
+i&lt;5
+
+00:00:00.000 --> 00:00:00.000
+i&gt;6
+
+00:00:00.000 --> 00:00:00.000
+<v Viggo>Hallo
+
+00:00:00.000 --> 00:00:00.000
+&rlm;<c.arabic>مسلسلات NETFLIX ألاصلية</c.arabic>";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            Assert.AreEqual("<i>R&D</i>", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("i<5", subtitle.Paragraphs[1].Text);
+            Assert.AreEqual("i>6", subtitle.Paragraphs[2].Text);
+            Assert.AreEqual("<v Viggo>Hallo", subtitle.Paragraphs[3].Text);
+            Assert.AreEqual("&rlm;<c.arabic>مسلسلات NETFLIX ألاصلية</c.arabic>", subtitle.Paragraphs[4].Text);
+        }
+
+        [TestMethod]
+        public void WebVttXTimestampHeader()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:00.000
+
+00:00:16.360 --> 00:00:20.840
+Line1
+
+00:00:30.000 --> 00:00:35.000
+Line2";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            Assert.AreEqual("Line1", subtitle.Paragraphs[0].Text);
+            Assert.IsTrue(Math.Abs(26360 - subtitle.Paragraphs[0].StartTime.TotalMilliseconds) < 0.01);
+            Assert.IsTrue(Math.Abs(30840 - subtitle.Paragraphs[0].EndTime.TotalMilliseconds) < 0.01);
+            Assert.AreEqual("Line2", subtitle.Paragraphs[1].Text);
+            Assert.IsTrue(Math.Abs(40000 - subtitle.Paragraphs[1].StartTime.TotalMilliseconds) < 0.01);
+        }
+
+        [TestMethod]
+        public void WebVttXTimestampHeader2()
+        {
+            var target = new WebVTT();
+            var subtitle = new Subtitle();
+            string raw = @"WEBVTT
+X-TIMESTAMP-MAP=MPEGTS:900000,LOCAL:00:00:10.000
+
+00:00:16.360 --> 00:00:20.840
+Line1
+
+00:00:30.000 --> 00:00:35.000
+Line2";
+            target.LoadSubtitle(subtitle, raw.SplitToLines(), null);
+            Assert.AreEqual("Line1", subtitle.Paragraphs[0].Text);
+            Assert.IsTrue(Math.Abs(16360 - subtitle.Paragraphs[0].StartTime.TotalMilliseconds) < 0.01);
+            Assert.IsTrue(Math.Abs(20840 - subtitle.Paragraphs[0].EndTime.TotalMilliseconds) < 0.01);
+            Assert.AreEqual("Line2", subtitle.Paragraphs[1].Text);
+            Assert.IsTrue(Math.Abs(30000 - subtitle.Paragraphs[1].StartTime.TotalMilliseconds) < 0.01);
+        }
+
+        #endregion
+
+        #region DvdStudioGraphics
+
+        private const string DvdStudioGraphicsAsString = @"$SetFilePathToken = <<Graphic>>
+01:00:42:00 , 01:00:46:22 , <<Graphic>>file.0001.tif
+01:09:02:13 , 01:09:06:12 , <<Graphic>>file.0002.tif
+01:09:06:13 , 01:09:10:02 , <<Graphic>>file.0003.tif
+01:09:34:23 , 01:09:37:22 , <<Graphic>>file.0004.tif
+01:36:15:02 , 01:36:21:01 , <<Graphic>>file.0005.tif
+01:37:35:00 , 01:37:40:11 , <<Graphic>>file.0006.tif
+01:38:34:17 , 01:38:37:14 , <<Graphic>>file.0007.tif";
+
+        [TestMethod]
+        public void DvdStudioProSpaceGraphicTestText()
+        {
+            var format = new DvdStudioProSpaceGraphic();
+            var subtitle = new Subtitle();
+            format.LoadSubtitle(subtitle, new List<string>(DvdStudioGraphicsAsString.SplitToLines()), null);
+            Assert.AreEqual("file.0001.tif", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("file.0007.tif", subtitle.Paragraphs[subtitle.Paragraphs.Count - 1].Text);
+        }
+
+        [TestMethod]
+        public void DvdStudioProSpaceGraphicShouldNotBeLoaded()
+        {
+            var lines = DvdStudioGraphicsAsString.SplitToLines();
+            foreach (var format in SubtitleFormat.AllSubtitleFormats)
+            {
+                if (format.IsMine(lines, null))
+                {
+                    Assert.Fail("'DvdStudioProSpaceGraphic' should not be recognized by " + format.FriendlyName);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Structured Titles
+
+        [TestMethod]
+        public void StructuredTitlesLoad()
+        {
+            var format = new StructuredTitles();
+            var subtitle = new Subtitle();
+            format.LoadSubtitle(subtitle, (@"Structured titles
+0001 : 00:00:03:18,00:00:05:22,1
+80 80 81
+C1N03 Top
+
+0002 : 00:00:12:04,00:00:14:04,11
+80 80 81
+C1N03 <Italic>
+
+0003 : 00:00:14:06,00:00:16:05,10
+80 80 81
+C1N03 Line 1
+C1N03 Line 2").SplitToLines(), null);
+            Assert.AreEqual("{\\an8}Top", subtitle.Paragraphs[0].Text);
+            Assert.AreEqual("<i>Italic</i>", subtitle.Paragraphs[1].Text);
+        }
+
+        [TestMethod]
+        public void StructuredTitlesSave()
+        {
+            var sub = new Subtitle();
+            sub.Paragraphs.Add(new Paragraph("{\\an8}Top", 0, 2000));
+            sub.Paragraphs.Add(new Paragraph("<i>Italic</i>", 3000, 5000));
+            var format = new StructuredTitles();
+            var txt = format.ToText(sub, null);
+            Assert.IsTrue(txt.Contains(",1" + Environment.NewLine));
+            Assert.IsFalse(txt.Contains("{\\an8}"));
+            Assert.IsTrue(txt.Contains("<Italic>"));
+        }
 
         #endregion
     }

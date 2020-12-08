@@ -3,6 +3,7 @@ using Nikse.SubtitleEdit.Core;
 using Nikse.SubtitleEdit.Logic.Ocr.Binary;
 using System.Drawing;
 using System.IO;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Test.Logic.Ocr
 {
@@ -12,7 +13,7 @@ namespace Test.Logic.Ocr
         [TestMethod]
         public void TestMethodBinOcrSaveLoad()
         {
-            string tempFileName = Path.GetTempFileName();
+            string tempFileName = FileUtil.GetTempFileName(".db");
             var db = new BinaryOcrDb(tempFileName);
             var nbmp = new NikseBitmap(2, 2);
             nbmp.SetPixel(0, 0, Color.Transparent);
@@ -70,7 +71,7 @@ namespace Test.Logic.Ocr
         [TestMethod]
         public void TestMethodBinOcrSaveLoadTestExceptions()
         {
-            string tempFileName = Path.GetTempFileName();
+            string tempFileName = FileUtil.GetTempFileName(".db");
             var db = new BinaryOcrDb(tempFileName);
             var nbmp = new NikseBitmap(2, 2);
             nbmp.SetPixel(0, 0, Color.Transparent);

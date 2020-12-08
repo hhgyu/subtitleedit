@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Globalization;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Nikse.SubtitleEdit.Core;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.NetflixQualityCheck;
 
 namespace Test.Logic
@@ -54,7 +56,7 @@ namespace Test.Logic
             sub.Paragraphs.Add(p2);
 
             var controller = new NetflixQualityController();
-            var checker = new NetflixCheckDialogeHyphenSpace();
+            var checker = new NetflixCheckDialogHyphenSpace();
 
             checker.Check(sub, controller);
 
@@ -72,7 +74,7 @@ namespace Test.Logic
             sub.Paragraphs.Add(p2);
 
             var controller = new NetflixQualityController();
-            var checker = new NetflixCheckDialogeHyphenSpace();
+            var checker = new NetflixCheckDialogHyphenSpace();
 
             checker.Check(sub, controller);
 
@@ -90,7 +92,7 @@ namespace Test.Logic
             sub.Paragraphs.Add(p2);
 
             var controller = new NetflixQualityController() { Language = "fr" };
-            var checker = new NetflixCheckDialogeHyphenSpace();
+            var checker = new NetflixCheckDialogHyphenSpace();
 
             checker.Check(sub, controller);
 
@@ -108,7 +110,7 @@ namespace Test.Logic
             sub.Paragraphs.Add(p2);
 
             var controller = new NetflixQualityController() { Language = "fr" };
-            var checker = new NetflixCheckDialogeHyphenSpace();
+            var checker = new NetflixCheckDialogHyphenSpace();
 
             checker.Check(sub, controller);
 
@@ -198,14 +200,17 @@ namespace Test.Logic
             sub.Paragraphs.Add(p1);
             var p2 = new Paragraph("Lorem ipsum." + Environment.NewLine + "Line 2.", 0, 832);
             sub.Paragraphs.Add(p2);
+            var p3 = new Paragraph("Lorem ipsum dolor sit amet," + Environment.NewLine + "consectetur adipiscing elit", 0, 832);
+            sub.Paragraphs.Add(p3);
 
             var controller = new NetflixQualityController();
             var checker = new NetflixCheckNumberOfLines();
 
             checker.Check(sub, controller);
 
-            Assert.AreEqual(1, controller.Records.Count);
+            Assert.AreEqual(2, controller.Records.Count);
             Assert.AreEqual(controller.Records[0].OriginalParagraph, p1);
+            Assert.AreEqual(controller.Records[1].FixedParagraph.Text, "Lorem ipsum. Line 2.");
         }
 
         [TestMethod]
@@ -331,6 +336,84 @@ namespace Test.Logic
             Assert.AreEqual(1, controller.Records.Count);
             Assert.AreEqual(controller.Records[0].OriginalParagraph, p1);
             Assert.AreEqual(controller.Records[0].FixedParagraph.Text, "<i>Enginie starting</i>");
+        }
+
+        [TestMethod]
+        public void TestNetflixValidFrameRatesDrop()
+        {
+            var sub = new Subtitle();
+            var template = @"<?xml version='1.0' encoding='utf-8'?>
+<tt xml:lang='en' xmlns='http://www.w3.org/ns/ttml' xmlns:tts='http://www.w3.org/ns/ttml#styling' xmlns:ttp='http://www.w3.org/ns/ttml#parameter' xmlns:ttm='http://www.w3.org/ns/ttml#metadata' ttp:profile='http://www.netflix.com/ns/ttml/profile/nflx-tt' ttp:frameRate='[frameRate]' ttp:frameRateMultiplier='[frameRateMultiplier]' ttp:dropMode='nonDrop' ttp:timeBase='smpte'>
+  <head>
+    <metadata />
+  </head>
+  <body>
+    <div xml:lang='en'>
+      <p begin='00:00:55:01' xml:id='p0' end='00:00:58:07'>
+        <span tts:fontStyle='italic'>Enginie starting</span>
+      </p>
+    </div>
+  </body>
+</tt>".Replace('\'', '"');
+
+            var p1 = new Paragraph("<i>Enginie starting</i>", 0, 1000);
+            sub.Paragraphs.Add(p1);
+            for (int frameRate = 0; frameRate < 100; frameRate++)
+            {
+                var controller = new NetflixQualityController();
+                sub.Header = template.Replace("[frameRate]", frameRate.ToString(CultureInfo.InvariantCulture)).Replace("[frameRateMultiplier]", "1000 1001"); //ttp:frameRate='25' ttp:frameRateMultiplier='1000 1001'
+                var checker = new NetflixCheckTimedTextFrameRate();
+                if (frameRate == 24 || frameRate == 30 || frameRate == 60)
+                {
+                    checker.Check(sub, controller);
+                    Assert.AreEqual(0, controller.Records.Count);
+                }
+                else
+                {
+                    checker.Check(sub, controller);
+                    Assert.AreEqual(1, controller.Records.Count);
+                    Assert.AreEqual("Frame rate is invalid", controller.Records[0].Comment);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void TestNetflixValidFrameRates()
+        {
+            var sub = new Subtitle();
+            var template = @"<?xml version='1.0' encoding='utf-8'?>
+<tt xml:lang='en' xmlns='http://www.w3.org/ns/ttml' xmlns:tts='http://www.w3.org/ns/ttml#styling' xmlns:ttp='http://www.w3.org/ns/ttml#parameter' xmlns:ttm='http://www.w3.org/ns/ttml#metadata' ttp:profile='http://www.netflix.com/ns/ttml/profile/nflx-tt' ttp:frameRate='[frameRate]' ttp:frameRateMultiplier='[frameRateMultiplier]' ttp:dropMode='nonDrop' ttp:timeBase='smpte'>
+  <head>
+    <metadata />
+  </head>
+  <body>
+    <div xml:lang='en'>
+      <p begin='00:00:55:01' xml:id='p0' end='00:00:58:07'>
+        <span tts:fontStyle='italic'>Enginie starting</span>
+      </p>
+    </div>
+  </body>
+</tt>".Replace('\'', '"');
+
+            var p1 = new Paragraph("<i>Enginie starting</i>", 0, 1000);
+            sub.Paragraphs.Add(p1);
+            for (int frameRate = 0; frameRate < 200; frameRate++)
+            {
+                var controller = new NetflixQualityController();
+                sub.Header = template.Replace("[frameRate]", frameRate.ToString(CultureInfo.InvariantCulture)).Replace("[frameRateMultiplier]", "1 1"); //ttp:frameRate='25' ttp:frameRateMultiplier='1000 1001'
+                var checker = new NetflixCheckTimedTextFrameRate();
+                if (frameRate == 24 || frameRate == 25 || frameRate == 30 || frameRate == 50 || frameRate == 60)
+                {
+                    checker.Check(sub, controller);
+                    Assert.AreEqual(0, controller.Records.Count);
+                }
+                else
+                {
+                    checker.Check(sub, controller);
+                    Assert.AreEqual(1, controller.Records.Count);
+                    Assert.AreEqual("Frame rate is invalid", controller.Records[0].Comment);
+                }
+            }
         }
 
     }

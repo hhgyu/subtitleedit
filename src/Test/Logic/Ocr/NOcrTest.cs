@@ -1,7 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Nikse.SubtitleEdit.Core;
 using Nikse.SubtitleEdit.Logic.Ocr;
 using System.Drawing;
 using System.IO;
+using Nikse.SubtitleEdit.Core.Common;
 
 namespace Test.Logic.Ocr
 {
@@ -12,7 +14,7 @@ namespace Test.Logic.Ocr
         [TestMethod]
         public void TestNOcrSaveLoad()
         {
-            string tempFileName = Path.GetTempFileName();
+            string tempFileName = FileUtil.GetTempFileName(".nocr");
             var db = new NOcrDb(tempFileName);
 
             var nOcrChar = new NOcrChar("t");

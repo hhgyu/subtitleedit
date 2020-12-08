@@ -2,7 +2,8 @@
 using Nikse.SubtitleEdit.Core.Forms;
 using System;
 using Nikse.SubtitleEdit.Core;
-using Nikse.SubtitleEdit.Core.Dictionaries;
+using Nikse.SubtitleEdit.Core.Common;
+using Nikse.SubtitleEdit.Core.Enums;
 
 namespace Test.Logic.Forms
 {
@@ -27,9 +28,9 @@ namespace Test.Logic.Forms
 
         private static InterjectionRemoveContext GetRemoveInterjectionContext(string text, bool onlyInSeparatedLine)
         {
-            return new InterjectionRemoveContext()
+            return new InterjectionRemoveContext
             {
-                OnlySeparetedLines = onlyInSeparatedLine,
+                OnlySeparatedLines = onlyInSeparatedLine,
                 Interjections = RemoveTextForHI.GetInterjectionList(),
                 Text = text,
             };
@@ -214,6 +215,39 @@ namespace Test.Logic.Forms
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        public void RemoveColonTest10()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveIfAllUppercase = false;
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            target.Settings.OnlyIfInSeparateLine = false;
+            target.Settings.ColonSeparateLine = false;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            string text = "- Rich: Hm-mm." + Environment.NewLine + "- Sam: Yes, and it was,";
+            string expected = "- Hm-mm." + Environment.NewLine + "- Yes, and it was,";
+            string actual = target.RemoveColon(text);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void RemoveColonTest11()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveIfAllUppercase = true;
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            target.Settings.OnlyIfInSeparateLine = false;
+            target.Settings.ColonSeparateLine = false;
+            target.Settings.RemoveTextBetweenParentheses = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            string text = "- He's got the clap." + Environment.NewLine + "- SAM: (gasps) What?";
+            string expected = "- He's got the clap." + Environment.NewLine + "- What?";
+            string actual = target.RemoveTextFromHearImpaired(text);
+            Assert.AreEqual(expected, actual);
+        }
+
         /// <summary>
         /// A test for RemoveHIInsideLine
         /// </summary>
@@ -229,7 +263,7 @@ namespace Test.Logic.Forms
             target.Settings.ColonSeparateLine = false;
             const string text = "Be quiet. (SHUSHING) It's okay.";
             const string expected = "Be quiet. It's okay.";
-            string actual = target.RemoveHearImpairedtagsInsideLine(text);
+            string actual = target.RemoveHearingImpairedTagsInsideLine(text);
             Assert.AreEqual(expected, actual);
         }
 
@@ -1279,9 +1313,12 @@ namespace Test.Logic.Forms
             target.Settings.CustomStart = "♪";
             target.Settings.CustomEnd = "♪";
             target.Settings.RemoveTextBetweenBrackets = true;
+            Configuration.Settings.General.DialogStyle = DialogType.DashBothLinesWithSpace;
             string text = "The meal is ready. Let's go!" + Environment.NewLine + "<i>- [Nick]</i> J. T. Lancer!";
-            string expected = "The meal is ready. Let's go!" + Environment.NewLine + "- J. T. Lancer!";
-            string actual = target.RemoveTextFromHearImpaired(text);
+            string expected = "- The meal is ready. Let's go!" + Environment.NewLine + "- J. T. Lancer!";
+            var sub = new Subtitle();
+            sub.Paragraphs.Add(new Paragraph(text, 0, 2000));
+            string actual = target.RemoveTextFromHearImpaired(text, sub, 0);
             Assert.AreEqual(expected, actual);
         }
 
@@ -1311,6 +1348,36 @@ namespace Test.Logic.Forms
             string expected = "<i>- Have you lost someone?</i>" + Environment.NewLine + "- What?";
             string actual = target.RemoveColon(text);
             Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiDialogMusicSymbolsFirstLine()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            string actual = target.RemoveColon("- ♪ To defeat ♪" + Environment.NewLine + "- Referee: Salute.");
+            Assert.AreEqual("- ♪ To defeat ♪" + Environment.NewLine + "- Salute.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiDialogMusicSymbolsFirstLine2()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = true;
+            string actual = target.RemoveColon("- ♪ To defeat ♪" + Environment.NewLine + "- Referee: Salute.");
+            Assert.AreEqual("- ♪ To defeat ♪" + Environment.NewLine + "- Referee: Salute.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiDialogMusicSymbolsFirstLine3()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveTextBetweenCustomTags = true;
+            target.Settings.CustomStart = "♪";
+            target.Settings.CustomEnd = "♪";
+            string actual = target.RemoveTextFromHearImpaired("- ♪ To defeat ♪" + Environment.NewLine + "- Referee: Salute.");
+            Assert.AreEqual("Salute.", actual);
         }
 
         [TestMethod]
@@ -1615,7 +1682,7 @@ namespace Test.Logic.Forms
         }
 
         [TestMethod]
-        public void RemoveColonNameAfterElipseInsideLine()
+        public void RemoveColonNameAfterEllipsisInsideLine()
         {
             var target = GetRemoveTextForHiLib();
             target.Settings.RemoveTextBeforeColon = true;
@@ -1678,36 +1745,237 @@ namespace Test.Logic.Forms
             Assert.AreEqual("Gotta be ready before nightfall.", actual);
         }
 
-        #region Additional test attributes
+        [TestMethod]
+        public void RemoveTextBetweenBeforeColonDoNotTouch()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBetweenParentheses = true;
+            var source = "{\\an8}But I know of something" + Environment.NewLine +
+                         "<i>that could:</i>";
+            string actual = target.RemoveColon(source);
+            Assert.AreEqual(source, actual);
+        }
 
-        //
-        //You can use the following additional attributes as you write your tests:
-        //
-        //Use ClassInitialize to run code before running the first test in the class
-        //[ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext)
-        //{
-        //}
-        //
-        //Use ClassCleanup to run code after all tests in a class have run
-        //[ClassCleanup()]
-        //public static void MyClassCleanup()
-        //{
-        //}
-        //
-        //Use TestInitialize to run code before running each test
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
-        //
-        //Use TestCleanup to run code after each test has run
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
-        //
+        [TestMethod]
+        public void RemoveTextBetweenBeforeColonMakeEmpty()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveColon("<i>SAURON:</i>");
+            Assert.AreEqual(string.Empty, actual);
+        }
 
-        #endregion Additional test attributes
+        [TestMethod]
+        public void RemoveTextBetweenBeforeColonMakeEmpty2()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveColon("<i>SAURON:</i>");
+            Assert.AreEqual(string.Empty, actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextBetweenBeforeColonMakeEmpty3()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = true;
+            target.Settings.OnlyIfInSeparateLine = true;
+            string actual = target.RemoveColon("<i>SAURON:</i>");
+            Assert.AreEqual(string.Empty, actual);
+        }
+
+        [TestMethod]
+        public void RemoveHiSecondLineHiDialog()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = true;
+            target.Settings.OnlyIfInSeparateLine = true;
+            string actual = target.RemoveTextFromHearImpaired("<i>-Era stato avveritito.</i>" + Environment.NewLine + "-(PARLA IN SPANOLO)");
+            Assert.AreEqual("<i>Era stato avveritito.</i>", actual);
+        }
+
+        [TestMethod]
+        public void RemoveHiRemoveInLine()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveTextFromHearImpaired("Senti, [si schiarisce la voce]," + Environment.NewLine + "dille semplicemente che ti e mancata.");
+            Assert.AreEqual("Senti," + Environment.NewLine + "dille semplicemente che ti e mancata.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveInterjectionsRemovePeriod()
+        {
+            string actual = new RemoveInterjection().Invoke(GetRemoveInterjectionContext("Hey. Uh.", onlyInSeparatedLine: false));
+            Assert.AreEqual("Hey.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHi()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = false;
+            target.Settings.RemoveTextBetweenBrackets = true;
+            string actual = target.RemoveTextFromHearImpaired("Spoken text." + Environment.NewLine + "<i>- [hearing impaired text] Spoken text.</i>");
+            Assert.AreEqual("- Spoken text." + Environment.NewLine + "<i>- Spoken text.</i>", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiSecondLineDifficult()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = true;
+            target.Settings.RemoveInterjections = false;
+            string actual = target.RemoveTextFromHearImpaired("- [chuckles]" + Environment.NewLine + "- MRS. TRYON: Mr. Wylie!");
+            Assert.AreEqual("Mr. Wylie!", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiSecondLineDifficult2()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            string actual = target.RemoveTextFromHearImpaired("- [chuckles]" + Environment.NewLine + "- MRS. TRYON: Mr. Wylie!");
+            Assert.AreEqual("Mr. Wylie!", actual);
+        }
+
+
+        [TestMethod]
+        public void RemoveTextForHiBracketDoubleLineDoRemove()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = false;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveTextFromHearImpaired("[man] Aren't you a little old" + Environment.NewLine + "to be playing with dolls, Michael?");
+            Assert.AreEqual("Aren't you a little old" + Environment.NewLine + "to be playing with dolls, Michael?", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiBracketDoubleLineDoNotRemove()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = false;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = true;
+            target.Settings.OnlyIfInSeparateLine = true;
+            string actual = target.RemoveTextFromHearImpaired("[man] Aren't you a little old" + Environment.NewLine + "to be playing with dolls, Michael?");
+            Assert.AreEqual("[man] Aren't you a little old" + Environment.NewLine + "to be playing with dolls, Michael?", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiDialogHearingImpairedSecondLine()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = false;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveTextFromHearImpaired("- You're weird!" + Environment.NewLine + "- [sigh]");
+            Assert.AreEqual("You're weird!", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiAlternateHyphenU2010()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = false;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = true;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveTextFromHearImpaired("\u2010 You're weird!" + Environment.NewLine + "\u2010 [sigh]");
+            Assert.AreEqual("You're weird!", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiThreeLinesDialog1()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = false;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveColon("- I mean, sometimes" + Environment.NewLine + "a leaf is just..." + Environment.NewLine + "- SAMANTHA: Uganda");
+            Assert.AreEqual("- I mean, sometimes" + Environment.NewLine + "a leaf is just..." + Environment.NewLine + "- Uganda", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiThreeLinesDialog2()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = false;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveColon("- DAVID: I'm Artemis." + Environment.NewLine + "- LARRY: Not supposed" + Environment.NewLine + "to be purple.");
+            Assert.AreEqual("- I'm Artemis." + Environment.NewLine + "- Not supposed" + Environment.NewLine + "to be purple.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveTextForHiThreeLinesDialog3()
+        {
+            var target = GetRemoveTextForHiLib();
+            target.Settings.RemoveTextBeforeColon = true;
+            target.Settings.RemoveTextBeforeColonOnlyUppercase = false;
+            target.Settings.RemoveInterjections = false;
+            target.Settings.RemoveTextBetweenBrackets = false;
+            target.Settings.OnlyIfInSeparateLine = false;
+            string actual = target.RemoveColon("<i>- and many were imm..." + Environment.NewLine + "- WOMAN: We believe" + Environment.NewLine + "the future of food...</i>");
+            Assert.AreEqual("<i>- and many were imm..." + Environment.NewLine + "- We believe" + Environment.NewLine + "the future of food...</i>", actual);
+        }
+
+        [TestMethod]
+        public void RemoveInterjectionsAfterComma()
+        {
+            string actual = new RemoveInterjection().Invoke(GetRemoveInterjectionContext("Hey, ahhhh.", onlyInSeparatedLine: false));
+            Assert.AreEqual("Hey.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveInterjectionsAfterCommaUpper()
+        {
+            string actual = new RemoveInterjection().Invoke(GetRemoveInterjectionContext("Hey, Ah.", onlyInSeparatedLine: false));
+            Assert.AreEqual("Hey.", actual);
+        }
+
+        [TestMethod]
+        public void RemoveInterjectionsAfterComma2()
+        {
+            string actual = new RemoveInterjection().Invoke(GetRemoveInterjectionContext("Hey, ahhhh!", onlyInSeparatedLine: false));
+            Assert.AreEqual("Hey!", actual);
+        }
+
+        [TestMethod]
+        public void RemoveInterjectionsAfterComma3()
+        {
+            string actual = new RemoveInterjection().Invoke(GetRemoveInterjectionContext("Hey, ahhhh?", onlyInSeparatedLine: false));
+            Assert.AreEqual("Hey?", actual);
+        }
+
+        [TestMethod]
+        public void RemoveInterjectionsAfterComma4()
+        {
+            string actual = new RemoveInterjection().Invoke(GetRemoveInterjectionContext("Hey, ahhhh!?", onlyInSeparatedLine: false));
+            Assert.AreEqual("Hey!?", actual);
+        }
     }
 }
